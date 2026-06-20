@@ -735,6 +735,170 @@ html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;
   .sys-tab-title{font-size:9px;}.sys-tab-sub{font-size:8px;}
 
 
+
+/* ── TAB INNER (sostituisce .page dentro i tab) ── */
+.tab-inner{max-width:1200px;margin:0 auto;padding:18px 22px 60px;}
+
+/* ── SYS TABS (Zone Corsa) ── */
+.sys-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sys-tab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.sys-tab:last-child{border-right:none;}
+.sys-tab:hover{background:var(--g2);}
+.sys-tab.active{background:rgba(184,151,42,.12);border-bottom:2px solid var(--gold);}
+.sys-tab-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;color:var(--mu2);}
+.sys-tab.active .sys-tab-title{color:var(--gold);}
+.sys-tab-sub{font-size:9px;color:var(--g6);margin-top:2px;line-height:1.3;}
+
+/* ── FCR OPTS (Zone Corsa) ── */
+.fcr-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fcr-opt{background:var(--g2);border:1px solid var(--g4);border-radius:3px;padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);transition:.15s;}
+.fcr-opt:hover{border-color:rgba(184,151,42,.6);color:var(--wh);}
+.fcr-opt.active{border-color:var(--gold);background:rgba(184,151,42,.12);color:var(--gold);}
+.fcr-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+
+/* ── GARA PRESETS (Zone Corsa) ── */
+.gara-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.gara-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;padding:5px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);cursor:pointer;transition:.15s;}
+.gara-btn:hover{border-color:rgba(184,151,42,.6);color:var(--wh);}
+.gara-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* ── FORMULA VIS (Intensità) ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--g2);border-radius:4px;padding:10px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);}
+.f-hi{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500;}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:#4DBD74;font-weight:500;}
+
+/* ── RANGE TABLE (Intensità Via B/C) ── */
+.range-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.range-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;text-align:center;border-bottom:1px solid var(--g3);}
+.range-table td{padding:7px 10px;border-bottom:1px solid var(--g2);font-family:'DM Mono',monospace;font-size:11px;text-align:center;color:var(--mu2);}
+.range-table tr:last-child td{border-bottom:none;}
+.range-table tr.rl td{background:rgba(184,151,42,.06);}
+.range-table td.kg{color:var(--gold2);font-weight:500;font-size:13px;}
+.range-table td.reps{color:var(--wh);}
+
+/* ── PROFILO (Intensità) ── */
+.profilo-row{display:flex;gap:8px;margin-bottom:16px;}
+.profilo-opt{flex:1;background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:10px 12px;cursor:pointer;transition:.15s;text-align:center;}
+.profilo-opt:hover{border-color:rgba(184,151,42,.6);}
+.profilo-opt.active{border-color:var(--gold);background:rgba(184,151,42,.07);}
+.profilo-opt.neu-active{border-color:#2E9B9B;background:rgba(46,155,155,.1);}
+.profilo-opt.met-active{border-color:#9A7ACC;background:rgba(154,122,204,.1);}
+.profilo-icon{font-size:18px;margin-bottom:4px;}
+.profilo-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);margin-bottom:2px;}
+.profilo-opt.active .profilo-name,.profilo-opt.neu-active .profilo-name,.profilo-opt.met-active .profilo-name{color:var(--wh);}
+.profilo-desc{font-size:9px;color:var(--mu);line-height:1.4;}
+
+/* ── ZONA BADGE (Intensità) ── */
+.zona-badge{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 10px;border-radius:2px;border:1px solid;}
+.zona-badge.fmax{color:#E05C5C;border-color:rgba(224,92,92,.4);background:rgba(224,92,92,.08);}
+.zona-badge.frel{color:#CC7733;border-color:rgba(204,119,51,.4);background:rgba(204,119,51,.08);}
+.zona-badge.iper{color:#B8972A;border-color:rgba(184,151,42,.4);background:rgba(184,151,42,.08);}
+.zona-badge.pot{color:#4A8FCC;border-color:rgba(74,143,204,.4);background:rgba(74,143,204,.08);}
+.zona-badge.res{color:#4DBD74;border-color:rgba(77,189,116,.4);background:rgba(77,189,116,.08);}
+.zona-badge.aa{color:#9A7ACC;border-color:rgba(154,122,204,.4);background:rgba(154,122,204,.08);}
+.zona-badge.sovra{color:#FF6666;border-color:rgba(255,102,102,.5);background:rgba(255,102,102,.1);}
+.zona-badge.nd{color:var(--g6);border-color:var(--g4);background:transparent;}
+
+/* ── ZONA DOT ── */
+.zona-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+
+/* ── FULL TABLE (Intensità ref) ── */
+.full-table-wrap{overflow-x:auto;border-radius:4px;border:1px solid var(--g3);}
+.full-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+.full-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);text-align:center;}
+.full-table td{padding:7px 12px;border-bottom:1px solid var(--g2);font-family:'DM Mono',monospace;text-align:center;color:var(--mu2);}
+.full-table td:first-child{text-align:left;color:var(--wh);}
+.full-table tr:last-child td{border-bottom:none;}
+.full-table tr.highlight td{background:rgba(184,151,42,.07);}
+.full-table tr.highlight td:first-child{color:var(--gold2);}
+
+/* ── RESULT CARD SHARED ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.result-main{padding:16px 18px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:16px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+.rc-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:5px;}
+.rc-val{font-family:'DM Mono',monospace;font-size:17px;color:var(--wh);font-weight:500;}
+
+/* ── ZONE TABLE (Corsa) ── */
+.zone-table-wrap{border-radius:4px;overflow:hidden;border:1px solid var(--g3);}
+.zone-table{width:100%;border-collapse:collapse;}
+.zone-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);text-align:left;white-space:nowrap;}
+.zone-table td{padding:0;border-bottom:1px solid var(--g2);}
+.zone-table tr:last-child td{border-bottom:none;}
+.zone-table tr.current td{background:rgba(255,255,255,.03);}
+.zone-row{display:flex;align-items:stretch;}
+.zone-color-bar{width:5px;flex-shrink:0;}
+.zone-cells{display:flex;align-items:center;flex:1;flex-wrap:wrap;}
+.zc{padding:10px 12px;text-align:center;flex:1;min-width:80px;}
+.zc.left{text-align:left;min-width:140px;}
+.zone-name{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--wh);display:block;}
+.zone-sys{font-size:9px;color:var(--mu);display:block;margin-top:1px;}
+.zone-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--wh);}
+.zone-val.big{font-size:15px;}
+.zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);display:block;margin-top:2px;}
+.zone-obiettivo{font-size:10px;color:var(--mu2);line-height:1.4;}
+.current-badge{display:inline-block;background:var(--gold);color:#000;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;font-weight:bold;padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* ── INP SHARED FIXES ── */
+.inp-row-3{display:flex;gap:8px;margin-bottom:14px;}
+.inp-sm{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:15px;font-weight:500;padding:8px 8px;outline:none;width:70px;text-align:center;transition:.15s;}
+.inp-sm:focus{border-color:var(--gold);}
+.inp-colon{font-family:'DM Mono',monospace;font-size:18px;color:var(--mu);padding:0 2px;line-height:40px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+
+/* ── LISTINO PREZZI ── */
+.listino-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.listino-category{flex:1;min-width:260px;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.lc-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.lc-icon{font-size:16px;}
+.lc-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.lc-body{padding:6px 0;}
+.listino-item{display:flex;align-items:center;gap:10px;padding:8px 14px;cursor:pointer;transition:.15s;border-bottom:1px solid rgba(34,34,34,.6);}
+.listino-item:last-child{border-bottom:none;}
+.listino-item:hover{background:var(--g2);}
+.listino-item.selected{background:rgba(184,151,42,.07);}
+.li-check{width:16px;height:16px;border:1px solid var(--g5);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;transition:.15s;}
+.listino-item.selected .li-check{background:var(--gold);border-color:var(--gold);color:#000;}
+.li-name{flex:1;font-size:11px;color:var(--mu2);}
+.listino-item.selected .li-name{color:var(--wh);}
+.li-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);white-space:nowrap;}
+.listino-item.selected .li-price{color:var(--gold2);}
+.li-desc{font-size:9px;color:var(--g6);display:block;margin-top:1px;}
+/* preventivo */
+.preventivo-box{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.prev-head{padding:10px 16px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:10px;}
+.prev-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.prev-body{padding:14px 16px;}
+.prev-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--g3);}
+.prev-row:last-child{border-bottom:none;}
+.prev-item-name{font-size:11px;color:var(--mu2);}
+.prev-item-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);}
+.prev-subtotal{display:flex;justify-content:space-between;align-items:center;padding:10px 0 6px;border-top:2px solid var(--g3);margin-top:4px;}
+.prev-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);}
+.prev-value{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.prev-value.final{font-size:24px;color:var(--gold2);}
+.prev-value.saving{font-size:14px;color:#4DBD74;}
+.sconto-row{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap;}
+.sconto-presets{display:flex;gap:6px;flex-wrap:wrap;}
+.sconto-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);cursor:pointer;transition:.15s;}
+.sconto-btn:hover{border-color:rgba(184,151,42,.6);color:var(--gold);}
+.sconto-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(184,151,42,.08);}
+.sconto-custom{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:13px;padding:5px 8px;outline:none;width:70px;text-align:center;}
+.sconto-custom:focus{border-color:var(--gold);}
+.prev-note-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 10px;outline:none;width:100%;resize:vertical;min-height:40px;margin-top:8px;}
+.prev-note-inp:focus{border-color:var(--gold);}
+.prev-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+
 </style>
 </head>
 <body>
@@ -1188,6 +1352,162 @@ html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;
           <div class="sop-frame">
             <div id="wapp-section"></div>
           </div>
+
+          <!-- LISTINO PREZZI -->
+          <div class="slbl" style="margin-top:24px;">Listino Prezzi & Preventivo</div>
+          <div class="warn-box">
+            <strong>Costruttore preventivo:</strong> seleziona uno o più servizi → il totale si aggiorna in tempo reale.
+            Applica uno sconto, aggiungi note e copia il testo per WhatsApp.
+          </div>
+
+          <div class="listino-grid" id="listino-grid">
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">🔬</span><span class="lc-title">Valutazione</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Valutazione standard" data-price="60" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Valutazione standard<span class="li-desc">Anamnesi + batteria test A/B/C/D · 60–75 min</span></div>
+                  <div class="li-price">€60</div>
+                </div>
+                <div class="listino-item" data-name="Valutazione performance (VOLTRA)" data-price="90" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Valutazione performance<span class="li-desc">Batteria VOLTRA / Xenios USA · 60–75 min</span></div>
+                  <div class="li-price">€90</div>
+                </div>
+                <div class="listino-item" data-name="Sconto valutazione (dedotto 1ª rata)" data-price="-60" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Deduzione val. da 1ª rata<span class="li-desc">Sconto automatico se il cliente si iscrive</span></div>
+                  <div class="li-price" style="color:#4DBD74;">−€60</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">👥</span><span class="lc-title">Small Class</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Small Class Entry (8 sessioni)" data-price="120" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Entry — 8 sessioni<span class="li-desc">Gruppo · no programmazione individuale</span></div>
+                  <div class="li-price">€120</div>
+                </div>
+                <div class="listino-item" data-name="Small Class Entry (12 sessioni)" data-price="160" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Entry — 12 sessioni<span class="li-desc">Gruppo · no programmazione individuale</span></div>
+                  <div class="li-price">€160</div>
+                </div>
+                <div class="listino-item" data-name="Small Class Plus (8 sessioni)" data-price="160" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Plus — 8 sessioni<span class="li-desc">Gruppo + programma individuale incluso</span></div>
+                  <div class="li-price">€160</div>
+                </div>
+                <div class="listino-item" data-name="Small Class Plus (12 sessioni)" data-price="210" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Plus — 12 sessioni<span class="li-desc">Gruppo + programma individuale incluso</span></div>
+                  <div class="li-price">€210</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">🏋️</span><span class="lc-title">Personal Training</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="PT Kick (8 sessioni · 4 sett.)" data-price="320" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">PT Kick — 8 sess. / 4 sett.<span class="li-desc">€40/sess · Foundation cycle</span></div>
+                  <div class="li-price">€320</div>
+                </div>
+                <div class="listino-item" data-name="PT Flex (12 sessioni · 6 sett.)" data-price="450" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">PT Flex — 12 sess. / 6 sett.<span class="li-desc">€37.5/sess · ciclo completo</span></div>
+                  <div class="li-price">€450</div>
+                </div>
+                <div class="listino-item" data-name="Sessione PT singola" data-price="55" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Sessione singola PT<span class="li-desc">45–50 min · programmazione inclusa</span></div>
+                  <div class="li-price">€55</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">⚡</span><span class="lc-title">Pacchetti Ibridi</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Hybrid Start (4 PT + 8 SC)" data-price="380" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Hybrid Start<span class="li-desc">4 PT + 8 Small Class · 4 settimane</span></div>
+                  <div class="li-price">€380</div>
+                </div>
+                <div class="listino-item" data-name="Hybrid Growth (8 PT + 12 SC)" data-price="560" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Hybrid Growth<span class="li-desc">8 PT + 12 Small Class · 6 settimane</span></div>
+                  <div class="li-price">€560</div>
+                </div>
+                <div class="listino-item" data-name="Elite Hybrid" data-price="720" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Elite Hybrid<span class="li-desc">PT premium + accesso autonomo illimitato</span></div>
+                  <div class="li-price">€720</div>
+                </div>
+                <div class="listino-item" data-name="Duo Partner (coppia)" data-price="280" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Duo Partner<span class="li-desc">8 sessioni in coppia · tariffa a testa</span></div>
+                  <div class="li-price">€280</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">💻</span><span class="lc-title">Online & Extra</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Coaching online mensile" data-price="120" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Coaching online mensile<span class="li-desc">Programma + check-in settimanale</span></div>
+                  <div class="li-price">€120</div>
+                </div>
+                <div class="listino-item" data-name="Scheda personalizzata (singola)" data-price="60" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Scheda personalizzata<span class="li-desc">Programma su misura senza sessioni</span></div>
+                  <div class="li-price">€60</div>
+                </div>
+                <div class="listino-item" data-name="Report nutrizionale (consulenza)" data-price="80" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Consulenza nutrizione<span class="li-desc">Report + indicazioni base (no dieta medica)</span></div>
+                  <div class="li-price">€80</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /listino-grid -->
+
+          <!-- PREVENTIVO -->
+          <div class="preventivo-box" id="preventivo-box" style="display:none;">
+            <div class="prev-head">
+              <span class="prev-title">📋 Preventivo</span>
+              <button class="btn" onclick="resetListino()">Azzera</button>
+            </div>
+            <div class="prev-body">
+              <div id="prev-items"></div>
+              <div class="sconto-row">
+                <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;">Sconto:</span>
+                <div class="sconto-presets">
+                  <div class="sconto-btn" onclick="setSconto(0,this)">Nessuno</div>
+                  <div class="sconto-btn" onclick="setSconto(5,this)">5%</div>
+                  <div class="sconto-btn" onclick="setSconto(10,this)">10%</div>
+                  <div class="sconto-btn" onclick="setSconto(15,this)">15%</div>
+                  <div class="sconto-btn" onclick="setSconto(20,this)">20%</div>
+                </div>
+                <input class="sconto-custom" id="sconto-custom" type="number" min="0" max="50" placeholder="%" oninput="setSconto(this.value,null)">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);">%</span>
+              </div>
+              <div id="prev-totals"></div>
+              <textarea class="prev-note-inp" id="prev-note" placeholder="Note per il cliente (opzionale)..."></textarea>
+              <div class="prev-actions">
+                <button class="btn pri" onclick="copyPreventivo()">📋 Copia testo WhatsApp</button>
+                <button class="btn" onclick="resetListino()">🗑 Azzera selezione</button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div><!-- /tab-documenti -->
 
@@ -1196,7 +1516,7 @@ html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;
            TAB: CALCOLATORE INTENSITÀ
       ══════════════════════════════════════════════════ -->
       <div class="tab-panel" id="tab-intensita">
-        <div class="page">
+        <div class="tab-inner">
 
   <!-- AVVISO SCIENTIFICO -->
   <div class="warn-box">
@@ -1335,7 +1655,7 @@ html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;
            TAB: ZONE CORSA
       ══════════════════════════════════════════════════ -->
       <div class="tab-panel" id="tab-corsa">
-        <div class="page">
+        <div class="tab-inner">
 
   <div class="warn-box">
     <strong>⚠ Nota metodologica:</strong>
@@ -2319,7 +2639,10 @@ Risposta in italiano, concisa (max 250 parole), con intestazioni brevi. Usa ling
   try{
     const response=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
-      headers:{"Content-Type":"application/json"},
+      headers:{
+        "Content-Type":"application/json",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
       body:JSON.stringify({
         model:"claude-sonnet-4-6",
         max_tokens:1000,
@@ -3477,6 +3800,111 @@ function applyRecordToCalc(){
 renderRecord();
 renderFCHistory();
 
+
+/* ════════════════════════════════════════════
+   LISTINO PREZZI & PREVENTIVO
+════════════════════════════════════════════ */
+let _scontoVal = 0;
+
+function toggleListino(el){
+  el.classList.toggle('selected');
+  const check = el.querySelector('.li-check');
+  check.textContent = el.classList.contains('selected') ? '✓' : '';
+  renderPreventivo();
+}
+
+function renderPreventivo(){
+  const selected = [...document.querySelectorAll('.listino-item.selected')];
+  const box = document.getElementById('preventivo-box');
+  if(!selected.length){ box.style.display='none'; return; }
+  box.style.display='block';
+
+  const itemsEl = document.getElementById('prev-items');
+  let subtotal = 0;
+  itemsEl.innerHTML = selected.map(el=>{
+    const name = el.dataset.name;
+    const price = parseFloat(el.dataset.price)||0;
+    subtotal += price;
+    const col = price < 0 ? '#4DBD74' : 'var(--gold)';
+    return `<div class="prev-row">
+      <span class="prev-item-name">${name}</span>
+      <span class="prev-item-price" style="color:${col}">${price>=0?'€'+price:'−€'+Math.abs(price)}</span>
+    </div>`;
+  }).join('');
+
+  const sconto = Math.min(Math.max(_scontoVal,0),100);
+  const scontoAmt = subtotal > 0 ? Math.round(subtotal * sconto / 100) : 0;
+  const totale = subtotal - scontoAmt;
+
+  const totEl = document.getElementById('prev-totals');
+  totEl.innerHTML = `
+    <div class="prev-subtotal">
+      <span class="prev-label">Subtotale</span>
+      <span class="prev-value">€${subtotal.toFixed(0)}</span>
+    </div>
+    ${sconto>0?`<div class="prev-subtotal" style="padding:4px 0;">
+      <span class="prev-label">Sconto ${sconto}%</span>
+      <span class="prev-value saving">−€${scontoAmt}</span>
+    </div>`:''}
+    <div class="prev-subtotal" style="border-top:2px solid var(--gold);margin-top:4px;padding-top:10px;">
+      <span class="prev-label" style="color:var(--gold);">Totale</span>
+      <span class="prev-value final">€${totale.toFixed(0)}</span>
+    </div>`;
+}
+
+function setSconto(val, btn){
+  _scontoVal = parseFloat(val)||0;
+  document.querySelectorAll('.sconto-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const ci = document.getElementById('sconto-custom');
+  if(!btn && ci) ci.value = val;
+  renderPreventivo();
+}
+
+function resetListino(){
+  document.querySelectorAll('.listino-item.selected').forEach(el=>{
+    el.classList.remove('selected');
+    el.querySelector('.li-check').textContent='';
+  });
+  _scontoVal=0;
+  document.querySelectorAll('.sconto-btn').forEach(b=>b.classList.remove('active'));
+  const ci=document.getElementById('sconto-custom'); if(ci) ci.value='';
+  renderPreventivo();
+}
+
+function copyPreventivo(){
+  const selected = [...document.querySelectorAll('.listino-item.selected')];
+  if(!selected.length) return;
+  let subtotal=0;
+  const lines = selected.map(el=>{
+    const price=parseFloat(el.dataset.price)||0;
+    subtotal+=price;
+    return `• ${el.dataset.name}: ${price>=0?'€'+price:'−€'+Math.abs(price)}`;
+  });
+  const sconto=Math.min(Math.max(_scontoVal,0),100);
+  const scontoAmt=subtotal>0?Math.round(subtotal*sconto/100):0;
+  const totale=subtotal-scontoAmt;
+  const note=document.getElementById('prev-note')?.value||'';
+  const txt=[
+    `Ciao! Ecco il riepilogo di quanto abbiamo discusso 🤝`,
+    ``,
+    ...lines,
+    ``,
+    sconto>0?`Sconto applicato (${sconto}%): −€${scontoAmt}`:'',
+    `*Totale: €${totale}*`,
+    ``,
+    note||'',
+    ``,
+    `Per qualsiasi domanda sono qui. 🙌`,
+    ``,
+    `— Leo · PPL`
+  ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n');
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=event.target;
+    btn.textContent='✓ Copiato!';
+    setTimeout(()=>btn.textContent='📋 Copia testo WhatsApp',1800);
+  });
+}
 
 /* ── PWA Service Worker ── */
 if('serviceWorker' in navigator){
