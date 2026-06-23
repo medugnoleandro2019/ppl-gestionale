@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<title>PPL · Listino Prezzi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;--vio:#9A7ACC;--teal:#2E9B9B;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+/* ── TOPNAV ── */
+.topnav{background:var(--g1);border-bottom:1px solid rgba(184,151,42,.2);
+  padding:0 20px;height:36px;display:flex;align-items:center;gap:0;
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  position:sticky;top:0;z-index:200;}
+.topnav-brand{color:var(--gold);font-size:10px;letter-spacing:4px;padding-right:16px;
+  border-right:1px solid var(--g4);margin-right:8px;white-space:nowrap;}
+.topnav-link{color:var(--mu);padding:0 12px;height:100%;display:flex;align-items:center;
+  text-decoration:none;transition:.15s;border-bottom:2px solid transparent;white-space:nowrap;}
+.topnav-link:hover{color:var(--wh);}
+.topnav-link.active{color:var(--gold);border-bottom-color:var(--gold);}
+.topnav-sp{flex:1;}
+/* ── TOPBAR ── */
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:48px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:36px;z-index:100;}
+.topbar-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;}
+.tbtn:hover{border-color:var(--gold);color:var(--gold);}
+/* ── PAGE ── */
+.page{max-width:960px;margin:0 auto;padding:20px 20px 80px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:20px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.warn-box{background:rgba(184,151,42,.06);border:1px solid rgba(184,151,42,.25);border-radius:4px;
+  padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--mu2);line-height:1.6;}
+.warn-box strong{color:var(--gold2);}
+.btn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);}
+/* ── LISTINO ── */
+
+@media(max-width:600px){
+  .topnav{padding:0 10px;}
+  .topnav-brand{display:none;}
+  .topnav-link{padding:0 8px;font-size:7px;}
+  .listino-category{min-width:100%;}
+  .page{padding:14px 12px 60px;}
+}
+</style>
+</head>
+<body>
+<nav class="topnav">
+  <span class="topnav-brand">PPL</span>
+  <a class="topnav-link" href="index.html">🗂 Gestionale</a>
+  <a class="topnav-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="topnav-link active" href="listino.html">💰 Listino</a>
+  <div class="topnav-sp"></div>
+</nav>
+<div class="topbar">
+  <span class="topbar-title">Listino Prezzi & Preventivo</span>
+  <div class="tb-sp"></div>
+  <button class="tbtn" onclick="resetListino()">🗑 Azzera selezione</button>
+</div>
+<div class="page">
+  <!-- LISTINO PREZZI -->
+          <div class="slbl" style="margin-top:24px;">Listino Prezzi & Preventivo</div>
+          <div class="warn-box">
+            <strong>Costruttore preventivo:</strong> seleziona uno o più servizi → il totale si aggiorna in tempo reale.
+            Applica uno sconto, aggiungi note e copia il testo per WhatsApp.
+          </div>
+
+          <div class="listino-grid" id="listino-grid">
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">🔬</span><span class="lc-title">Valutazione</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Valutazione standard" data-price="60" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Valutazione standard<span class="li-desc">Anamnesi + batteria test A/B/C/D · 60–75 min</span></div>
+                  <div class="li-price">€60</div>
+                </div>
+                <div class="listino-item" data-name="Valutazione performance (VOLTRA)" data-price="90" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Valutazione performance<span class="li-desc">Batteria VOLTRA / Xenios USA · 60–75 min</span></div>
+                  <div class="li-price">€90</div>
+                </div>
+                <div class="listino-item" data-name="Sconto valutazione (dedotto 1ª rata)" data-price="-60" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Deduzione val. da 1ª rata<span class="li-desc">Sconto automatico se il cliente si iscrive</span></div>
+                  <div class="li-price" style="color:#4DBD74;">−€60</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">👥</span><span class="lc-title">Small Class</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Small Class Entry (8 sessioni)" data-price="120" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Entry — 8 sessioni<span class="li-desc">Gruppo · no programmazione individuale</span></div>
+                  <div class="li-price">€120</div>
+                </div>
+                <div class="listino-item" data-name="Small Class Entry (12 sessioni)" data-price="160" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Entry — 12 sessioni<span class="li-desc">Gruppo · no programmazione individuale</span></div>
+                  <div class="li-price">€160</div>
+                </div>
+                <div class="listino-item" data-name="Small Class Plus (8 sessioni)" data-price="160" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Plus — 8 sessioni<span class="li-desc">Gruppo + programma individuale incluso</span></div>
+                  <div class="li-price">€160</div>
+                </div>
+                <div class="listino-item" data-name="Small Class Plus (12 sessioni)" data-price="210" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Plus — 12 sessioni<span class="li-desc">Gruppo + programma individuale incluso</span></div>
+                  <div class="li-price">€210</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">🏋️</span><span class="lc-title">Personal Training</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="PT Kick (8 sessioni · 4 sett.)" data-price="320" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">PT Kick — 8 sess. / 4 sett.<span class="li-desc">€40/sess · Foundation cycle</span></div>
+                  <div class="li-price">€320</div>
+                </div>
+                <div class="listino-item" data-name="PT Flex (12 sessioni · 6 sett.)" data-price="450" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">PT Flex — 12 sess. / 6 sett.<span class="li-desc">€37.5/sess · ciclo completo</span></div>
+                  <div class="li-price">€450</div>
+                </div>
+                <div class="listino-item" data-name="Sessione PT singola" data-price="55" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Sessione singola PT<span class="li-desc">45–50 min · programmazione inclusa</span></div>
+                  <div class="li-price">€55</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">⚡</span><span class="lc-title">Pacchetti Ibridi</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Hybrid Start (4 PT + 8 SC)" data-price="380" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Hybrid Start<span class="li-desc">4 PT + 8 Small Class · 4 settimane</span></div>
+                  <div class="li-price">€380</div>
+                </div>
+                <div class="listino-item" data-name="Hybrid Growth (8 PT + 12 SC)" data-price="560" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Hybrid Growth<span class="li-desc">8 PT + 12 Small Class · 6 settimane</span></div>
+                  <div class="li-price">€560</div>
+                </div>
+                <div class="listino-item" data-name="Elite Hybrid" data-price="720" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Elite Hybrid<span class="li-desc">PT premium + accesso autonomo illimitato</span></div>
+                  <div class="li-price">€720</div>
+                </div>
+                <div class="listino-item" data-name="Duo Partner (coppia)" data-price="280" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Duo Partner<span class="li-desc">8 sessioni in coppia · tariffa a testa</span></div>
+                  <div class="li-price">€280</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="listino-category">
+              <div class="lc-head"><span class="lc-icon">💻</span><span class="lc-title">Online & Extra</span></div>
+              <div class="lc-body">
+                <div class="listino-item" data-name="Coaching online mensile" data-price="120" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Coaching online mensile<span class="li-desc">Programma + check-in settimanale</span></div>
+                  <div class="li-price">€120</div>
+                </div>
+                <div class="listino-item" data-name="Scheda personalizzata (singola)" data-price="60" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Scheda personalizzata<span class="li-desc">Programma su misura senza sessioni</span></div>
+                  <div class="li-price">€60</div>
+                </div>
+                <div class="listino-item" data-name="Report nutrizionale (consulenza)" data-price="80" onclick="toggleListino(this)">
+                  <div class="li-check"></div>
+                  <div class="li-name">Consulenza nutrizione<span class="li-desc">Report + indicazioni base (no dieta medica)</span></div>
+                  <div class="li-price">€80</div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /listino-grid -->
+
+          <!-- PREVENTIVO -->
+          <div class="preventivo-box" id="preventivo-box" style="display:none;">
+            <div class="prev-head">
+              <span class="prev-title">📋 Preventivo</span>
+              <button class="btn" onclick="resetListino()">Azzera</button>
+            </div>
+            <div class="prev-body">
+              <div id="prev-items"></div>
+              <div class="sconto-row">
+                <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;">Sconto:</span>
+                <div class="sconto-presets">
+                  <div class="sconto-btn" onclick="setSconto(0,this)">Nessuno</div>
+                  <div class="sconto-btn" onclick="setSconto(5,this)">5%</div>
+                  <div class="sconto-btn" onclick="setSconto(10,this)">10%</div>
+                  <div class="sconto-btn" onclick="setSconto(15,this)">15%</div>
+                  <div class="sconto-btn" onclick="setSconto(20,this)">20%</div>
+                </div>
+                <input class="sconto-custom" id="sconto-custom" type="number" min="0" max="50" placeholder="%" oninput="setSconto(this.value,null)">
+                <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);">%</span>
+              </div>
+              <div id="prev-totals"></div>
+              <textarea class="prev-note-inp" id="prev-note" placeholder="Note per il cliente (opzionale)..."></textarea>
+              <div class="prev-actions">
+                <button class="btn pri" onclick="copyPreventivo()">📋 Copia testo WhatsApp</button>
+                <button class="btn" onclick="resetListino()">🗑 Azzera selezione</button>
+              </div>
+            </div>
+          </div>
+</div>
+<script>
+let _scontoVal = 0;
+function toggleListino(el){
+  el.classList.toggle('selected');
+  el.querySelector('.li-check').textContent = el.classList.contains('selected') ? '✓' : '';
+  renderPreventivo();
+}
+function renderPreventivo(){
+  const sel = [...document.querySelectorAll('.listino-item.selected')];
+  const box = document.getElementById('preventivo-box');
+  if(!sel.length){box.style.display='none'; return;}
+  box.style.display = 'block';
+  let sub = 0;
+  document.getElementById('prev-items').innerHTML = sel.map(el=>{
+    const pr = parseFloat(el.dataset.price)||0; sub += pr;
+    const c = pr<0?'#4DBD74':'var(--gold)';
+    return `<div class="prev-row"><span class="prev-item-name">${el.dataset.name}</span><span class="prev-item-price" style="color:${c}">${pr>=0?'€'+pr:'−€'+Math.abs(pr)}</span></div>`;
+  }).join('');
+  const sc=Math.min(Math.max(_scontoVal,0),100), sA=sub>0?Math.round(sub*sc/100):0, tot=sub-sA;
+  document.getElementById('prev-totals').innerHTML = `
+    <div class="prev-subtotal"><span class="prev-label">Subtotale</span><span class="prev-value">€${sub}</span></div>
+    ${sc>0?`<div class="prev-subtotal"><span class="prev-label">Sconto ${sc}%</span><span class="prev-value saving">−€${sA}</span></div>`:''}
+    <div class="prev-subtotal" style="border-top:2px solid var(--gold);padding-top:10px;margin-top:4px;">
+      <span class="prev-label" style="color:var(--gold);">Totale</span>
+      <span class="prev-value final">€${tot}</span>
+    </div>`;
+}
+function setSconto(val,btn){
+  _scontoVal = parseFloat(val)||0;
+  document.querySelectorAll('.sconto-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const ci = document.getElementById('sconto-custom');
+  if(!btn&&ci) ci.value = val;
+  renderPreventivo();
+}
+function resetListino(){
+  document.querySelectorAll('.listino-item.selected').forEach(el=>{
+    el.classList.remove('selected');
+    el.querySelector('.li-check').textContent='';
+  });
+  _scontoVal=0;
+  document.querySelectorAll('.sconto-btn').forEach(b=>b.classList.remove('active'));
+  const ci=document.getElementById('sconto-custom'); if(ci) ci.value='';
+  renderPreventivo();
+}
+function copyPreventivo(){
+  const sel=[...document.querySelectorAll('.listino-item.selected')];
+  if(!sel.length) return;
+  let sub=0;
+  const lines=sel.map(el=>{
+    const pr=parseFloat(el.dataset.price)||0; sub+=pr;
+    return `• ${el.dataset.name}: ${pr>=0?'€'+pr:'−€'+Math.abs(pr)}`;
+  });
+  const sc=Math.min(Math.max(_scontoVal,0),100), sA=sub>0?Math.round(sub*sc/100):0, tot=sub-sA;
+  const note=document.getElementById('prev-note')?.value||'';
+  const txt=[
+    `Ciao! Ecco il riepilogo di quanto abbiamo discusso 🤝`,``,
+    ...lines,``,
+    sc>0?`Sconto applicato (${sc}%): −€${sA}`:'',
+    `*Totale: €${tot}*`,``,note||'',``,
+    `Per qualsiasi domanda sono qui 🙌`,``,`— Leo · PPL`
+  ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n');
+  navigator.clipboard.writeText(txt).then(()=>{
+    const b=event.target; b.textContent='✓ Copiato!';
+    setTimeout(()=>b.textContent='📋 Copia testo WhatsApp',1800);
+  });
+}
+</script>
+</body>
+</html>
