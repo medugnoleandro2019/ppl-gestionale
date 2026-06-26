@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPL · Simulatore Break-Even</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;--vio:#9A7ACC;--teal:#2E9B9B;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 24px;height:52px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;
+  letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:22px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-reset{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  background:none;border:1px solid var(--g4);color:var(--mu);padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;}
+.tb-reset:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── LAYOUT ── */
+.page{max-width:1100px;margin:0 auto;padding:20px 20px 80px;}
+.grid-2{display:flex;gap:14px;flex-wrap:wrap;}
+.col{flex:1;min-width:300px;}
+.col-wide{flex:1.6;min-width:340px;}
+
+/* ── SECTION LABEL ── */
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:20px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── CARD ── */
+.card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.card-head{padding:11px 16px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:10px;}
+.card-icon{font-size:15px;}
+.card-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.card-body{padding:14px 16px;}
+
+/* ── KPI CARDS ── */
+.kpi-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.kpi{flex:1;min-width:130px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:13px 15px;border-top:3px solid var(--g4);transition:.3s;}
+.kpi.grn{border-top-color:var(--grn);}
+.kpi.red{border-top-color:var(--red);}
+.kpi.org{border-top-color:var(--org);}
+.kpi.gold{border-top-color:var(--gold);}
+.kpi.vio{border-top-color:var(--vio);}
+.kpi-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);
+  text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.dot.grn{background:var(--grn);}.dot.red{background:var(--red);}
+.dot.org{background:var(--org);}.dot.gold{background:var(--gold);}
+.dot.vio{background:var(--vio);}
+.kpi-val{font-family:'DM Mono',monospace;font-size:28px;font-weight:500;line-height:1;color:var(--wh);}
+.kpi-val.grn{color:var(--grn);}.kpi-val.red{color:var(--red);}
+.kpi-val.org{color:var(--org);}.kpi-val.gold{color:var(--gold);}
+.kpi-sub{font-size:10px;color:var(--mu);margin-top:5px;}
+
+/* ── BARRA PROGRESS ── */
+.progress-wrap{margin:14px 0;}
+.progress-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.progress-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;}
+.progress-pct{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.progress-track{height:8px;background:var(--g3);border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+
+/* ── PACCHETTI ── */
+.pkg-list{display:flex;flex-direction:column;gap:6px;}
+.pkg-row{display:flex;align-items:center;gap:10px;padding:9px 12px;
+  background:var(--g2);border:1px solid var(--g4);border-radius:4px;transition:.15s;}
+.pkg-row:hover{border-color:var(--g5);}
+.pkg-color{width:4px;height:32px;border-radius:2px;flex-shrink:0;}
+.pkg-name-wrap{flex:1;min-width:0;}
+.pkg-name-inp{background:transparent;border:none;outline:none;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;width:100%;
+  border-bottom:1px solid transparent;transition:.15s;}
+.pkg-name-inp:focus{border-bottom-color:var(--gold);}
+.pkg-sub{font-size:9px;color:var(--mu);}
+.pkg-price-wrap{display:flex;align-items:center;gap:4px;}
+.pkg-price-sym{font-family:'DM Mono',monospace;font-size:12px;color:var(--mu);}
+.pkg-price-inp{background:var(--g3);border:1px solid var(--g4);border-radius:3px;
+  color:var(--gold2);font-family:'DM Mono',monospace;font-size:14px;font-weight:500;
+  width:72px;text-align:right;padding:4px 8px;outline:none;transition:.15s;}
+.pkg-price-inp:focus{border-color:var(--gold);}
+.pkg-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:15px;padding:2px 4px;transition:.15s;}
+.pkg-del:hover{color:var(--red);}
+.pkg-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:9px;background:transparent;border:1px dashed var(--g4);border-radius:4px;
+  color:var(--mu);cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;transition:.15s;width:100%;}
+.pkg-add-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── SLIDER ── */
+.slider-list{display:flex;flex-direction:column;gap:12px;}
+.slider-row{background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:11px 13px;}
+.slider-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.slider-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.slider-name{font-size:12px;color:var(--wh);font-weight:500;flex:1;}
+.slider-count{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--gold);
+  min-width:32px;text-align:right;}
+.slider-rev{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);text-align:right;min-width:70px;}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:5px;background:var(--g4);border-radius:3px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;appearance:none;
+  width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;transition:.15s;}
+input[type=range]::-webkit-slider-thumb:hover{background:var(--gold2);transform:scale(1.15);}
+input[type=range]::-moz-range-thumb{
+  width:16px;height:16px;border-radius:50%;background:var(--gold);cursor:pointer;border:none;}
+
+/* ── COSTI ── */
+.costo-row{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--g3);}
+.costo-row:last-child{border-bottom:none;}
+.costo-name{flex:1;font-size:11px;color:var(--mu2);}
+.costo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;
+  width:90px;text-align:right;padding:4px 8px;outline:none;transition:.15s;}
+.costo-inp:focus{border-color:var(--gold);}
+.costo-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:14px;transition:.15s;}
+.costo-del:hover{color:var(--red);}
+.costo-add-btn{display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:8px;background:transparent;border:1px dashed var(--g4);border-radius:3px;
+  color:var(--mu);cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;transition:.15s;width:100%;margin-top:8px;}
+.costo-add-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── SCENARIO TABLE ── */
+.scenario-table-wrap{overflow-x:auto;}
+.scenario-table{width:100%;border-collapse:collapse;font-size:11px;}
+.scenario-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:right;white-space:nowrap;}
+.scenario-table th:first-child{text-align:left;}
+.scenario-table td{padding:7px 10px;border-bottom:1px solid var(--g2);
+  font-family:'DM Mono',monospace;text-align:right;color:var(--mu2);}
+.scenario-table td:first-child{text-align:left;color:var(--wh);}
+.scenario-table tr:last-child td{border-bottom:none;}
+.scenario-table tr.current td{background:rgba(184,151,42,.06);}
+.scenario-table tr.be-row td{background:rgba(77,189,116,.05);}
+.c-grn{color:var(--grn)!important;}.c-red{color:var(--red)!important;}
+.c-gold{color:var(--gold)!important;}.c-org{color:var(--org)!important;}
+
+/* ── MIX DONUT ── */
+.mix-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.mix-seg{flex:1;min-width:70px;padding:8px 10px;border-radius:3px;text-align:center;border:1px solid transparent;}
+.mix-seg-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;margin-bottom:3px;}
+.mix-seg-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+.mix-seg-rev{font-size:9px;color:var(--mu);margin-top:2px;}
+
+/* ── INSIGHTS ── */
+.insight{border-radius:4px;padding:10px 13px;margin-bottom:6px;font-size:11px;
+  color:var(--mu2);line-height:1.6;border-left:3px solid;}
+.insight strong{color:var(--wh);}
+.insight.grn{border-left-color:var(--grn);background:rgba(77,189,116,.05);}
+.insight.red{border-left-color:var(--red);background:rgba(224,92,92,.05);}
+.insight.org{border-left-color:var(--org);background:rgba(224,140,58,.05);}
+.insight.vio{border-left-color:var(--vio);background:rgba(154,122,204,.05);}
+
+/* ── BTN ── */
+.btn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);}
+.btn.pri:hover{background:var(--gold2);}
+
+/* ── MOBILE ── */
+@media(max-width:680px){
+  .page{padding:14px 12px 60px;}
+  .kpi{min-width:calc(50% - 5px);}
+  .kpi-val{font-size:22px;}
+  .col,.col-wide{min-width:100%;}
+  .topbar{padding:0 14px;}
+}
+
+/* ══ TOPNAV ══ */
+
+@media(max-width:600px){
+  
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ── pkg sconto inputs ── */
+.pkg-sconto-wrap{display:flex;align-items:center;gap:3px;flex-shrink:0;}
+.pkg-sconto-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:11px;padding:4px 5px;width:46px;text-align:center;outline:none;}
+.pkg-sconto-inp:focus{border-color:var(--gold);}
+.pkg-sconto-sep{color:var(--g6);font-size:12px;}
+.pkg-sconto-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);}
+:root{--teal:#2E9B9B;}
+
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link active" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+
+<div class="topbar">
+  <span class="tb-brand">PPL</span>
+  <div class="tb-sep"></div>
+  <span class="tb-title">Simulatore Break-Even</span>
+  <div class="tb-sp"></div>
+  <button class="tb-reset" onclick="resetAll()">⟳ Reset default</button>
+</div>
+
+<div class="page">
+
+  <!-- KPI LIVE -->
+  <div class="slbl">Situazione attuale</div>
+  <div class="kpi-row">
+    <div class="kpi" id="kpi-rev">
+      <div class="kpi-lbl"><span class="dot gold"></span>Revenue mensile</div>
+      <div class="kpi-val gold" id="kv-rev">€0</div>
+      <div class="kpi-sub" id="ks-rev">0 clienti attivi</div>
+    </div>
+    <div class="kpi" id="kpi-be">
+      <div class="kpi-lbl"><span class="dot" id="dot-be"></span>Break-even</div>
+      <div class="kpi-val" id="kv-be">€0</div>
+      <div class="kpi-sub" id="ks-be">costi fissi mensili</div>
+    </div>
+    <div class="kpi" id="kpi-delta">
+      <div class="kpi-lbl"><span class="dot" id="dot-delta"></span>Margine</div>
+      <div class="kpi-val" id="kv-delta">€0</div>
+      <div class="kpi-sub" id="ks-delta">vs break-even</div>
+    </div>
+    <div class="kpi gold" id="kpi-target">
+      <div class="kpi-lbl"><span class="dot gold"></span>Target mensile</div>
+      <div class="kpi-val gold" id="kv-target">€0</div>
+      <div class="kpi-sub" id="ks-target">0% raggiunto</div>
+    </div>
+    <div class="kpi" id="kpi-ticket">
+      <div class="kpi-lbl"><span class="dot vio"></span>Ticket medio</div>
+      <div class="kpi-val vio" id="kv-ticket">€0</div>
+      <div class="kpi-sub" id="ks-ticket">per cliente/mese</div>
+    </div>
+  </div>
+
+  <!-- BARRE PROGRESS -->
+  <div class="card">
+    <div class="card-head"><span class="card-icon">📊</span><span class="card-title">Avanzamento verso gli obiettivi</span></div>
+    <div class="card-body">
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-name">Break-even coverage</span>
+          <span class="progress-pct" id="pct-be" style="color:var(--org)">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="bar-be" style="width:0%;background:var(--org);"></div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span class="progress-name">Target revenue</span>
+          <span class="progress-pct" id="pct-target" style="color:var(--gold)">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="bar-target" style="width:0%;background:var(--gold);"></div></div>
+      </div>
+      <div class="progress-wrap" style="margin-bottom:0;">
+        <div class="progress-label">
+          <span class="progress-name">Saturazione clienti</span>
+          <span class="progress-pct" id="pct-cli" style="color:var(--vio)">0%</span>
+        </div>
+        <div class="progress-track"><div class="progress-fill" id="bar-cli" style="width:0%;background:var(--vio);"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- COLONNA SINISTRA: config -->
+    <div class="col">
+
+      <!-- COSTI FISSI -->
+      <div class="slbl">Costi fissi mensili</div>
+      <div class="card">
+        <div class="card-body" style="padding-bottom:8px;">
+          <div id="costi-list"></div>
+          <button class="costo-add-btn" onclick="addCosto()">+ Aggiungi voce di costo</button>
+        </div>
+      </div>
+
+      <!-- TARGET -->
+      <div class="slbl">Obiettivi</div>
+      <div class="card">
+        <div class="card-body">
+          <div style="display:flex;flex-wrap:wrap;gap:10px;">
+            <div style="flex:1;min-width:120px;display:flex;flex-direction:column;gap:4px;">
+              <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;">Target revenue €/mese</span>
+              <input class="costo-inp" id="inp-target" type="number" value="5400" style="width:100%;" oninput="calc()">
+            </div>
+            <div style="flex:1;min-width:120px;display:flex;flex-direction:column;gap:4px;">
+              <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;">Clienti max (capacità)</span>
+              <input class="costo-inp" id="inp-maxcli" type="number" value="44" style="width:100%;" oninput="calc()">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PACCHETTI -->
+      <div class="slbl">Pacchetti & prezzi</div>
+      <div class="card">
+        <div class="card-body" style="padding-bottom:8px;">
+          <div id="pkg-list"></div>
+          <button class="pkg-add-btn" onclick="addPacchetto()">+ Aggiungi pacchetto</button>
+        </div>
+      </div>
+
+    </div><!-- /col -->
+
+    <!-- COLONNA DESTRA: simulatore -->
+    <div class="col-wide">
+
+      <!-- SLIDER CLIENTI -->
+      <div class="slbl">Mix clienti — sposta gli slider</div>
+      <div class="card">
+        <div class="card-body">
+          <div class="slider-list" id="slider-list"></div>
+          <div class="mix-row" id="mix-row"></div>
+        </div>
+      </div>
+
+      <!-- INSIGHTS -->
+      <div class="slbl">Analisi automatica</div>
+      <div id="insights-box"></div>
+
+      <!-- SCENARIO TABLE -->
+      <div class="slbl">Scenari — clienti necessari per break-even e target</div>
+      <div class="card">
+        <div class="card-body" style="padding:0;">
+          <div class="scenario-table-wrap">
+            <table class="scenario-table">
+              <thead>
+                <tr>
+                  <th style="text-align:left;">Pacchetto</th>
+                  <th>Prezzo</th>
+                  <th>Clienti → BE</th>
+                  <th>Revenue → BE</th>
+                  <th>Clienti → Target</th>
+                  <th>Revenue → Target</th>
+                </tr>
+              </thead>
+              <tbody id="scenario-tbody"></tbody>
+            </table>
+          </div>
+        <div class="slbl" style="margin-top:20px;">Analisi sconti & margini netti <span style="font-size:8px;color:var(--mu);">(tasse calcolate · margine vs BE per cliente nel mix)</span></div>
+        <div class="scenario-table-wrap">
+          <table class="scenario-table">
+            <thead><tr>
+              <th>Pacchetto</th>
+              <th style="text-align:right;">Prezzo pieno</th>
+              <th style="text-align:center;">Sconto incentivo</th>
+              <th style="text-align:center;">Sconto massimo</th>
+              <th style="text-align:right;">Margine base</th>
+              <th style="text-align:right;">Margine incentivo</th>
+              <th style="text-align:right;">Margine max sconto</th>
+              <th style="text-align:center;">Max teorico</th>
+            </tr></thead>
+            <tbody id="sconti-tbody"></tbody>
+          </table>
+        </div>
+        </div>
+      </div>
+
+            <div class="slbl" style="margin-top:14px;">Tassazione forfettaria</div>
+        <div style="display:flex;align-items:center;gap:10px;background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:10px 14px;margin-bottom:8px;">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;flex:1;">Aliquota %</span>
+          <input id="inp-aliquota" type="number" value="15" min="5" max="43" step="1"
+            style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:5px 8px;outline:none;width:70px;text-align:right;"
+            oninput="calc()">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);">%</span>
+        </div>
+        <div style="font-size:9px;color:var(--g6);padding:0 2px 10px;">5% primi 5 anni · 15% regime ordinario</div>
+</div><!-- /col-wide -->
+
+  </div><!-- /grid-2 -->
+
+</div><!-- /page -->
+
+<script>
+/* ══════════════════════════════════════════════
+   DEFAULT DATA
+══════════════════════════════════════════════ */
+const COLORS = ['#B8972A','#4DBD74','#9A7ACC','#2E9B9B','#E08C3A','#E05C5C','#4A8FCC','#D4AF45'];
+
+const DEFAULT_COSTI = [
+  {id:1, nome:'Affitto/rata studio', val:900},
+  {id:2, nome:'Sportclubby + software', val:80},
+  {id:3, nome:'Assicurazione RC', val:50},
+  {id:4, nome:'Commercialista', val:80},
+  {id:5, nome:'Marketing & materiali', val:100},
+  {id:6, nome:'Attrezzatura (ammortamento)', val:100},
+  {id:7, nome:'Utenze (luce, internet)', val:60},
+  {id:8, nome:'Formazione continua', val:80},
+  {id:9, nome:'Buffer/imprevisti', val:60},
+  {id:10, nome:'Tasse stimate (forfettario 5%)', val:200},
+  {id:11, nome:'Contributi INPS min.', val:350},
+];
+
+const DEFAULT_PACCHETTI = [
+  {id:1, nome:'Small Class Entry (8 sess.)', prezzo:120, scontoInc:10, scontoMax:20},
+  {id:2, nome:'Small Class Plus (8 sess.)', prezzo:160, scontoInc:10, scontoMax:18},
+  {id:3, nome:'PT Kick (8 sess. / 4 sett.)', prezzo:320, scontoInc:8, scontoMax:15},
+  {id:4, nome:'Hybrid Start (4PT + 8SC)', prezzo:380, scontoInc:8, scontoMax:15},
+  {id:5, nome:'Hybrid Growth (8PT + 12SC)', prezzo:560, scontoInc:5, scontoMax:12},
+  {id:6, nome:'Coaching online mensile', prezzo:120, scontoInc:0, scontoMax:10},
+];
+
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let costi = JSON.parse(JSON.stringify(DEFAULT_COSTI));
+let pacchetti = JSON.parse(JSON.stringify(DEFAULT_PACCHETTI));
+let sliders = {}; // pkgId → count
+let nextId = 100;
+
+function getColor(idx){ return COLORS[idx % COLORS.length]; }
+
+/* ══════════════════════════════════════════════
+   RENDER COSTI
+══════════════════════════════════════════════ */
+function renderCosti(){
+  const el = document.getElementById('costi-list');
+  const total = costi.reduce((s,c)=>s+c.val,0);
+  el.innerHTML = costi.map(c=>`
+    <div class="costo-row">
+      <span class="costo-name">${c.nome}</span>
+      <input class="costo-inp" type="number" value="${c.val}" min="0"
+        onchange="updateCosto(${c.id}, this.value)" oninput="updateCosto(${c.id}, this.value)">
+      <button class="costo-del" onclick="delCosto(${c.id})">✕</button>
+    </div>`).join('') +
+    `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;border-top:1px solid var(--g3);margin-top:6px;">
+      <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;">Totale costi fissi</span>
+      <span style="font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--red);">€${total.toLocaleString('it-IT')}</span>
+    </div>`;
+}
+function updateCosto(id, val){ const c=costi.find(x=>x.id===id); if(c){ c.val=parseInt(val)||0; calc(); } }
+function delCosto(id){ costi=costi.filter(x=>x.id!==id); renderCosti(); calc(); }
+function addCosto(){
+  costi.push({id:nextId++, nome:'Nuova voce', val:0});
+  renderCosti(); calc();
+}
+
+/* ══════════════════════════════════════════════
+   RENDER PACCHETTI
+══════════════════════════════════════════════ */
+function renderPacchetti(){
+  const el = document.getElementById('pkg-list');
+  el.innerHTML = pacchetti.map((p,i)=>`
+    <div class="pkg-row">
+      <div class="pkg-color" style="background:${getColor(i)};"></div>
+      <div class="pkg-name-wrap">
+        <input class="pkg-name-inp" value="${p.nome}" onchange="updatePkgNome(${p.id},this.value)">
+        <div class="pkg-sub">€${p.prezzo}/mese</div>
+      </div>
+      <div class="pkg-price-wrap">
+        <span class="pkg-price-sym">€</span>
+        <input class="pkg-price-inp" type="number" value="${p.prezzo}" min="0"
+          onchange="updatePkgPrezzo(${p.id},this.value)" oninput="updatePkgPrezzo(${p.id},this.value)">
+      </div>
+      <div class="pkg-sconto-wrap" title="Sconto incentivo % / Sconto massimo %">
+        <input class="pkg-sconto-inp" type="number" value="${p.scontoInc||0}" min="0" max="100" placeholder="Inc%"
+          onchange="updatePkgSconto(${p.id},'scontoInc',this.value)"
+          oninput="updatePkgSconto(${p.id},'scontoInc',this.value)">
+        <span class="pkg-sconto-sep">/</span>
+        <input class="pkg-sconto-inp" type="number" value="${p.scontoMax||0}" min="0" max="100" placeholder="Max%"
+          onchange="updatePkgSconto(${p.id},'scontoMax',this.value)"
+          oninput="updatePkgSconto(${p.id},'scontoMax',this.value)">
+        <span class="pkg-sconto-lbl">%</span>
+      </div>
+      <button class="pkg-del" onclick="delPacchetto(${p.id})">✕</button>
+    </div>`).join('');
+  renderSliders();
+}
+function updatePkgNome(id,val){ const p=pacchetti.find(x=>x.id===id); if(p){ p.nome=val; renderPacchetti(); } }
+function updatePkgSconto(id,field,val){ const p=pacchetti.find(x=>x.id===id); if(p){ p[field]=Math.min(Math.max(parseInt(val)||0,0),80); calc(); } }
+function updatePkgPrezzo(id,val){ const p=pacchetti.find(x=>x.id===id); if(p){ p.prezzo=parseInt(val)||0; renderPacchetti(); calc(); } }
+function delPacchetto(id){
+  pacchetti=pacchetti.filter(x=>x.id!==id);
+  delete sliders[id];
+  renderPacchetti(); calc();
+}
+function addPacchetto(){
+  const id=nextId++;
+  pacchetti.push({id, nome:'Nuovo pacchetto', prezzo:200, scontoInc:10, scontoMax:20});
+  sliders[id]=0;
+  renderPacchetti(); calc();
+}
+
+/* ══════════════════════════════════════════════
+   RENDER SLIDERS
+══════════════════════════════════════════════ */
+function renderSliders(){
+  const el = document.getElementById('slider-list');
+  // init sliders state for new packages
+  pacchetti.forEach(p=>{ if(!(p.id in sliders)) sliders[p.id]=0; });
+  el.innerHTML = pacchetti.map((p,i)=>{
+    const cnt = sliders[p.id]||0;
+    const rev = cnt * p.prezzo;
+    return `<div class="slider-row">
+      <div class="slider-top">
+        <div class="slider-dot" style="background:${getColor(i)};"></div>
+        <span class="slider-name">${p.nome}</span>
+        <span class="slider-count" style="color:${getColor(i)};" id="sc-${p.id}">${cnt}</span>
+        <span class="slider-rev" id="sr-${p.id}">€${rev.toLocaleString('it-IT')}</span>
+      </div>
+      <input type="range" min="0" max="100" step="1" value="${cnt}"
+        oninput="updateSlider(${p.id},this.value)"
+        style="accent-color:${getColor(i)}">
+    </div>`;
+  }).join('');
+}
+
+function updateSlider(id, val){
+  sliders[id] = parseInt(val)||0;
+  const p = pacchetti.find(x=>x.id===id);
+  if(!p) return;
+  const cnt = sliders[id];
+  const sc = document.getElementById('sc-'+id);
+  const sr = document.getElementById('sr-'+id);
+  if(sc) sc.textContent = cnt;
+  if(sr) sr.textContent = '€'+(cnt*p.prezzo).toLocaleString('it-IT');
+  calc();
+}
+
+/* ══════════════════════════════════════════════
+   MAIN CALC
+══════════════════════════════════════════════ */
+function fE(v){ return '€'+Math.round(v).toLocaleString('it-IT'); }
+function fP(v){ return Math.round(v)+'%'; }
+
+function calc(){
+  const totalCosti = costi.reduce((s,c)=>s+c.val,0);
+  const target = parseInt(document.getElementById('inp-target').value)||0;
+  const maxCli = parseInt(document.getElementById('inp-maxcli').value)||44;
+
+  // Revenue e clienti dal mix attuale
+  let totalRev = 0, totalCli = 0;
+  pacchetti.forEach(p=>{
+    const cnt = sliders[p.id]||0;
+    totalRev += cnt * p.prezzo;
+    totalCli += cnt;
+  });
+
+  const delta = totalRev - totalCosti;
+  const ticket = totalCli > 0 ? totalRev/totalCli : 0;
+
+  // ── KPI ──
+  document.getElementById('kv-rev').textContent = fE(totalRev);
+  document.getElementById('ks-rev').textContent = `${totalCli} clienti attivi`;
+
+  document.getElementById('kv-be').textContent = fE(totalCosti);
+
+  const dotBe = document.getElementById('dot-be');
+  const kvBe = document.getElementById('kv-be');
+  dotBe.className = 'dot '+(delta>=0?'grn':'red');
+  kvBe.style.color = delta>=0?'var(--grn)':'var(--red)';
+
+  const kvDelta = document.getElementById('kv-delta');
+  const dotDelta = document.getElementById('dot-delta');
+  const kpiDelta = document.getElementById('kpi-delta');
+  kvDelta.textContent = (delta>=0?'+':'')+fE(delta);
+  kvDelta.className = 'kpi-val '+(delta>0?'grn':delta<0?'red':'');
+  dotDelta.className = 'dot '+(delta>0?'grn':delta<0?'red':'org');
+  kpiDelta.className = 'kpi '+(delta>0?'grn':delta<0?'red':'org');
+
+  const tPct = target>0 ? Math.min(totalRev/target*100,999) : 0;
+  document.getElementById('kv-target').textContent = fE(target);
+  document.getElementById('ks-target').textContent = fP(tPct)+' raggiunto';
+
+  document.getElementById('kv-ticket').textContent = fE(ticket);
+  document.getElementById('ks-ticket').textContent = 'per cliente/mese';
+
+  // ── PROGRESS BARS ──
+  const bePct = totalCosti>0?Math.min(totalRev/totalCosti*100,100):0;
+  const tgtPct2 = target>0?Math.min(totalRev/target*100,100):0;
+  const cliPct = maxCli>0?Math.min(totalCli/maxCli*100,100):0;
+
+  const barBe = document.getElementById('bar-be');
+  barBe.style.width = bePct+'%';
+  barBe.style.background = bePct>=100?'var(--grn)':bePct>=70?'var(--org)':'var(--red)';
+  document.getElementById('pct-be').textContent = fP(bePct);
+  document.getElementById('pct-be').style.color = bePct>=100?'var(--grn)':bePct>=70?'var(--org)':'var(--red)';
+
+  document.getElementById('bar-target').style.width = tgtPct2+'%';
+  document.getElementById('pct-target').textContent = fP(tgtPct2);
+
+  document.getElementById('bar-cli').style.width = cliPct+'%';
+  document.getElementById('pct-cli').textContent = fP(cliPct);
+
+  // ── MIX ROW ──
+  const mixEl = document.getElementById('mix-row');
+  mixEl.innerHTML = pacchetti.map((p,i)=>{
+    const cnt = sliders[p.id]||0;
+    const rev = cnt * p.prezzo;
+    const pct = totalCli>0?Math.round(cnt/totalCli*100):0;
+    if(cnt===0) return '';
+    return `<div class="mix-seg" style="border-color:${getColor(i)}30;background:${getColor(i)}08;">
+      <div class="mix-seg-label" style="color:${getColor(i)};">${p.nome.split('(')[0].trim()}</div>
+      <div class="mix-seg-val" style="color:${getColor(i)};">${cnt}</div>
+      <div class="mix-seg-rev">${fE(rev)} · ${pct}%</div>
+    </div>`;
+  }).filter(Boolean).join('') || '<div style="color:var(--mu);font-size:10px;padding:8px 0;">Nessun cliente nel mix</div>';
+
+  // ── INSIGHTS ──
+  const ins = [];
+  if(totalCli===0){
+    ins.push({cl:'vio',t:'Inizia il simulatore',m:'Sposta gli slider in alto per aggiungere clienti al mix e vedere l\'analisi in tempo reale.'});
+  } else {
+    if(totalRev < totalCosti)
+      ins.push({cl:'red',t:`⚠ Sotto break-even di ${fE(totalCosti-totalRev)}`,m:`Con ${totalCli} clienti generi ${fE(totalRev)} ma i costi fissi sono ${fE(totalCosti)}. Mancano ${Math.ceil((totalCosti-totalRev)/ticket)} clienti medi per coprire i costi.`});
+    else if(totalRev < target*0.75)
+      ins.push({cl:'org',t:'Revenue sopra BE ma lontana dal target',m:`Sei al ${fP(tPct)} del target mensile di ${fE(target)}. Serve ancora ${fE(target-totalRev)} di revenue.`});
+    else if(totalRev >= target)
+      ins.push({cl:'grn',t:`✓ Target raggiunto — ${fE(totalRev)}`,m:`Superi il target del ${fP(totalRev/target*100-100)}. Margine sul BE: ${fE(delta)}.`});
+    else
+      ins.push({cl:'grn',t:'Sopra break-even',m:`Revenue ${fE(totalRev)} — margine positivo di ${fE(delta)}. Al ${fP(tPct)} del target mensile.`});
+
+    if(ticket>0 && ticket<100)
+      ins.push({cl:'org',t:'Ticket medio basso',m:`Il ticket medio attuale è ${fE(ticket)}. Considera di spostare il mix verso pacchetti PT o ibridi per alzarlo.`});
+    else if(ticket>=200)
+      ins.push({cl:'grn',t:`Ticket medio ottimo: ${fE(ticket)}`,m:'Il mix è orientato verso servizi ad alto valore. Mantieni la proporzione PT/ibridi.'});
+
+    if(cliPct>85)
+      ins.push({cl:'org',t:'Saturazione alta',m:`Sei al ${fP(cliPct)} della capacità massima (${maxCli} clienti). Valuta se aumentare i prezzi o la capacità prima di acquisire nuovi clienti.`});
+  }
+
+  document.getElementById('insights-box').innerHTML = ins.map(i=>
+    `<div class="insight ${i.cl}"><strong>${i.t}</strong> — ${i.m}</div>`).join('');
+
+  // ── SCENARIO TABLE ──
+  const tbody = document.getElementById('scenario-tbody');
+  const rows = pacchetti.map((p,i)=>{
+    if(p.prezzo<=0) return '';
+    const cliForBE = Math.ceil(totalCosti/p.prezzo);
+    const revBE = cliForBE * p.prezzo;
+    const cliForT = target>0?Math.ceil(target/p.prezzo):0;
+    const revT = cliForT * p.prezzo;
+    const isCurrent = (sliders[p.id]||0)>0;
+    return `<tr class="${isCurrent?'current':''}">
+      <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${getColor(i)};margin-right:7px;"></span>${p.nome}</td>
+      <td>${fE(p.prezzo)}</td>
+      <td class="${isCurrent?'c-gold':''}">${cliForBE}</td>
+      <td>${fE(revBE)}</td>
+      <td class="${isCurrent?'c-gold':''}">${cliForT||'—'}</td>
+      <td>${cliForT?fE(revT):'—'}</td>
+    </tr>`;
+  }).filter(Boolean).join('');
+
+  // Riga mix attuale
+  const cliForBE_mix = ticket>0?Math.ceil(totalCosti/ticket):0;
+  const cliForT_mix = ticket>0&&target>0?Math.ceil(target/ticket):0;
+  const mixRow = totalCli>0?`<tr class="be-row">
+    <td><strong style="color:var(--gold);">Mix attuale (${totalCli} cli.)</strong></td>
+    <td>${fE(ticket)}</td>
+    <td class="${totalCli>=cliForBE_mix?'c-grn':'c-red'}">${cliForBE_mix}</td>
+    <td>${fE(totalCosti)}</td>
+    <td class="${totalCli>=cliForT_mix?'c-grn':'c-org'}">${cliForT_mix||'—'}</td>
+    <td>${cliForT_mix?fE(target):'—'}</td>
+  </tr>`:'';
+
+  tbody.innerHTML = rows + mixRow;
+
+  // ── ANALISI SCONTI ──
+  const aliquota = (parseInt(document.getElementById('inp-aliquota')?.value)||15) / 100;
+  const ticketBE = totalCli > 0 ? totalCosti / totalCli : 0; // costo per cliente
+
+  const scontiEl = document.getElementById('sconti-tbody');
+  if(scontiEl){
+    scontiEl.innerHTML = pacchetti.map((p,i)=>{
+      if(p.prezzo <= 0) return '';
+      const inc = (p.scontoInc||0);
+      const max = (p.scontoMax||0);
+      
+      const prezzoInc = p.prezzo * (1 - inc/100);
+      const prezzoMax = p.prezzo * (1 - max/100);
+      
+      // Netto dopo tasse (forfettario: tassa su ricavo)
+      const nettoBase = p.prezzo * (1 - aliquota);
+      const nettoInc  = prezzoInc * (1 - aliquota);
+      const nettoMax  = prezzoMax * (1 - aliquota);
+      
+      // Margine rispetto al break-even per cliente (se ci sono clienti nel mix)
+      const bePerCli = ticketBE;
+      const margineBase = nettoBase - bePerCli;
+      const margineInc  = nettoInc  - bePerCli;
+      const margineMax  = nettoMax  - bePerCli;
+      
+      // Sconto massimo teorico (dove netto = BE per cliente)
+      const scontoMaxTeorico = bePerCli > 0 
+        ? Math.max(0, Math.floor((1 - bePerCli / (p.prezzo*(1-aliquota))) * 100))
+        : null;
+      
+      const fmtMargine = (m) => {
+        if(bePerCli === 0) return '<span style="color:var(--mu);">—</span>';
+        return m >= 0 
+          ? `<span style="color:var(--grn);">+${fE(m)}</span>`
+          : `<span style="color:var(--red);">${fE(m)}</span>`;
+      };
+      
+      const isCurrent = (sliders[p.id]||0) > 0;
+      
+      return `<tr class="${isCurrent?'current':''}">
+        <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${getColor(i)};margin-right:7px;"></span>${p.nome}</td>
+        <td style="text-align:right;">${fE(p.prezzo)}<br><span style="font-size:9px;color:var(--mu);">netto: ${fE(nettoBase)}</span></td>
+        <td style="text-align:center;">
+          ${inc > 0 ? `<strong style="color:var(--org);">${inc}%</strong>
+          <br><span style="font-size:10px;">${fE(prezzoInc)}</span>
+          <br><span style="font-size:9px;color:var(--mu);">netto: ${fE(nettoInc)}</span>` : '<span style="color:var(--mu);">—</span>'}
+        </td>
+        <td style="text-align:center;">
+          ${max > 0 ? `<strong style="color:var(--red);">${max}%</strong>
+          <br><span style="font-size:10px;">${fE(prezzoMax)}</span>
+          <br><span style="font-size:9px;color:var(--mu);">netto: ${fE(nettoMax)}</span>` : '<span style="color:var(--mu);">—</span>'}
+        </td>
+        <td style="text-align:right;">${fmtMargine(margineBase)}</td>
+        <td style="text-align:right;">${fmtMargine(margineInc)}</td>
+        <td style="text-align:right;">${fmtMargine(margineMax)}</td>
+        <td style="text-align:center;">${scontoMaxTeorico !== null 
+          ? `<span style="font-family:'DM Mono',monospace;font-size:11px;color:${scontoMaxTeorico>0?'var(--teal)':'var(--red)'};">${scontoMaxTeorico}%</span>`
+          : '<span style="color:var(--mu);">n/d</span>'}</td>
+      </tr>`;
+    }).filter(Boolean).join('') || '<tr><td colspan="8" style="color:var(--mu);text-align:center;padding:12px;">Nessun pacchetto</td></tr>';
+  }
+}
+
+/* ══════════════════════════════════════════════
+   RESET
+══════════════════════════════════════════════ */
+function resetAll(){
+  if(!confirm('Ripristinare tutti i valori di default?')) return;
+  costi = JSON.parse(JSON.stringify(DEFAULT_COSTI));
+  pacchetti = JSON.parse(JSON.stringify(DEFAULT_PACCHETTI));
+  sliders = {};
+  pacchetti.forEach(p=>sliders[p.id]=0);
+  document.getElementById('inp-target').value = 5400;
+  document.getElementById('inp-maxcli').value = 44;
+  renderCosti();
+  renderPacchetti();
+  calc();
+}
+
+/* ══════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════ */
+pacchetti.forEach(p=>sliders[p.id]=0);
+renderCosti();
+renderPacchetti();
+calc();
+
+
+
+
+function toggleNav(){
+  const nav = document.getElementById('ppl-topnav');
+  if(nav) nav.classList.toggle('nav-open');
+}
+// Close nav when clicking a link
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('tn-link')){
+    const nav = document.getElementById('ppl-topnav');
+    if(nav) nav.classList.remove('nav-open');
+  }
+});
+</script>
+</body>
+</html>
