@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PPL Progressioni">
+<link rel="manifest" href="manifest.json">
+<title>PPL · Progressioni</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ══ TOKENS ══ */
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:#6B5518;
+  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  --sidebar:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+/* ══ LAYOUT ══ */
+.shell{display:flex;height:calc(100vh - 40px);overflow:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--g1);border-right:1px solid var(--g3);
+  display:flex;flex-direction:column;
+  z-index:200;
+  transition:width .22s ease;
+  overflow:hidden;min-width:0;
+}
+.sidebar.collapsed{width:48px;}
+.sb-logo{
+  padding:12px 10px;border-bottom:1px solid var(--g3);
+  display:flex;align-items:center;gap:8px;height:52px;flex-shrink:0;
+}
+.sb-logo-text{overflow:hidden;white-space:nowrap;flex:1;transition:opacity .15s .05s;}
+.sidebar.collapsed .sb-logo-text{opacity:0;width:0;flex:0;transition:opacity .05s;}
+.sb-brand{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;
+  letter-spacing:4px;color:var(--gold);text-transform:uppercase;line-height:1;}
+.sb-sub{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--mu);text-transform:uppercase;margin-top:3px;}
+.sb-toggle{
+  background:none;border:1px solid var(--g4);color:var(--mu2);
+  width:28px;height:28px;min-width:28px;border-radius:3px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:.15s;flex-shrink:0;
+}
+.sb-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden;}
+.sb-section{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--g6);text-transform:uppercase;padding:12px 14px 5px;
+  white-space:nowrap;overflow:hidden;transition:opacity .1s;}
+.sidebar.collapsed .sb-section{opacity:0;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;cursor:pointer;
+  font-size:12px;color:var(--mu2);
+  border-left:2px solid transparent;
+  transition:.15s;user-select:none;white-space:nowrap;overflow:hidden;
+}
+.sb-item:hover{color:var(--wh);background:var(--g2);}
+.sb-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(184,151,42,.06);}
+.sb-icon{font-size:16px;width:20px;min-width:20px;text-align:center;flex-shrink:0;}
+.sb-label{flex:1;overflow:hidden;white-space:nowrap;transition:opacity .1s;}
+.sidebar.collapsed .sb-label{opacity:0;width:0;overflow:hidden;}
+.sidebar.collapsed .sb-badge{display:none;}
+.sb-badge{font-family:'DM Mono',monospace;font-size:8px;background:var(--g4);
+  color:var(--mu);padding:1px 5px;border-radius:2px;flex-shrink:0;}
+.sb-badge.new{background:var(--goldd);color:var(--gold2);}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--g3);overflow:hidden;flex-shrink:0;}
+.sb-foot-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);
+  white-space:nowrap;transition:opacity .1s;}
+.sidebar.collapsed .sb-foot-t{opacity:0;}
+/* mobile overlay */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;}
+.sb-overlay.visible{display:block;}
+
+/* ══ CONTENT AREA ══ */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.topbar{
+  background:var(--g1);border-bottom:1px solid var(--g3);
+  padding:0 22px;height:48px;display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.topbar-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;}
+.topbar-sep{width:1px;height:20px;background:var(--g4);}
+.tb-sp{flex:1;}
+.tbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--gold);color:var(--gold);}
+.tbtn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
+.tbtn.pri:hover{background:var(--gold2);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--g5);transition:.3s;flex-shrink:0;}
+.sdot.uns{background:var(--org);}.sdot.sav{background:var(--grn);}
+
+.panel-area{flex:1;overflow-y:auto;overflow-x:hidden;}
+.tab-panel{display:none;height:100%;}
+.tab-panel.active{display:block;}
+
+/* ══ SHARED COMPONENTS ══ */
+.main{max-width:1380px;margin:0 auto;padding:18px 22px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+.btn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
+.btn.pri:hover{background:var(--gold2);}
+
+/* ══ DASHBOARD KPI ══ */
+.krow{display:flex;gap:10px;flex-wrap:wrap;}
+.kc{flex:1;min-width:150px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:12px 14px;border-top:2px solid var(--g4);}
+.kc.grn{border-top-color:var(--grn);}.kc.org{border-top-color:var(--org);}
+.kc.red{border-top-color:var(--red);}.kc.neu{border-top-color:var(--g4);}
+.klbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.grn{background:var(--grn);}.dot.org{background:var(--org);}
+.dot.red{background:var(--red);}.dot.neu{background:var(--g5);}
+.kval{font-family:'DM Mono',monospace;font-size:24px;line-height:1;color:var(--wh);font-weight:500;}
+.kval.dim{color:var(--mu);}
+.ksub{font-size:10px;color:var(--mu);margin-top:5px;display:flex;justify-content:space-between;}
+.kdelta{font-family:'DM Mono',monospace;font-size:10px;}
+.kdelta.pos{color:var(--grn);}.kdelta.neg{color:var(--red);}
+.crow{display:flex;gap:10px;margin-bottom:2px;flex-wrap:wrap;}
+.cb{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 16px;min-width:0;}
+.cb.f2{flex:2 1 300px;}.cb.f1{flex:1 1 200px;}
+.cbtitle{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:12px;}
+.cbwrap{position:relative;height:150px;}
+.panels{display:flex;gap:10px;flex-wrap:wrap;}
+.panel{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;flex:1;min-width:280px;}
+.ph{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--g3);}
+.ph-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.ph-arr{color:var(--mu);font-size:11px;}
+.pb{padding:14px;}.pb.closed{display:none;}
+.fg{display:flex;flex-wrap:wrap;gap:8px;}
+.fi{display:flex;flex-direction:column;gap:3px;min-width:95px;flex:1;}
+.fi.w2{min-width:200px;flex:2;}
+.filab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.finp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;
+  padding:6px 8px;outline:none;width:100%;transition:border-color .15s;}
+.finp:focus{border-color:var(--gold);}
+.finp::placeholder{color:var(--g5);}
+.finp.ta{resize:vertical;min-height:50px;font-family:'DM Sans',sans-serif;font-size:11px;}
+.fdiv{width:100%;height:1px;background:var(--g3);flex-basis:100%;margin:4px 0;}
+.fsubl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--vio);text-transform:uppercase;flex-basis:100%;padding-top:4px;}
+.irow{display:flex;gap:10px;flex-wrap:wrap;}
+.ins{flex:1;min-width:210px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:11px 13px;border-left:3px solid;}
+.ins.grn{border-left-color:var(--grn);}.ins.org{border-left-color:var(--org);}
+.ins.red{border-left-color:var(--red);}.ins.inf{border-left-color:var(--vio);}
+.ins-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.ins.grn .ins-t{color:var(--grn);}.ins.org .ins-t{color:var(--org);}
+.ins.red .ins-t{color:var(--red);}.ins.inf .ins-t{color:var(--vio);}
+.ins-m{font-size:11px;color:var(--mu2);line-height:1.55;}
+.htw{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow-x:auto;}
+.ht{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+.ht th{background:var(--g2);padding:8px 11px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  text-align:right;border-bottom:1px solid var(--g3);}
+.ht th:first-child{text-align:left;}
+.ht td{padding:8px 11px;border-bottom:1px solid var(--g2);text-align:right;
+  font-family:'DM Mono',monospace;color:var(--mu2);}
+.ht td:first-child{text-align:left;color:var(--wh);font-weight:bold;}
+.ht tr:last-child td{border-bottom:none;}
+.ht tr.act td{background:rgba(184,151,42,.05);}
+.cg{color:var(--grn)!important;}.cr{color:var(--red)!important;}
+.co{color:var(--gold)!important;}.co2{color:var(--org)!important;}
+
+/* ══ RESPONSIVE MOBILE ══ */
+@media(max-width:700px){
+  :root{ --sidebar:200px; }
+  .main{ padding:12px 12px 60px; }
+  .kc{ min-width:calc(50% - 5px); }
+  .kval{ font-size:20px; }
+  .cb.f2,.cb.f1{ flex:1 1 100%; }
+  .cbwrap{ height:130px; }
+  .panel{ min-width:100%; }
+  .ins{ min-width:100%; }
+  .topbar{ padding:0 10px; gap:6px; }
+  .topbar-sep{ display:none; }
+  .tbtn{ font-size:8px; padding:5px 7px; letter-spacing:0; }
+  .topbar-title{ font-size:9px; letter-spacing:1px; }
+  .mnav{ gap:4px; }
+  .mnavlabel{ min-width:70px; font-size:11px; }
+  .mnavbtn{ width:26px; height:26px; }
+  .sdot{ display:none; }
+  .hide-xs{ display:none; }
+  .prog-input-row{ flex-direction:column; }
+  .prog-inp-group{ min-width:100%; }
+  .bat-opt{ min-width:60px; }
+  .vfi{ min-width:calc(50% - 4px); }
+  .cli-card{ min-width:calc(50% - 5px); }
+}
+/* month nav */
+.mnav{display:flex;align-items:center;gap:8px;}
+.mnavbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  width:30px;height:30px;border-radius:3px;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:.15s;}
+.mnavbtn:hover{border-color:var(--gold);color:var(--gold);}
+.mnavlabel{font-family:'DM Mono',monospace;font-size:12px;font-weight:bold;
+  color:var(--wh);letter-spacing:1px;min-width:100px;text-align:center;}
+/* settings modal */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;
+  align-items:center;justify-content:center;}
+.ov.open{display:flex;}
+.mod{background:var(--g1);border:1px solid var(--g3);border-radius:6px;
+  width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.mh{padding:15px 20px;border-bottom:1px solid var(--g3);
+  display:flex;justify-content:space-between;align-items:center;}
+.mh-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.mx{background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;}
+.mx:hover{color:var(--wh);}
+.mb{padding:18px 20px;}.ms{margin-bottom:16px;}
+.ms-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--vio);text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--g3);}
+.mgrid{display:flex;flex-wrap:wrap;gap:10px;}
+.mf{flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px;}
+.mflab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.mfinp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;padding:6px 9px;outline:none;width:100%;}
+.mfinp:focus{border-color:var(--gold);}
+.mfhint{font-size:10px;color:var(--mu);margin-top:2px;font-style:italic;}
+.mfoot{padding:12px 20px;border-top:1px solid var(--g3);display:flex;justify-content:flex-end;gap:8px;}
+
+/* ══ VALUTAZIONE ══ */
+.val-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.val-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+.client-select-bar{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:14px 16px;margin-bottom:16px;}
+.client-select-bar select{background:var(--g2);border:1px solid var(--g4);color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;border-radius:3px;outline:none;width:200px;}
+.client-select-bar select:focus{border-color:var(--gold);}
+/* Form fields */
+.vform-section{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  margin-bottom:10px;overflow:hidden;}
+.vform-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;
+  justify-content:space-between;align-items:center;cursor:pointer;}
+.vform-head-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.vform-body{padding:14px;}
+.vfg{display:flex;flex-wrap:wrap;gap:8px;}
+.vfi{display:flex;flex-direction:column;gap:3px;min-width:110px;flex:1;}
+.vfi.w3{min-width:240px;flex:3;}
+.vfl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.vfinp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:11px;
+  padding:6px 8px;outline:none;width:100%;transition:.15s;}
+.vfinp:focus{border-color:var(--gold);}
+.vfinp.ta{resize:vertical;min-height:55px;}
+/* battery */
+.bat-row{display:flex;gap:8px;flex-wrap:wrap;}
+.bat-opt{flex:1;min-width:80px;background:var(--g2);border:1px solid var(--g4);
+  border-radius:4px;padding:10px 8px;text-align:center;cursor:pointer;transition:.15s;}
+.bat-opt:hover{border-color:var(--gold2);}
+.bat-opt.active{border-color:var(--gold);background:rgba(184,151,42,.08);}
+.bat-letter{font-family:'DM Mono',monospace;font-size:20px;font-weight:bold;color:var(--gold);line-height:1;}
+.bat-name{font-size:9px;color:var(--mu2);margin-top:3px;line-height:1.3;}
+/* tags */
+.tag{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:8px;
+  letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--g4);color:var(--mu2);transition:.15s;margin:3px 3px 3px 0;}
+.tag:hover{border-color:var(--gold2);color:var(--wh);}
+.tag.active{background:rgba(184,151,42,.15);border-color:var(--gold);color:var(--gold);}
+.tag.red{border-color:rgba(224,92,92,.4);color:#E05C5C;}
+.tag.red.active{background:rgba(224,92,92,.15);border-color:var(--red);}
+/* test table */
+.test-table{width:100%;border-collapse:collapse;font-size:11px;}
+.test-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;}
+.test-table th:last-child{text-align:right;}
+.test-table td{padding:8px 10px;border-bottom:1px solid var(--g2);vertical-align:middle;}
+.test-table tr:last-child td{border-bottom:none;}
+.test-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:20px;display:inline-block;}
+.test-name{font-weight:500;font-size:11px;}
+.test-unit{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:1px;}
+.test-result-inp{background:transparent;border:none;border-bottom:1px solid var(--g4);
+  outline:none;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);
+  text-align:right;width:90px;padding:0 0 2px;}
+.lev-row{display:flex;gap:3px;justify-content:flex-end;}
+.lev{width:14px;height:14px;border-radius:2px;cursor:pointer;background:var(--g4);transition:.15s;}
+.lev.active{opacity:1;}.lev:not(.active){opacity:.3;}
+.lev.l1{background:#E05C5C;}.lev.l2{background:#CC8822;}.lev.l3{background:#BBBB22;}
+.lev.l4{background:#5ACC44;}.lev.l5{background:#2E9B9B;}
+.lev-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:3px;text-align:right;}
+/* smart objectives */
+.smart-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;
+  border-bottom:1px solid var(--g3);}
+.smart-row:last-child{border-bottom:none;}
+.smart-num{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);
+  width:24px;flex-shrink:0;padding-top:4px;}
+.smart-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);
+  text-transform:uppercase;width:120px;flex-shrink:0;padding-top:6px;}
+/* client list */
+.cli-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.cli-card{flex:1;min-width:180px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:12px 14px;cursor:pointer;transition:.15s;border-top:2px solid var(--g4);}
+.cli-card:hover{border-color:var(--gold);}
+.cli-card.active{border-top-color:var(--gold);background:rgba(184,151,42,.04);}
+.cli-name{font-weight:500;font-size:13px;margin-bottom:3px;}
+.cli-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;}
+.cli-add{display:flex;align-items:center;justify-content:center;gap:8px;
+  min-width:140px;border-style:dashed;color:var(--mu);font-size:12px;}
+.cli-add:hover{color:var(--gold);border-color:var(--gold);}
+
+/* ══ DOCUMENTI (SOP) ══ */
+.doc-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.sop-frame{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.sop-toc{display:flex;flex-direction:column;}
+.sop-chapter{border-bottom:1px solid var(--g3);}
+.sop-chapter:last-child{border-bottom:none;}
+.sop-ch-head{display:flex;align-items:center;gap:12px;padding:11px 16px;
+  cursor:pointer;transition:.15s;}
+.sop-ch-head:hover{background:var(--g2);}
+.sop-ch-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);width:28px;flex-shrink:0;}
+.sop-ch-title{font-size:12px;color:var(--wh);font-weight:500;flex:1;}
+.sop-ch-arr{font-size:10px;color:var(--mu);}
+.sop-ch-body{display:none;padding:14px 20px 16px 56px;background:var(--g2);
+  font-size:11px;color:var(--mu2);line-height:1.7;border-top:1px solid var(--g3);}
+.sop-ch-body.open{display:block;}
+.sop-ch-body h4{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin:12px 0 6px;}
+.sop-ch-body p{margin-bottom:8px;}
+.sop-ch-body ul{padding-left:16px;margin-bottom:8px;}
+.sop-ch-body li{margin-bottom:4px;}
+.sop-ch-body strong{color:var(--wh);}
+.sop-ch-body .tag-inline{display:inline-block;background:var(--g3);border:1px solid var(--g4);
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;padding:1px 6px;border-radius:2px;color:var(--mu2);}
+.wapp-block{background:var(--g1);border:1px solid var(--g4);border-left:3px solid var(--teal);
+  border-radius:3px;padding:10px 12px;margin:8px 0;font-size:11px;font-family:'DM Sans',sans-serif;
+  line-height:1.6;color:var(--mu2);}
+.wapp-block strong{color:var(--wh);}
+
+/* ══ PROGRESSIONI AI ══ */
+.prog-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.prog-skill-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.prog-skill{flex:1;min-width:100px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:10px 12px;text-align:center;cursor:pointer;transition:.15s;}
+.prog-skill:hover{border-color:var(--gold2);}
+.prog-skill.active{border-color:var(--gold);background:rgba(184,151,42,.07);}
+.prog-skill-icon{font-size:20px;margin-bottom:4px;}
+.prog-skill-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);}
+.prog-skill.active .prog-skill-name{color:var(--gold);}
+.prog-input-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.prog-inp-group{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;}
+.prog-inp-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  color:var(--mu);text-transform:uppercase;}
+.prog-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:13px;
+  padding:7px 10px;outline:none;width:100%;transition:.15s;}
+.prog-inp:focus{border-color:var(--gold);}
+.prog-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:18px 20px;min-height:120px;position:relative;}
+.prog-result-placeholder{color:var(--mu);font-size:11px;text-align:center;
+  padding:30px 0;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.prog-loading{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:11px;}
+.prog-loading .spin{
+  width:16px;height:16px;border:2px solid var(--g4);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.prog-answer{font-size:12px;line-height:1.7;color:var(--mu2);}
+.prog-answer h3{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--gold);text-transform:uppercase;margin:14px 0 6px;}
+.prog-answer h3:first-child{margin-top:0;}
+.prog-answer p{margin-bottom:8px;}
+.prog-answer ul{padding-left:16px;margin-bottom:10px;}
+.prog-answer li{margin-bottom:5px;color:var(--wh);}
+.prog-answer strong{color:var(--wh);}
+.prog-answer em{color:var(--gold2);font-style:normal;}
+.prog-history{margin-top:16px;}
+.prog-hist-item{background:var(--g2);border:1px solid var(--g3);border-radius:3px;
+  padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.prog-hist-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);
+  letter-spacing:1px;white-space:nowrap;}
+.prog-hist-q{font-size:11px;color:var(--mu2);}
+.prog-hist-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:14px;flex-shrink:0;}
+.prog-hist-del:hover{color:var(--red);}
+
+/* ══ MISC ══ */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;color:var(--mu);}
+.empty-state-icon{font-size:36px;margin-bottom:12px;opacity:.4;}
+.empty-state-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:6px;}
+.empty-state-s{font-size:11px;color:var(--g6);}
+.foot-note{text-align:center;font-family:'DM Mono',monospace;font-size:9px;
+  color:var(--g4);letter-spacing:2px;padding-top:14px;margin-top:8px;border-top:1px solid var(--g2);}
+
+/* ════ CALCOLATORE INTENSITÀ ════ */
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;--blu:#4A8FCC;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+/* ── TOPBAR ── */
+
+/* ── LAYOUT ── */
+/* ── SECTION LABELS ── */
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;
+  border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;
+  color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+
+/* ── PANELS ── */
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUT GROUP ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-group.wide{min-width:200px;flex:2;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+
+/* ── PROFILO ATLETICO ── */
+.profilo-row{display:flex;gap:8px;margin-bottom:16px;}
+.profilo-opt{flex:1;background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:10px 12px;cursor:pointer;transition:.15s;text-align:center;}
+.profilo-opt:hover{border-color:var(--gold2);}
+.profilo-opt.active{border-color:var(--gold);background:var(--goldd);}
+.profilo-opt.neu-active{border-color:var(--teal);background:rgba(46,155,155,.1);}
+.profilo-opt.met-active{border-color:var(--vio);background:rgba(154,122,204,.1);}
+.profilo-icon{font-size:18px;margin-bottom:4px;}
+.profilo-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);margin-bottom:2px;}
+.profilo-opt.active .profilo-name,.profilo-opt.neu-active .profilo-name{color:var(--wh);}
+.profilo-desc{font-size:9px;color:var(--mu);line-height:1.4;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  overflow:hidden;margin-bottom:12px;}
+.result-main{padding:18px 20px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:42px;font-weight:500;
+  color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:18px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+.result-grid{display:flex;flex-wrap:wrap;}
+.result-cell{flex:1;min-width:120px;padding:12px 16px;border-right:1px solid var(--g3);}
+.result-cell:last-child{border-right:none;}
+.rc-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;
+  color:var(--mu);text-transform:uppercase;margin-bottom:5px;}
+.rc-val{font-family:'DM Mono',monospace;font-size:17px;color:var(--wh);font-weight:500;}
+.rc-val.gold{color:var(--gold);}
+.rc-val.teal{color:var(--teal);}
+.rc-val.vio{color:var(--vio);}
+
+/* ── ZONA INTENSITÀ ── */
+.zona-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-bottom:16px;}
+.zona-seg{flex:1;transition:.3s;}
+.zona-seg.active{flex:3;}
+.zona-badge{display:inline-flex;align-items:center;gap:6px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 10px;border-radius:2px;border:1px solid;}
+.zona-badge.fmax{color:#E05C5C;border-color:rgba(224,92,92,.4);background:rgba(224,92,92,.08);}
+.zona-badge.frel{color:#CC7733;border-color:rgba(204,119,51,.4);background:rgba(204,119,51,.08);}
+.zona-badge.iper{color:#B8972A;border-color:rgba(184,151,42,.4);background:rgba(184,151,42,.08);}
+.zona-badge.pot{color:#4A8FCC;border-color:rgba(74,143,204,.4);background:rgba(74,143,204,.08);}
+.zona-badge.res{color:#4DBD74;border-color:rgba(77,189,116,.4);background:rgba(77,189,116,.08);}
+.zona-badge.aa{color:#9A7ACC;border-color:rgba(154,122,204,.4);background:rgba(154,122,204,.08);}
+.zona-badge.sovra{color:#FF6666;border-color:rgba(255,102,102,.5);background:rgba(255,102,102,.1);}
+.zona-badge.nd{color:var(--g6);border-color:var(--g4);background:transparent;}
+
+/* ── TABELLA COMPLETA ── */
+.full-table-wrap{overflow-x:auto;border-radius:4px;border:1px solid var(--g3);}
+.full-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+.full-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:center;}
+.full-table th:first-child{text-align:left;}
+.full-table td{padding:7px 12px;border-bottom:1px solid var(--g2);
+  font-family:'DM Mono',monospace;text-align:center;color:var(--mu2);}
+.full-table td:first-child{text-align:left;color:var(--wh);}
+.full-table tr:last-child td{border-bottom:none;}
+.full-table tr.highlight td{background:rgba(184,151,42,.07);}
+.full-table tr.highlight td:first-child{color:var(--gold2);}
+.zona-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+
+/* ── NOTE SCIENTIFICHE ── */
+/* ── FORMULA VIS ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:10px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:12px;color:var(--mu2);}
+.f-part.hi{color:var(--gold2);font-weight:500;}
+.f-part.op{color:var(--g6);}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--teal);font-weight:500;}
+
+/* ── RANGE REPS TABLE (Via B) ── */
+.range-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.range-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  text-align:center;border-bottom:1px solid var(--g3);}
+.range-table td{padding:7px 10px;border-bottom:1px solid var(--g2);
+  font-family:'DM Mono',monospace;font-size:11px;text-align:center;color:var(--mu2);}
+.range-table tr:last-child td{border-bottom:none;}
+.range-table tr.hl td{background:rgba(184,151,42,.06);}
+.range-table td.kg{color:var(--gold2);font-weight:500;font-size:13px;}
+.range-table td.reps{color:var(--wh);}
+
+/* ── EMPTY STATE ── */
+/* ── BTN ── */
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .via-tab{padding:10px 6px;}
+  .via-num{font-size:14px;}
+  .via-lbl{font-size:7px;}
+  .result-val{font-size:32px;}
+  .result-cell{min-width:100px;}
+  .profilo-row{flex-direction:column;}
+  .inp-row{gap:8px;}
+  .inp-group{min-width:calc(50% - 4px);}
+.standalone-wrap{display:flex;flex-direction:column;min-height:calc(100vh - 40px);margin-top:40px;}
+.topbar-simple{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 24px;height:50px;
+  display:flex;align-items:center;gap:10px;position:sticky;top:40px;z-index:100;flex-shrink:0;}
+.tb-title-s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.content-scroll{flex:1;overflow-y:visible;overflow-x:hidden;}
+.content-scroll .val-wrap,.content-scroll .doc-wrap,.content-scroll .prog-wrap,.content-scroll .page{
+  max-width:1100px;margin:0 auto;padding:20px 24px 80px;}
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+.standalone-wrap{overflow:hidden;}
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link active" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="standalone-wrap">
+  <div class="topbar-simple">
+    <span class="tb-title-s">Progressioni</span>
+    <div class="tb-sp"></div>
+  </div>
+  <div class="content-scroll">
+    <div class="prog-wrap">
+      <div class="prog-wrap">
+          <div class="slbl" style="margin-top:0;">Skill</div>
+          <div class="prog-skill-grid" id="prog-skill-grid">
+            <div class="prog-skill active" data-skill="trazioni" onclick="selectSkill(this)">
+              <div class="prog-skill-icon">🏋️</div>
+              <div class="prog-skill-name">Trazioni</div>
+            </div>
+            <div class="prog-skill" data-skill="push-up" onclick="selectSkill(this)">
+              <div class="prog-skill-icon">💪</div>
+              <div class="prog-skill-name">Push-up</div>
+            </div>
+            <div class="prog-skill" data-skill="dip" onclick="selectSkill(this)">
+              <div class="prog-skill-icon">🤸</div>
+              <div class="prog-skill-name">Dip</div>
+            </div>
+            <div class="prog-skill" data-skill="squat" onclick="selectSkill(this)">
+              <div class="prog-skill-icon">🦵</div>
+              <div class="prog-skill-name">Squat</div>
+            </div>
+            <div class="prog-skill" data-skill="core" onclick="selectSkill(this)">⬛ Core<div class="prog-skill-icon">⚡</div>
+              <div class="prog-skill-name">Core/Plank</div>
+            </div>
+            <div class="prog-skill" data-skill="swing" onclick="selectSkill(this)">🔄 Swing/KB<div class="prog-skill-icon">🔔</div>
+              <div class="prog-skill-name">Kettlebell</div>
+            </div>
+          </div>
+
+          <div class="slbl">Situazione attuale</div>
+          <div class="prog-input-row">
+            <div class="prog-inp-group">
+              <span class="prog-inp-label">Livello attuale</span>
+              <input class="prog-inp" id="prog-current" type="text" placeholder="es. 2 trazioni, 0 push-up, nessun dip..."/>
+            </div>
+            <div class="prog-inp-group">
+              <span class="prog-inp-label">Obiettivo</span>
+              <input class="prog-inp" id="prog-goal" type="text" placeholder="es. 5 trazioni, 10 push-up perfetti..."/>
+            </div>
+            <div class="prog-inp-group" style="flex:0.5;min-width:100px;">
+              <span class="prog-inp-label">Note cliente</span>
+              <input class="prog-inp" id="prog-notes" type="text" placeholder="infortuni, limitazioni..."/>
+            </div>
+          </div>
+          <button class="btn pri" style="margin-bottom:16px;" onclick="askProgression()">▶ Analizza prossimo step</button>
+
+          <div class="slbl">Risposta</div>
+          <div class="prog-result" id="prog-result">
+            <div class="prog-result-placeholder">Seleziona una skill, inserisci il livello attuale e premi Analizza</div>
+          </div>
+
+          <div class="prog-history" id="prog-history" style="display:none;">
+            <div class="slbl" style="margin-top:16px;">Storico query</div>
+            <div id="prog-history-list"></div>
+          </div>
+        </div>
+      </div><!-- /tab-progressioni -->
+
+      <!-- ══════════════════════════════════════════════════
+           TAB: DOCUMENTI
+      ══════════════════════════════════════════════════ -->
+    </div>
+  </div>
+</div>
+<script>
+const storageGet = (k) => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){return null;} };
+const storageSet = (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+
+const PROG_DB = {
+  trazioni: {
+    label: 'Trazioni',
+    src: 'Project Calisthenics — Erik Neri (fasi 0–3)',
+    fasi: [
+      {
+        id:'t0', label:'Fase 0', range:'0 trazioni',
+        desc:'Nessuna trazione completa eseguibile. Obiettivo: costruire forza di trazione e adattamento tendineo.',
+        step_next:'Introduci Australian pull-up e negativi.',
+        esercizi:[
+          { nome:'Australian pull-up', schema:'3×8–12', note:'Corpo orizzontale sotto la sbarra bassa o tavolo. Gomiti vicini al corpo.' },
+          { nome:'Trazione negativa (eccentrica)', schema:'5×3–5 (6" di discesa)', note:'Sali con salto o box, scendi lentamente. Quando riesci 5×5 sei pronto per la fase 1.' },
+          { nome:'Isometria mento sopra sbarra', schema:'6×10"', note:'Mantieni il mento sopra la sbarra. Aumenta il tempo ogni settimana.' },
+          { nome:'Trazione verticale con piedi appoggiati', schema:'4×6–8', note:'Piedi a terra, angolo del corpo circa 45°. Variante più facile dell\'Australian.' },
+          { nome:'Dead hang', schema:'4\' totali (serie da 20–30")', note:'Costruisce forza presa e adattamento tendini spalla.' },
+        ],
+        avanzamento:'Passa alla Fase 1 quando riesci a eseguire 5 negativi da 6" e 3 isometrie da 10" consecutive.',
+      },
+      {
+        id:'t1', label:'Fase 1', range:'1–9 trazioni',
+        desc:'Riesci a fare almeno 1 trazione. Obiettivo: arrivare a 10 reps e consolidare la tecnica.',
+        step_next:'Lavora con singole qualitative + propedeutiche per il volume.',
+        esercizi:[
+          { nome:'Trazioni supine (chin-up)', schema:'5×Max-3', note:'Fermati 3 reps prima del cedimento. Qualità sopra quantità.' },
+          { nome:'Piramide 1-2-3-4-5', schema:'1 serie completa, poi scendi', note:'Se non arrivi a 5, spezza (es. 4+1). Quando completi senza spezzare, aggiungi un giro.' },
+          { nome:'Commando pull-up', schema:'6×6–7', note:'Presa alternata, porta il mento a sinistra e destra alternando. Lavora sul piano frontale.' },
+          { nome:'Mezzo ROM dall\'alto', schema:'3×Max', note:'Parti con le braccia a 90° e porta il mento sopra la sbarra. Isola la parte alta.' },
+          { nome:'Mezzo ROM dal basso', schema:'3×Max + 2" isometria', note:'Parti appeso e arriva a 90°. Isola la partenza. Tieni 2" a 90°.' },
+          { nome:'Australian pull-up (volume)', schema:'3×10–15', note:'Per completare il volume totale di sessione (target 60–70 reps totali).' },
+        ],
+        avanzamento:'Passa alla Fase 2 quando esegui 10 trazioni pulite consecutive (chin-up o prone).',
+      },
+      {
+        id:'t2', label:'Fase 2', range:'10–19 trazioni',
+        desc:'10+ trazioni. Obiettivo: forza elevata, varianti avanzate e avvicinarsi alle 20 reps.',
+        step_next:'Introduci archer pull-up e trazioni zavorrate.',
+        esercizi:[
+          { nome:'Trazioni prone al petto', schema:'4×(1-2-3-2-1)', note:'Piramidale interna. Porta il petto alla sbarra — ROM completo.' },
+          { nome:'Archer pull-up', schema:'4×3–5 per lato', note:'Un braccio piega, l\'altro è quasi teso. Propedeutica alla trazione monobraccia.' },
+          { nome:'Trazioni in L-sit', schema:'4×5–6', note:'Gambe tese orizzontali durante tutta la trazione. Difficoltà addominale elevata.' },
+          { nome:'Trazioni zavorrate (5–10 kg)', schema:'5×4–6', note:'Aggiunta progressiva di carico. Usa cintura o zaino. Ramping: +2.5 kg ogni 2 sett.' },
+          { nome:'Dead hang presa larga', schema:'3\' totali', note:'Mantenimento della forza presa per le varianti advanced.' },
+          { nome:'Trazioni supine gambe a squadra', schema:'4×Max', note:'Aggiunge difficoltà addominale senza variare la presa.' },
+        ],
+        avanzamento:'Passa alla Fase 3 quando esegui 3×6 archer pull-up per lato o trazioni con +20 kg per 5 reps.',
+      },
+      {
+        id:'t3', label:'Fase 3', range:'20+ trazioni',
+        desc:'Atleta avanzato. Obiettivo: progressioni verso muscle-up e trazioni monobraccia.',
+        step_next:'Archer agli anelli e zavorrate pesanti.',
+        esercizi:[
+          { nome:'Archer pull-up agli anelli', schema:'5×3–4 per lato', note:'Anelli = instabilità aggiuntiva. Massimo transfert verso OAP.' },
+          { nome:'Trazioni zavorrate 20–40 kg', schema:'5×3–5 (ramping)', note:'Forza massima. Usa cintura da powerlifting.' },
+          { nome:'Trazioni esplosive (kipping controllato)', schema:'4×5', note:'Lavoro di potenza — non kipping da CrossFit, ma esplosività controllata.' },
+          { nome:'Negative monobraccia assistite', schema:'5×2 per braccio', note:'Usa elastico o piede su step per assistenza. Eccentrica di 5–8".' },
+          { nome:'Muscle-up negativo', schema:'5×2', note:'Inizia sopra la sbarra, scendi lentamente attraverso la transizione.' },
+        ],
+        avanzamento:'Obiettivo terminale: muscle-up o 5 reps di OAP assistita.',
+      },
+    ]
+  },
+
+  'push-up': {
+    label: 'Push-up',
+    src: 'Project Calisthenics · Allenamento Funzionale — propedeutiche spinta',
+    fasi: [
+      {
+        id:'p0', label:'Fase 0', range:'0–5 push-up',
+        desc:'Forza di spinta di base insufficiente per push-up standard. Costruisci la base.',
+        step_next:'Inizia da push-up al muro o sulle ginocchia.',
+        esercizi:[
+          { nome:'Push-up al muro', schema:'3×15', note:'Mani al muro, corpo inclinato. Più l\'angolo è verticale, più è facile.' },
+          { nome:'Push-up sulle ginocchia', schema:'3×10–15', note:'Regressione classica. Glutei attivi, corpo allineato da ginocchia a testa.' },
+          { nome:'Push-up su rialzo (mani alte)', schema:'3×8–12', note:'Mani su bench/step. Più il rialzo è alto, più è facile. Abbassa progressivamente.' },
+          { nome:'Hollow body hold', schema:'3×20"', note:'Tensione corporea — fondamentale per la posizione corretta del push-up.' },
+        ],
+        avanzamento:'Passa alla Fase 1 quando esegui 3×10 push-up sulle ginocchia con tecnica perfetta.',
+      },
+      {
+        id:'p1', label:'Fase 1', range:'5–29 push-up',
+        desc:'Base stabilita. Obiettivo: arrivare a 30 reps prima di introdurre varianti avanzate.',
+        step_next:'Volume progressivo su push-up standard.',
+        esercizi:[
+          { nome:'Push-up classici', schema:'5×Max-2', note:'Fermati 2 reps prima del cedimento. Mani larghezza spalle, gomiti a 45°.' },
+          { nome:'Diamond push-up', schema:'3×8–10', note:'Mani a diamante — enfasi su tricipiti e petto centrale.' },
+          { nome:'Pike push-up', schema:'3×8–10', note:'Bacino in alto (V rovesciata) — propedeutica alle spinte verticali.' },
+          { nome:'Hollow push-up', schema:'3×10', note:'Corpo in hollow hold durante tutta l\'esecuzione. Alta tensione core.' },
+          { nome:'Piramide 1-2-3-4-5', schema:'1 giro completo', note:'Come per le trazioni. Quando completi 2 giri senza spezzare, cambia programma.' },
+        ],
+        avanzamento:'Passa alla Fase 2 quando esegui 30 push-up consecutivi con tecnica pulita.',
+      },
+      {
+        id:'p2', label:'Fase 2', range:'30–60 push-up',
+        desc:'Volume alto. Introduci varianti che aumentano difficoltà e transfert verso HSPU.',
+        step_next:'Archer push-up e parallele.',
+        esercizi:[
+          { nome:'Archer push-up', schema:'4×4–6 per lato', note:'Un braccio piega, l\'altro è teso di lato. Propedeutico al one-arm push-up.' },
+          { nome:'Push-up su parallele', schema:'3×10–12', note:'ROM aumentato sotto il petto. Maggiore attivazione pettorale.' },
+          { nome:'Push-up esplosivi (clap)', schema:'4×5', note:'Spingi esplosivamente fino a staccare le mani. Solo se tecnica consolidata.' },
+          { nome:'Push-up pliometrici su rialzo', schema:'3×5', note:'Una mano sul rialzo, l\'altra a terra. Alterna.' },
+          { nome:'V push-up (pike avanzato)', schema:'3×8', note:'Angolo più chiuso — più vicino alla verticale. Spalle molto coinvolte.' },
+        ],
+        avanzamento:'Passa alla Fase 3 quando esegui 5 archer push-up per lato con controllo completo.',
+      },
+      {
+        id:'p3', label:'Fase 3', range:'Spinte verticali',
+        desc:'Fase avanzata: handstand push-up e one-arm push-up.',
+        step_next:'HSPU contro muro e negativi one-arm.',
+        esercizi:[
+          { nome:'HSPU negativo al muro', schema:'5×3 (5" di discesa)', note:'In verticale al muro, scendi lentamente fino a testa a terra.' },
+          { nome:'HSPU assistito (box pike)', schema:'3×5', note:'Piedi su box, testa a terra. Progressione verso HSPU libero.' },
+          { nome:'One-arm push-up assistito', schema:'4×3 per braccio', note:'Piede opposto lontano per assistenza. Ridurci progressivamente la base.' },
+          { nome:'Pseudo planche push-up', schema:'3×8', note:'Mani ruotate verso l\'esterno, corpo inclinato in avanti. Spalle e tricipiti.' },
+        ],
+        avanzamento:'Obiettivo terminale: 5 HSPU strict al muro o 3 one-arm push-up per lato.',
+      },
+    ]
+  },
+
+  dip: {
+    label: 'Dip',
+    src: 'Project Calisthenics — progressioni spinta verticale/obliqua',
+    fasi: [
+      {
+        id:'d0', label:'Fase 0', range:'0 dip',
+        desc:'Spalla e tricipite non pronti per il dip. Costruisci la base con spinta orizzontale.',
+        step_next:'Push-up avanzati e supporto isometrico.',
+        esercizi:[
+          { nome:'Push-up classici', schema:'3×15', note:'Base di spinta orizzontale necessaria prima del dip.' },
+          { nome:'Supporto sulle parallele (isometria)', schema:'5×10–20"', note:'Braccia tese, corpo sospeso tra le parallele. Solo supporto.' },
+          { nome:'Dip assistito con elastico', schema:'3×8', note:'Elastico sulle ginocchia per ridurre il carico. Abbassa l\'elastico progressivamente.' },
+          { nome:'Bench dip (panche)', schema:'3×10–15', note:'Piedi a terra davanti, mani sulla panca dietro. Versione più semplice.' },
+        ],
+        avanzamento:'Passa alla Fase 1 quando esegui 3×10 bench dip e 5×20" di supporto isometrico.',
+      },
+      {
+        id:'d1', label:'Fase 1', range:'1–10 dip',
+        desc:'Prime reps complete. Obiettivo: arrivare a 10 dip e consolidare la tecnica.',
+        step_next:'Volume progressivo su dip standard alle parallele.',
+        esercizi:[
+          { nome:'Dip alle parallele', schema:'5×Max-2', note:'ROM completo — spalla sotto il gomito in basso, braccia tese in alto.' },
+          { nome:'Piramidale 1-2-3-2-1', schema:'1–2 giri', note:'Come per trazioni e push-up. Aggiunge un giro quando completi senza spezzare.' },
+          { nome:'Dip negativo', schema:'5×3 (5" di discesa)', note:'Sali con salto, scendi lentamente. Utile se ancora poche reps positive.' },
+          { nome:'Push-up su parallele (volume)', schema:'3×12', note:'Completa il volume totale di sessione.' },
+        ],
+        avanzamento:'Passa alla Fase 2 quando esegui 10 dip consecutivi con tecnica pulita.',
+      },
+      {
+        id:'d2', label:'Fase 2', range:'10+ dip',
+        desc:'Dip consolidati. Introduci zavorra e preparazione al muscle-up.',
+        step_next:'Dip zavorrati e dip agli anelli.',
+        esercizi:[
+          { nome:'Dip zavorrati (5–20 kg)', schema:'5×5–8', note:'Ramping: +2.5 kg ogni 2 settimane. Usa cintura.' },
+          { nome:'Dip agli anelli', schema:'3×8', note:'Altissima instabilità — coinvolge stabilizzatori di spalla. Molto più difficile delle parallele.' },
+          { nome:'Dip russo (Russian dip)', schema:'3×5', note:'Aggiungi una flesso-estensione del polso nella transizione. Propedeutico al muscle-up.' },
+          { nome:'Transizione muscle-up (bassa sbarra)', schema:'3×3', note:'Esercita solo la transizione, partendo sopra la sbarra e tornando su.' },
+        ],
+        avanzamento:'Obiettivo: dip con +30 kg o 10 reps agli anelli → pronto per muscle-up.',
+      },
+    ]
+  },
+
+  squat: {
+    label: 'Squat',
+    src: 'Allenamento Funzionale · Project Nutrition — progressioni accosciata',
+    fasi: [
+      {
+        id:'s0', label:'Fase 0', range:'Squat limitato — mobilità carente',
+        desc:'Non riesce ad accosciarsi sotto il parallelo o con busto eretto. Priorità: mobilità anca/caviglia.',
+        step_next:'Goblet squat e squat con supporto per imparare il pattern.',
+        esercizi:[
+          { nome:'Squat con supporto (TRX o sbarra)', schema:'3×10–15', note:'Tieni il supporto davanti, siediti lentamente. Impara il pattern senza carico.' },
+          { nome:'Box squat', schema:'3×10', note:'Siediti su una sedia/box, risali. Abbassa progressivamente l\'altezza del box.' },
+          { nome:'Goblet squat (8–12 kg)', schema:'3×10', note:'Kettlebell al petto — aiuta a mantenere il busto eretto e profondità.' },
+          { nome:'Hip hinge con bastone', schema:'3×10', note:'Bastone lungo la schiena — impara la dissociazione anca/colonna.' },
+          { nome:'Mobilità caviglia (5 min)', schema:'Pre-sessione', note:'Stretching polpaccio + mobilizzazione tibiotarsica con ginocchio avanti.' },
+        ],
+        avanzamento:'Passa alla Fase 1 quando esegui 10 goblet squat sotto il parallelo con busto eretto.',
+      },
+      {
+        id:'s1', label:'Fase 1', range:'Squat a corpo libero (air squat)',
+        desc:'Pattern acquisito. Obiettivo: 30 air squat + introduzione front squat con bilanciere.',
+        step_next:'Volume su squat a corpo libero, poi bilanciere vuoto.',
+        esercizi:[
+          { nome:'Air squat', schema:'3×15–20', note:'Parallelo al terreno o sotto. Piedi larghezza spalle, punte leggermente fuori.' },
+          { nome:'Jump squat', schema:'3×8', note:'Esplosività dalla posizione di squat. Potenza dell\'arto inferiore.' },
+          { nome:'Affondi alternati', schema:'3×10 per gamba', note:'Passo avanti — ginocchio posteriore sfiora terra. Unilaterale.' },
+          { nome:'Front squat bilanciere vuoto', schema:'3×8', note:'Imposta la presa e la posizione del bilanciere prima di aggiungere carico.' },
+          { nome:'Back squat (20 kg + ramping)', schema:'5×5 (ogni sett. +2.5 kg)', note:'Progressione lineare. Stop solo se tecnica cede.' },
+        ],
+        avanzamento:'Passa alla Fase 2 quando esegui back squat con 0.75× BW per 5 reps.',
+      },
+      {
+        id:'s2', label:'Fase 2', range:'Back squat intermedio (0.75–1.5× BW)',
+        desc:'Forza base presente. Periodizzazione e varianti.',
+        step_next:'Cicli di forza 5×5 e introduzione pistol squat.',
+        esercizi:[
+          { nome:'Back squat 5×5 (75–85% 1RM)', schema:'5×5, +2.5 kg ogni sett.', note:'Periodizzazione forza classica. Pausa completa tra le serie (3–4 min).' },
+          { nome:'Front squat', schema:'4×4–6', note:'Maggiore coinvolgimento del quadricipite e del core.' },
+          { nome:'Pistol squat assistito', schema:'3×5 per gamba', note:'Con supporto o elastico. Propedeutico al pistol libero.' },
+          { nome:'Pausa squat (2–3")', schema:'3×5', note:'Pausa in buca per aumentare difficoltà e controllo.' },
+        ],
+        avanzamento:'Fase 3 quando esegui 1.5× BW di back squat o 5 pistol squat per gamba.',
+      },
+      {
+        id:'s3', label:'Fase 3', range:'Avanzato (1.5×+ BW)',
+        desc:'Atleta avanzato. Pistol, overhead squat e lavoro di potenza.',
+        step_next:'Pistol libero, overhead squat e squat jump zavorrato.',
+        esercizi:[
+          { nome:'Pistol squat libero', schema:'4×5 per gamba', note:'Gamba libera tesa in avanti. ROM completo.' },
+          { nome:'Overhead squat (OHS)', schema:'3×5', note:'Bilanciere sopra la testa. Massima richiesta di mobilità e coordinazione.' },
+          { nome:'Back squat pesante (>85%)', schema:'3×3–5', note:'Zona di forza massima. Recupero completo (5 min).' },
+          { nome:'Jump squat zavorrato (20–30% BW)', schema:'4×5', note:'Potenza esplosiva. Massima velocità concentrica.' },
+        ],
+        avanzamento:'Obiettivo terminale: 2× BW back squat o 10 pistol squat per gamba.',
+      },
+    ]
+  },
+
+  core: {
+    label: 'Core / Plank',
+    src: 'Project Calisthenics · Allenamento Funzionale — core strength',
+    fasi: [
+      {
+        id:'c0', label:'Fase 0', range:'< 20" plank',
+        desc:'Core non ancora stabilizzato. Priorità: hollow body e dead bug.',
+        step_next:'Hollow body hold e plank sulle ginocchia.',
+        esercizi:[
+          { nome:'Dead bug', schema:'3×6 per lato', note:'Schiena piatta a terra, estendi braccio e gamba opposta lentamente.' },
+          { nome:'Hollow body hold', schema:'3×15–20"', note:'Lombare incollata a terra, braccia e gambe tese sollevate. La base di tutto.' },
+          { nome:'Plank sulle ginocchia', schema:'3×20–30"', note:'Progressione verso il plank classico.' },
+          { nome:'Plank forearm', schema:'3×20–30"', note:'Avambracci a terra — più stabile del plank sulle mani.' },
+        ],
+        avanzamento:'Passa alla Fase 1 quando tieni 30" di plank forearm con posizione corretta.',
+      },
+      {
+        id:'c1', label:'Fase 1', range:'20–60" plank',
+        desc:'Base presente. Obiettivo: 90" di plank e introduzione varianti laterali.',
+        step_next:'Plank classico progressivo e side plank.',
+        esercizi:[
+          { nome:'Plank classico', schema:'3×Max (stop a cedimento tecnico)', note:'Glutei attivi, nessun cedimento del bacino. Qualità sopra durata.' },
+          { nome:'RKC plank', schema:'3×10"', note:'Tensione massima in posizione di plank — stringi tutto. Molto più intenso del plank classico.' },
+          { nome:'Side plank', schema:'3×20–30" per lato', note:'Corpo laterale, 1 piede sull\'altro o sovrapposti.' },
+          { nome:'Plank con leg lift', schema:'3×10 per gamba', note:'Alza una gamba per 2" alternando. Aumenta instabilità.' },
+          { nome:'Ab wheel rollout (assistito)', schema:'3×8', note:'Parti in ginocchio. Estendi solo fin dove mantieni la lombare neutra.' },
+        ],
+        avanzamento:'Passa alla Fase 2 quando tieni 90" di plank o 30" di RKC plank.',
+      },
+      {
+        id:'c2', label:'Fase 2', range:'60–180" plank',
+        desc:'Core solido. Introduci L-sit e hollow body avanzato.',
+        step_next:'L-sit con supporto e ab wheel completo.',
+        esercizi:[
+          { nome:'L-sit su parallele (progressione)', schema:'5×Max', note:'Gambe tese sollevate tra le parallele. Inizia con ginocchia piegate.' },
+          { nome:'Hollow body dinamico', schema:'3×10 (rock)', note:'Oscillazione avanti/indietro in hollow. Alta intensità addominale.' },
+          { nome:'Ab wheel rollout completo', schema:'3×8–10', note:'Partenza da piedi. Solo se lombare è protetta durante tutta l\'esecuzione.' },
+          { nome:'Plank su anelli', schema:'3×20–30"', note:'Anelli instabili aumentano molto la difficoltà.' },
+          { nome:'Dragon flag negativo', schema:'3×3 (5" di discesa)', note:'Partenza sopra con tutto il corpo teso. Scendi lentamente.' },
+        ],
+        avanzamento:'Obiettivo: L-sit libero per 10" o dragon flag completo.',
+      },
+    ]
+  },
+
+  swing: {
+    label: 'KB Swing',
+    src: 'Project Nutrition — progressione swing russo',
+    fasi: [
+      {
+        id:'sw0', label:'Fase 0', range:'Hip hinge non acquisito',
+        desc:'Il pattern di hip hinge (cerniera d\'anca) non è presente. Senza di esso lo swing è pericoloso.',
+        step_next:'Hip hinge con bastone prima di toccare il kettlebell.',
+        esercizi:[
+          { nome:'Hip hinge con bastone', schema:'3×10', note:'Bastone lungo la schiena (testa, dorso, glutei a contatto). Spingi il bacino indietro.' },
+          { nome:'Romanian deadlift (RDL) leggero', schema:'3×10', note:'Bilanciere o manubri leggeri. Gambe quasi tese, schiena neutra.' },
+          { nome:'Deadlift con KB (peso leggero)', schema:'3×8', note:'Introduzione al gesto con il kettlebell tra i piedi.' },
+          { nome:'Hip hinge esplosivo (senza carico)', schema:'3×10', note:'Pattern cerniera con chiusura esplosiva — snap dei fianchi.' },
+        ],
+        avanzamento:'Passa alla Fase 1 quando esegui 10 RDL con tecnica pulita.',
+      },
+      {
+        id:'sw1', label:'Fase 1', range:'Swing base (8–12 kg)',
+        desc:'Hip hinge acquisito. Impara lo swing russo con carico leggero.',
+        step_next:'Swing russo a 2 mani 3×15.',
+        esercizi:[
+          { nome:'Swing russo 2 mani (8 kg)', schema:'3×15', note:'Il KB sale fino all\'altezza degli occhi. Non è uno squat — è una spinta dei fianchi.' },
+          { nome:'Swing americano 2 mani', schema:'3×10', note:'Il KB arriva sopra la testa. Solo se mobilità spalla ottimale.' },
+          { nome:'Deadlift con KB', schema:'3×8', note:'Mantieni il pattern in ogni ripetizione dello swing.' },
+        ],
+        avanzamento:'Passa alla Fase 2 quando esegui 3×20 swing russo puliti senza perdere il pattern.',
+      },
+      {
+        id:'sw2', label:'Fase 2', range:'Swing intermedio (12–24 kg)',
+        desc:'Swing consolidato. Aumenta il carico e introduci il singolo braccio.',
+        step_next:'Swing 1 mano e aumento progressivo del carico.',
+        esercizi:[
+          { nome:'Swing russo 1 mano (12 kg)', schema:'3×10 per lato', note:'Transizione tra le mani possibile a metà serie.' },
+          { nome:'Swing alternato (h2h)', schema:'3×20 totali', note:'Passa il KB da una mano all\'altra in cima alla traiettoria.' },
+          { nome:'Swing 2 mani carico crescente', schema:'5×10 (ramping peso)', note:'Ogni serie aumenta il carico. Stop quando tecnica cede.' },
+          { nome:'EMOM swing (15 cal)', schema:'10 min EMOM', note:'15 swing all\'inizio di ogni minuto — condizionamento metabolico.' },
+        ],
+        avanzamento:'Passa alla Fase 3 quando esegui 3×20 swing 1 mano con 16 kg con tecnica solida.',
+      },
+      {
+        id:'sw3', label:'Fase 3', range:'Avanzato (24+ kg · Turkish Get-Up)',
+        desc:'Swing pesante consolidato. Introduci TGU e clean.',
+        step_next:'TGU completo e clean tecnico.',
+        esercizi:[
+          { nome:'Turkish Get-Up (TGU)', schema:'3×3 per lato', note:'Movimento completo dal suolo in verticale con KB. Massima coordinazione.' },
+          { nome:'KB Clean', schema:'3×5 per lato', note:'Porta il KB in rack position (spalla). Propedeutico al press.' },
+          { nome:'Swing snatch', schema:'3×5 per lato', note:'Dal basso direttamente sopra la testa in un unico movimento.' },
+          { nome:'Double swing (2 KB)', schema:'3×10', note:'2 kettlebell contemporaneamente. Alta richiesta lombare e cardiovascolare.' },
+        ],
+        avanzamento:'Obiettivo terminale: TGU con 24–32 kg o 10 clean+press per lato.',
+      },
+    ]
+  }
+};
+
+
+let _currentFase = null;
+
+function selectSkill(el){
+  document.querySelectorAll('.prog-skill').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  _currentSkill = el.dataset.skill;
+  _currentFase = null;
+  renderFaseRow();
+  document.getElementById('prog-result-area').style.display='none';
+  document.getElementById('prog-placeholder').style.display='flex';
+}
+
+function renderFaseRow(){
+  const db = PROG_DB[_currentSkill];
+  if(!db) return;
+  const row = document.getElementById('prog-fase-row');
+  row.innerHTML = db.fasi.map(f=>`
+    <div class="prog-skill" style="min-width:110px;text-align:left;padding:10px 12px;" 
+         data-fase="${f.id}" onclick="selectFase('${f.id}',this)">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:3px;">${f.label}</div>
+      <div style="font-size:10px;color:var(--mu2);">${f.range}</div>
+    </div>`).join('');
+}
+
+function selectFase(faseId, el){
+  document.querySelectorAll('#prog-fase-row .prog-skill').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  _currentFase = faseId;
+  renderProgResult();
+}
+
+function renderProgResult(){
+  const db = PROG_DB[_currentSkill];
+  if(!db) return;
+  const fase = db.fasi.find(f=>f.id===_currentFase);
+  if(!fase) return;
+
+  document.getElementById('prog-placeholder').style.display='none';
+  document.getElementById('prog-result-area').style.display='block';
+
+  // Step card
+  document.getElementById('prog-step-card').innerHTML=`
+    <div style="background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin-bottom:10px;">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">${db.label} · ${fase.label} · ${fase.range}</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:500;margin-bottom:6px;">${fase.step_next}</div>
+      <div style="font-size:11px;color:var(--mu2);line-height:1.6;">${fase.desc}</div>
+    </div>`;
+
+  // Full plan table
+  const rows = fase.esercizi.map(e=>`
+    <tr>
+      <td style="font-weight:500;color:var(--wh);font-size:11px;">${e.nome}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);text-align:center;white-space:nowrap;">${e.schema}</td>
+      <td style="font-size:10px;color:var(--mu2);">${e.note}</td>
+    </tr>`).join('');
+
+  document.getElementById('prog-full-plan').innerHTML=`
+    <div style="background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr>
+          <th style="background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);text-align:left;">Esercizio</th>
+          <th style="background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);text-align:center;">Schema</th>
+          <th style="background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);">Note coaching</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="background:var(--g2);border:1px solid var(--g3);border-left:3px solid #4DBD74;border-radius:0 4px 4px 0;padding:10px 14px;font-size:11px;color:var(--mu2);line-height:1.6;">
+      <strong style="color:#4DBD74;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;">Criterio di avanzamento alla fase successiva</strong><br>
+      ${fase.avanzamento}
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;padding-top:10px;">Fonte: ${db.src}</div>`;
+}
+
+
+
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  _progHistory = storageGet(PK) || [];
+  if(typeof renderProgHistory === 'function') renderProgHistory();
+  const first = document.querySelector('.prog-skill');
+  if(first) selectSkill(first);
+});
+</script>
+</body>
+</html>
