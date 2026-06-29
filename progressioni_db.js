@@ -331,7 +331,19 @@ const PROG_DB = {
           { nome:'Double swing (2 KB)', schema:'3×10', note:'2 kettlebell contemporaneamente. Alta richiesta lombare e cardiovascolare.' },
         ],
         avanzamento:'Obiettivo terminale: TGU con 24–32 kg o 10 clean+press per lato.',
-      },
+ romanian-deadlift: {
+  label: 'Romanian Deadlift',
+  src: 'Fonte metodologica',
+  fasi: [
+    {
+      id: 'beginner', label: 'Beginner', range: 'BW',
+      desc: 'Descrizione fase...',
+      step_next: 'Obiettivo da raggiungere',
+      esercizi: [
+        { nome: 'RDL con bilanciere', schema: '3×8', note: 'Nota coaching' }
+      ],
+      avanzamento: 'Criterio per passare alla fase successiva'
+    }
     ]
   }
 };
