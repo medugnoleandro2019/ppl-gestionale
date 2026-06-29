@@ -15,6 +15,7 @@ const SKILL_META = {
   'squat':     { icon: '🦵', label: 'Squat' },
   'core':      { icon: '⚡', label: 'Core / Plank' },
   'swing':     { icon: '🔔', label: 'KB Swing' },
+  'romanian-deadlift': { icon: '🏋️', label: 'Romanian Deadlift' },
 };
 
 const PROG_DB = {
