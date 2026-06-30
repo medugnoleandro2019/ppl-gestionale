@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPL · Zone Corsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  /* zone colors */
+  --z1:#6B9FCC;--z2:#4DBD74;--z3:#D4AF45;--z4:#E08C3A;--z5:#E05C5C;--z6:#9A7ACC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{padding-top:40px;background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;}
+
+.page{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── SISTEMA ZONE TAB ── */
+.sys-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sys-tab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.sys-tab:last-child{border-right:none;}
+.sys-tab:hover{background:var(--g2);}
+.sys-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.sys-tab-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;color:var(--mu2);}
+.sys-tab.active .sys-tab-title{color:var(--gold);}
+.sys-tab-sub{font-size:9px;color:var(--g6);margin-top:2px;line-height:1.3;}
+
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUTS ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+.inp-row-3{display:flex;gap:8px;margin-bottom:14px;}
+.inp-sm{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  padding:8px 8px;outline:none;width:70px;text-align:center;transition:.15s;}
+.inp-sm:focus{border-color:var(--gold);}
+.inp-colon{font-family:'DM Mono',monospace;font-size:18px;color:var(--mu);padding:0 2px;line-height:40px;}
+
+/* ── FCR METHOD TOGGLE ── */
+.fcr-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fcr-opt{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--mu2);transition:.15s;}
+.fcr-opt:hover{border-color:var(--gold2);color:var(--wh);}
+.fcr-opt.active{border-color:var(--gold);background:var(--goldd);color:var(--gold);}
+.fcr-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+
+/* ── WARN ── */
+.warn-box{background:rgba(184,151,42,.06);border:1px solid rgba(184,151,42,.25);border-radius:4px;
+  padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--mu2);line-height:1.6;}
+.warn-box strong{color:var(--gold2);}
+.note-box{background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--z6);
+  border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:10px;font-size:11px;color:var(--mu2);line-height:1.65;}
+.note-box strong{color:var(--wh);}
+.note-box .src{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+
+/* ── ZONE RESULT TABLE ── */
+.zone-table-wrap{border-radius:4px;overflow:hidden;border:1px solid var(--g3);}
+.zone-table{width:100%;border-collapse:collapse;}
+.zone-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;white-space:nowrap;}
+.zone-table th:not(:first-child){text-align:center;}
+.zone-table td{padding:0;border-bottom:1px solid var(--g2);}
+.zone-table tr:last-child td{border-bottom:none;}
+.zone-row{display:flex;align-items:stretch;}
+.zone-color-bar{width:5px;flex-shrink:0;}
+.zone-cells{display:flex;align-items:center;flex:1;flex-wrap:wrap;}
+.zc{padding:10px 12px;text-align:center;flex:1;min-width:80px;}
+.zc.left{text-align:left;min-width:140px;}
+.zone-name{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--wh);display:block;}
+.zone-sys{font-size:9px;color:var(--mu);display:block;margin-top:1px;}
+.zone-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--wh);}
+.zone-val.big{font-size:15px;}
+.zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);display:block;margin-top:2px;}
+.zone-obiettivo{font-size:10px;color:var(--mu2);line-height:1.4;}
+/* highlight current zone */
+.zone-table tr.current td{background:rgba(255,255,255,.03);}
+.current-badge{display:inline-block;background:var(--gold);color:#000;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;font-weight:bold;
+  padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.result-main{padding:16px 18px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:16px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+
+/* ── FORMULA ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:9px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);}
+.f-hi{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500;}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--z2);font-weight:500;}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;color:var(--mu);}
+.empty-icon{font-size:30px;opacity:.3;margin-bottom:8px;}
+.empty-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.empty-s{font-size:10px;color:var(--g6);}
+
+/* ── GARA PRESET ── */
+.gara-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.gara-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:5px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);cursor:pointer;transition:.15s;}
+.gara-btn:hover{border-color:var(--gold2);color:var(--wh);}
+.gara-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* ── FC CALCULATOR MODULE ── */
+.fc-module{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.fc-mod-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--g3);user-select:none;}
+.fc-mod-head:hover{background:var(--g2);}
+.fc-mod-icon{font-size:18px;flex-shrink:0;}
+.fc-mod-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.fc-mod-badge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;}
+.fc-mod-badge.saved{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:var(--z2);}
+.fc-mod-badge.empty{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.fc-mod-arr{color:var(--mu);font-size:11px;}
+.fc-mod-body{padding:16px;display:none;}
+.fc-mod-body.open{display:block;}
+
+/* formula compare grid */
+.formula-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.formula-card{flex:1;min-width:130px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:10px 12px;transition:.15s;}
+.formula-card.best{border-color:var(--gold);background:rgba(184,151,42,.06);}
+.formula-card.ok{border-color:rgba(46,155,155,.35);}
+.fc-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.fc-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold);line-height:1;}
+.formula-card:not(.best) .fc-val{color:var(--mu2);}
+.fc-formula{font-size:9px;color:var(--mu);margin-top:4px;font-family:'DM Mono',monospace;}
+.fc-err{font-size:9px;margin-top:3px;}
+.fc-err.hi{color:var(--red);}.fc-err.med{color:var(--org);}.fc-err.lo{color:var(--z2);}
+.badge-best{background:var(--gold);color:#000;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;font-weight:bold;}
+.badge-ok{background:rgba(46,155,155,.2);color:var(--teal);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;}
+
+/* test cards */
+.test-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.test-card{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;overflow:hidden;}
+.test-card-head{padding:10px 12px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.test-card-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gold);width:28px;flex-shrink:0;}
+.test-card-title{font-size:12px;font-weight:500;color:var(--wh);}
+.test-card-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+.test-card-body{padding:10px 12px;}
+.test-step{display:flex;gap:8px;margin-bottom:7px;font-size:10px;color:var(--mu2);line-height:1.5;}
+.test-step-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);width:14px;flex-shrink:0;padding-top:1px;}
+.test-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:2px;margin-right:4px;}
+.test-tag.easy{background:rgba(77,189,116,.15);color:var(--z2);}
+.test-tag.med{background:rgba(224,140,58,.15);color:var(--org);}
+.test-tag.hard{background:rgba(224,92,92,.15);color:var(--red);}
+.test-tag.equip{background:rgba(154,122,204,.15);color:var(--z6);}
+.test-result-input-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px;flex-wrap:wrap;}
+.test-result-note{font-size:9px;color:var(--mu);margin-top:4px;font-style:italic;}
+
+/* record atleta */
+.record-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.record-field{flex:1;min-width:120px;display:flex;flex-direction:column;gap:3px;}
+.record-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.record-lbl span{color:var(--gold);margin-left:4px;}
+.record-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:7px 9px;outline:none;width:100%;transition:.15s;}
+.record-inp:focus{border-color:var(--gold);}
+.record-display{background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+.rd-row{display:flex;flex-wrap:wrap;gap:14px;}
+.rd-item{display:flex;flex-direction:column;gap:2px;}
+.rd-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.rd-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.rd-val.sec{color:var(--teal);}
+.rd-val.nd{color:var(--g6);font-size:13px;}
+.rd-sub{font-size:9px;color:var(--mu);}
+.use-record-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;background:rgba(77,189,116,.1);border:1px solid rgba(77,189,116,.3);color:var(--z2);padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.use-record-btn:hover{background:rgba(77,189,116,.2);border-color:var(--z2);}
+.history-list{margin-top:10px;}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--g2);border:1px solid var(--g3);border-radius:3px;margin-bottom:5px;}
+.hi-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;}
+.hi-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.hi-method{font-size:9px;color:var(--mu2);flex:1;}
+.hi-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:13px;}
+.hi-del:hover{color:var(--red);}
+
+  .zc{min-width:60px;padding:8px 8px;}.zc.left{min-width:120px;}
+  .zone-name{font-size:9px;}.zone-val{font-size:12px;}.zone-val.big{font-size:13px;}
+  .result-val{font-size:30px;}
+  .sys-tab-title{font-size:9px;}.sys-tab-sub{font-size:8px;}
+  .topbar{padding:0 12px;}
+}
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link active" href="zone_corsa.html">🏃 Zone Corsa</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+
+<div class="topbar">
+  <span class="tb-brand">PPL</span>
+  <div class="tb-sep"></div>
+  <span class="tb-title">Zone Corsa</span>
+  <div class="tb-sp"></div>
+  <span class="tb-src">Bompa · Jack Daniels · Karvonen</span>
+</div>
+
+<div class="page">
+
+  <div class="warn-box">
+    <strong>⚠ Nota metodologica:</strong>
+    Le zone FC sono <em>stime</em> — variano significativamente tra individui e sport.
+    La formula <strong>220 − età per la FCmax</strong> ha un errore standard di ±10–12 bpm.
+    Per massima precisione: test sul campo (3' massimali o Cooper 12') o test in laboratorio.
+    Il metodo <strong>Karvonen</strong> (basato su FC di Riserva = FCmax − FCrep) è più accurato di FCmax% puro.
+  </div>
+
+  <!-- SISTEMA -->
+  <div class="slbl">Sistema di zone</div>
+  <div class="sys-tabs">
+    <div class="sys-tab active" onclick="setSys('5',this)">
+      <div class="sys-tab-title">5 Zone</div>
+      <div class="sys-tab-sub">Standard running<br>Garmin · Polar · Jack Daniels</div>
+    </div>
+    <div class="sys-tab" onclick="setSys('6',this)">
+      <div class="sys-tab-title">6 Zone</div>
+      <div class="sys-tab-sub">Bompa & Buzzichelli<br>Periodizzazione sportiva</div>
+    </div>
+  </div>
+
+  <!-- METODO FC -->
+  <div class="slbl">Metodo calcolo FC</div>
+  <div class="fcr-row">
+    <span class="fcr-lbl">Metodo:</span>
+    <div class="fcr-opt active" onclick="setFCM('pct',this)">% FCmax</div>
+    <div class="fcr-opt" onclick="setFCM('karvonen',this)">Karvonen (riserva)</div>
+  </div>
+
+  <!-- VIA TABS -->
+  <div class="slbl">Modalità di calcolo</div>
+  <div class="via-tabs">
+    <div class="via-tab active" onclick="switchVia('A',this)">
+      <div class="via-num">A</div>
+      <div class="via-lbl">FCmax + FCrep<br>→ Tutte le zone</div>
+    </div>
+    <div class="via-tab" onclick="switchVia('B',this)">
+      <div class="via-num">B</div>
+      <div class="via-lbl">Pace noto<br>→ Zona + FC</div>
+    </div>
+    <div class="via-tab" onclick="switchVia('C',this)">
+      <div class="via-num">C</div>
+      <div class="via-lbl">Tempo gara<br>→ Pace per zona</div>
+    </div>
+  </div>
+
+  <!-- ═══ VIA A ═══ -->
+  <div class="via-panel active" id="via-A">
+    <div class="inp-row">
+      <div class="inp-group">
+        <span class="inp-lbl">FCmax <span>bpm</span></span>
+        <input class="inp" id="a_fcmax" type="number" min="120" max="230" placeholder="es. 185" oninput="calcA()">
+        <span class="inp-hint">Test campo o stima (220 − età uomini · 226 − età donne)</span>
+      </div>
+      <div class="inp-group" id="a_fcrep_wrap">
+        <span class="inp-lbl">FC a riposo <span>bpm</span></span>
+        <input class="inp" id="a_fcrep" type="number" min="30" max="100" placeholder="es. 58" oninput="calcA()">
+        <span class="inp-hint">Misurare al mattino prima di alzarsi, 3 giorni consecutivi</span>
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">Velocità massima <span>km/h</span></span>
+        <input class="inp" id="a_vmax" type="number" min="8" max="30" step="0.1" placeholder="es. 14" oninput="calcA()">
+        <span class="inp-hint">vVO2max — oppure pace al test 6 min (Cooper breve)</span>
+      </div>
+    </div>
+    <div id="a_result">
+      <div class="empty"><div class="empty-icon">❤️</div>
+        <div class="empty-t">Inserisci FCmax per vedere le zone</div>
+        <div class="empty-s">Velocità opzionale — genera anche i range di pace min/km</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIA B ═══ -->
+  <div class="via-panel" id="via-B">
+    <div class="inp-row">
+      <div class="inp-group">
+        <span class="inp-lbl">FCmax <span>bpm</span></span>
+        <input class="inp" id="b_fcmax" type="number" min="120" max="230" placeholder="es. 185" oninput="calcB()">
+      </div>
+      <div class="inp-group" id="b_fcrep_wrap">
+        <span class="inp-lbl">FC a riposo <span>bpm</span></span>
+        <input class="inp" id="b_fcrep" type="number" min="30" max="100" placeholder="es. 58" oninput="calcB()">
+      </div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group">
+        <span class="inp-lbl">Pace osservato <span>min/km</span></span>
+        <div class="inp-row-3">
+          <input class="inp-sm" id="b_pmin" type="number" min="2" max="15" placeholder="5" oninput="calcB()">
+          <span class="inp-colon">:</span>
+          <input class="inp-sm" id="b_psec" type="number" min="0" max="59" placeholder="30" oninput="calcB()">
+          <span class="inp-lbl" style="line-height:40px;padding-left:4px;">min : sec /km</span>
+        </div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">FC osservata (opz.) <span>bpm</span></span>
+        <input class="inp" id="b_fc" type="number" min="80" max="230" placeholder="es. 155" oninput="calcB()">
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">Velocità max <span>km/h</span></span>
+        <input class="inp" id="b_vmax" type="number" min="8" max="30" step="0.1" placeholder="es. 14" oninput="calcB()">
+      </div>
+    </div>
+    <div id="b_result">
+      <div class="empty"><div class="empty-icon">🏃</div>
+        <div class="empty-t">Inserisci FCmax e pace</div>
+        <div class="empty-s">Identifica la zona di corrispondenza</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIA C ═══ -->
+  <div class="via-panel" id="via-C">
+    <div class="slbl" style="margin-top:0;">Distanza di gara</div>
+    <div class="gara-presets" id="gara-presets">
+      <div class="gara-btn active" data-km="5" onclick="setGara(5,this)">5 km</div>
+      <div class="gara-btn" data-km="10" onclick="setGara(10,this)">10 km</div>
+      <div class="gara-btn" data-km="21.1" onclick="setGara(21.1,this)">21,1 km</div>
+      <div class="gara-btn" data-km="42.2" onclick="setGara(42.2,this)">42,2 km</div>
+      <div class="gara-btn" data-km="custom" onclick="setGara('custom',this)">Altra distanza</div>
+    </div>
+    <div class="inp-row">
+      <div class="inp-group" id="c_km_wrap" style="display:none;">
+        <span class="inp-lbl">Distanza <span>km</span></span>
+        <input class="inp" id="c_km" type="number" min="1" max="200" step="0.1" placeholder="km" oninput="calcC()">
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">Tempo di gara</span>
+        <div class="inp-row-3">
+          <input class="inp-sm" id="c_th" type="number" min="0" max="12" placeholder="0" oninput="calcC()">
+          <span class="inp-colon">h</span>
+          <input class="inp-sm" id="c_tm" type="number" min="0" max="59" placeholder="25" oninput="calcC()">
+          <span class="inp-colon">:</span>
+          <input class="inp-sm" id="c_ts" type="number" min="0" max="59" placeholder="00" oninput="calcC()">
+          <span class="inp-lbl" style="line-height:40px;padding-left:4px;">h : mm : ss</span>
+        </div>
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">FCmax <span>bpm</span></span>
+        <input class="inp" id="c_fcmax" type="number" min="120" max="230" placeholder="es. 185" oninput="calcC()">
+      </div>
+    </div>
+    <div id="c_result">
+      <div class="empty"><div class="empty-icon">🏅</div>
+        <div class="empty-t">Inserisci distanza e tempo di gara</div>
+        <div class="empty-s">Calcola il pace gara e i ritmi per tutte le zone</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       MODULO FC — Calcolatore + Record Atleta
+  ══════════════════════════════════════ -->
+  <div class="slbl" style="margin-top:24px;">Calcolatore FCmax & Record Atleta</div>
+
+  <!-- 1. STIMA CON FORMULE -->
+  <div class="fc-module">
+    <div class="fc-mod-head" onclick="toggleFCMod('fc-formule')">
+      <span class="fc-mod-icon">🧮</span>
+      <span class="fc-mod-title">Stima FCmax con formule</span>
+      <span class="fc-mod-badge empty" id="badge-formule">Inserisci età</span>
+      <span class="fc-mod-arr" id="arr-formule">▸</span>
+    </div>
+    <div class="fc-mod-body" id="fc-formule">
+      <div class="warn-box" style="margin-bottom:14px;">
+        <strong>⚠ Le formule sono stime popolazionali</strong> con errore di ±10–15 bpm (Tanaka ±7 bpm).
+        Usale come punto di partenza — <strong>non come valore definitivo</strong>.
+        Per PPL: usa sempre il test da campo prima di prescrivere zone precise.
+      </div>
+      <div class="inp-row">
+        <div class="inp-group">
+          <span class="inp-lbl">Età <span>anni</span></span>
+          <input class="inp" id="fc_eta" type="number" min="10" max="90" placeholder="es. 35" oninput="calcFormule()">
+        </div>
+        <div class="inp-group">
+          <span class="inp-lbl">Sesso</span>
+          <div style="display:flex;gap:6px;margin-top:2px;">
+            <div class="fcr-opt active" id="sex_m" onclick="setSex('M')">M</div>
+            <div class="fcr-opt" id="sex_f" onclick="setSex('F')">F</div>
+          </div>
+        </div>
+      </div>
+      <div class="formula-grid" id="formula-grid">
+        <div class="empty"><div class="empty-icon">🧮</div><div class="empty-t">Inserisci età</div></div>
+      </div>
+      <div id="formula-rec" style="display:none;">
+        <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:8px;">Raccomandazione</div>
+        <div id="formula-rec-text" style="font-size:11px;color:var(--mu2);line-height:1.65;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. TEST DA CAMPO -->
+  <div class="fc-module">
+    <div class="fc-mod-head" onclick="toggleFCMod('fc-test')">
+      <span class="fc-mod-icon">🏃</span>
+      <span class="fc-mod-title">Test da campo per FCmax reale</span>
+      <span class="fc-mod-badge empty">3 protocolli</span>
+      <span class="fc-mod-arr" id="arr-test">▸</span>
+    </div>
+    <div class="fc-mod-body" id="fc-test">
+      <div class="note-box" style="margin-bottom:14px;">
+        <strong>Perché fare il test da campo?</strong> Le formule hanno errore medio ±10 bpm — su un atleta con FCmax 185,
+        questo significa zone spostate di 8–15 bpm, rendendo inutilizzabile la prescrizione.
+        Il test da campo è il metodo consigliato per tutti i clienti attivi.
+        <strong>Prerequisito:</strong> assenza di patologie cardiovascolari note. Per soggetti >45 anni o sedentari, consigliare visita medico-sportiva prima.
+        <div class="src">Fonte: Bompa — monitoraggio FC; test 3' massimali (Di Marzio Training)</div>
+      </div>
+      <div class="test-cards">
+
+        <!-- TEST 1: 3 MINUTI MASSIMALI -->
+        <div class="test-card">
+          <div class="test-card-head">
+            <span class="test-card-num">1</span>
+            <div>
+              <div class="test-card-title">Test 3 minuti massimali</div>
+              <div class="test-card-sub">
+                <span class="test-tag med">Intermedio</span>
+                <span class="test-tag equip">Cardiofrequenzimetro</span>
+              </div>
+            </div>
+          </div>
+          <div class="test-card-body">
+            <div class="test-step"><span class="test-step-num">1</span>Riscaldamento 10–15 min a ritmo lento (Z1). FC stabile sotto 120 bpm.</div>
+            <div class="test-step"><span class="test-step-num">2</span>Corri 3 minuti alla massima intensità sostenibile — non uno sprint, ma il massimo che puoi mantenere per l'intera durata.</div>
+            <div class="test-step"><span class="test-step-num">3</span>Negli ultimi 30 secondi, spingi al massimo assoluto.</div>
+            <div class="test-step"><span class="test-step-num">4</span>Il picco FC registrato = FCmax stimata. Registra immediatamente al termine.</div>
+            <div class="test-step"><span class="test-step-num">5</span>Defaticamento 10 min camminata leggera.</div>
+            <div class="test-result-input-row">
+              <div class="inp-group" style="min-width:100px;flex:1;">
+                <span class="inp-lbl">FC picco rilevata <span>bpm</span></span>
+                <input class="record-inp" id="test1_fc" type="number" min="100" max="230" placeholder="—" oninput="updateTestResult('test1')">
+              </div>
+              <button class="use-record-btn" onclick="useTestResult('test1_fc','Test 3 min massimali')">→ Usa come FCmax</button>
+            </div>
+            <div class="test-result-note">⚠ Ripeti 2–3 volte in sessioni diverse per confermare il picco. Il primo test spesso sottostima di 3–5 bpm.</div>
+          </div>
+        </div>
+
+        <!-- TEST 2: TEST 6 MINUTI (COOPER BREVE) -->
+        <div class="test-card">
+          <div class="test-card-head">
+            <span class="test-card-num">2</span>
+            <div>
+              <div class="test-card-title">Test 6 minuti (Cooper breve)</div>
+              <div class="test-card-sub">
+                <span class="test-tag easy">Accessibile</span>
+                <span class="test-tag equip">Pista o GPS</span>
+              </div>
+            </div>
+          </div>
+          <div class="test-card-body">
+            <div class="test-step"><span class="test-step-num">1</span>Riscaldamento 10 min. Poi corri 6 minuti alla massima intensità sostenibile.</div>
+            <div class="test-step"><span class="test-step-num">2</span>Registra la <strong>distanza percorsa in metri</strong> e il <strong>picco FC</strong>.</div>
+            <div class="test-step"><span class="test-step-num">3</span>Velocità (km/h) = metri ÷ 100. Pace = 60 ÷ velocità → min/km.</div>
+            <div class="test-result-input-row">
+              <div class="inp-group" style="min-width:90px;flex:1;">
+                <span class="inp-lbl">Distanza <span>m</span></span>
+                <input class="record-inp" id="test2_dist" type="number" min="500" max="3000" placeholder="es. 1500" oninput="calcTest2()">
+              </div>
+              <div class="inp-group" style="min-width:90px;flex:1;">
+                <span class="inp-lbl">FC picco <span>bpm</span></span>
+                <input class="record-inp" id="test2_fc" type="number" min="100" max="230" placeholder="—" oninput="calcTest2()">
+              </div>
+            </div>
+            <div id="test2_result" style="margin-top:8px;display:none;">
+              <div class="formula-row" style="margin:0;" id="test2_formula"></div>
+              <div style="margin-top:6px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <button class="use-record-btn" onclick="useTestResult('test2_fc','Test 6 min Cooper')">→ FCmax</button>
+                <button class="use-record-btn" onclick="useTest2Vmax()">→ Velocità max al calcolatore</button>
+              </div>
+            </div>
+            <div class="test-result-note">La velocità al test 6 min ≈ vVO₂max. Inseriscila nella Via A come "Velocità massima" per avere i pace delle zone.</div>
+          </div>
+        </div>
+
+        <!-- TEST 3: FC A RIPOSO (3 GIORNI) -->
+        <div class="test-card">
+          <div class="test-card-head">
+            <span class="test-card-num">3</span>
+            <div>
+              <div class="test-card-title">FC a riposo — protocollo 3 giorni</div>
+              <div class="test-card-sub">
+                <span class="test-tag easy">Sempre</span>
+                <span class="test-tag equip">Cardio o manuale</span>
+              </div>
+            </div>
+          </div>
+          <div class="test-card-body">
+            <div class="test-step"><span class="test-step-num">1</span>Per 3 mattine consecutive: al risveglio, prima di alzarsi, misura FC (polso radiale 60 sec, o cardiofrequenzimetro).</div>
+            <div class="test-step"><span class="test-step-num">2</span>Evita alcol serale, allenamento intenso nelle 12h precedenti e stress acuto.</div>
+            <div class="test-step"><span class="test-step-num">3</span>Media delle 3 misurazioni = FCrep da usare con Karvonen.</div>
+            <div class="test-step"><span class="test-step-num">4</span>⚠ Bompa: FCr elevata per 2–3 giorni consecutivi = possibile overreaching → riduci intensità.</div>
+            <div class="test-result-input-row">
+              <div class="inp-group" style="min-width:70px;flex:1;">
+                <span class="inp-lbl">Giorno 1</span>
+                <input class="record-inp" id="fcrep1" type="number" min="30" max="110" placeholder="—" oninput="calcFCrep()">
+              </div>
+              <div class="inp-group" style="min-width:70px;flex:1;">
+                <span class="inp-lbl">Giorno 2</span>
+                <input class="record-inp" id="fcrep2" type="number" min="30" max="110" placeholder="—" oninput="calcFCrep()">
+              </div>
+              <div class="inp-group" style="min-width:70px;flex:1;">
+                <span class="inp-lbl">Giorno 3</span>
+                <input class="record-inp" id="fcrep3" type="number" min="30" max="110" placeholder="—" oninput="calcFCrep()">
+              </div>
+            </div>
+            <div id="fcrep_result" style="margin-top:8px;display:none;">
+              <div class="formula-row" style="margin:0;" id="fcrep_formula"></div>
+              <button class="use-record-btn" style="margin-top:6px;" onclick="useFCrep()">→ Usa come FCrep nel calcolatore</button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /test-cards -->
+    </div>
+  </div>
+
+  <!-- 3. RECORD ATLETA -->
+  <div class="fc-module">
+    <div class="fc-mod-head" onclick="toggleFCMod('fc-record')">
+      <span class="fc-mod-icon">📋</span>
+      <span class="fc-mod-title">Record atleta — storico FC</span>
+      <span class="fc-mod-badge empty" id="badge-record">Nessun record</span>
+      <span class="fc-mod-arr" id="arr-record">▸</span>
+    </div>
+    <div class="fc-mod-body" id="fc-record">
+      <div id="record-display">
+        <div class="record-display">
+          <div class="rd-row" id="rd-row">
+            <div class="rd-item"><span class="rd-lbl">FCmax</span><span class="rd-val nd" id="rd-fcmax">—</span></div>
+            <div class="rd-item"><span class="rd-lbl">FCrep</span><span class="rd-val sec nd" id="rd-fcrep">—</span></div>
+            <div class="rd-item"><span class="rd-lbl">FC Riserva</span><span class="rd-val nd" id="rd-fcr">—</span></div>
+            <div class="rd-item"><span class="rd-lbl">Metodo FCmax</span><span class="rd-val nd" style="font-size:11px;" id="rd-method">—</span></div>
+            <div class="rd-item"><span class="rd-lbl">Data misura</span><span class="rd-val nd" style="font-size:11px;" id="rd-date">—</span></div>
+          </div>
+        </div>
+        <button class="use-record-btn" id="use-record-main-btn" style="display:none;margin-bottom:12px;" onclick="applyRecordToCalc()">
+          ✓ Usa questi valori in tutti i calcolatori
+        </button>
+      </div>
+
+      <div class="slbl" style="margin-top:0;">Salva nuovo record</div>
+      <div class="record-grid">
+        <div class="record-field">
+          <span class="record-lbl">FCmax misurata <span>bpm</span></span>
+          <input class="record-inp" id="rec_fcmax" type="number" min="100" max="230" placeholder="—">
+        </div>
+        <div class="record-field">
+          <span class="record-lbl">FC a riposo <span>bpm</span></span>
+          <input class="record-inp" id="rec_fcrep" type="number" min="30" max="110" placeholder="—">
+        </div>
+        <div class="record-field">
+          <span class="record-lbl">Metodo usato</span>
+          <input class="record-inp" id="rec_method" type="text" placeholder="es. Test 3 min campo">
+        </div>
+        <div class="record-field">
+          <span class="record-lbl">Data</span>
+          <input class="record-inp" id="rec_date" type="text" placeholder="gg/mm/aaaa">
+        </div>
+        <div class="record-field">
+          <span class="record-lbl">Note</span>
+          <input class="record-inp" id="rec_note" type="text" placeholder="condizioni, contesto...">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="use-record-btn" onclick="saveRecord()" style="background:rgba(184,151,42,.1);border-color:rgba(184,151,42,.3);color:var(--gold);">
+          💾 Salva record
+        </button>
+        <button class="use-record-btn" onclick="applyRecordToCalc()">
+          ✓ Applica ai calcolatori
+        </button>
+      </div>
+
+      <div class="slbl" style="margin-top:16px;">Storico misurazioni</div>
+      <div class="history-list" id="fc-history-list">
+        <div class="empty" style="padding:20px;"><div class="empty-t">Nessuna misurazione salvata</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABELLA RIFERIMENTO -->
+  <div class="slbl" style="margin-top:24px;">Riferimento fisiologico zone</div>
+  <div class="note-box">
+    <strong>Sistema 5 zone (Jack Daniels / Garmin / standard running):</strong>
+    Z1 Recupero · Z2 Aerobico / Base · Z3 Tempo / Soglia aerobica · Z4 Soglia anaerobica · Z5 VO₂max
+    <br><strong>Sistema 6 zone (Bompa & Buzzichelli, Periodizzazione dell'allenamento sportivo):</strong>
+    Z1 Anaerobico alattacido (sprint) · Z2 Anaerobico lattacido · Z3 VO₂max · Z4 Soglia anaerobica · Z5 Soglia aerobica · Z6 Compensazione/Recupero
+    <br><em>⚠ Attenzione: la numerazione è invertita — Bompa numera dal massimo al minimo.</em>
+    <div class="src">Fonte: Periodizzazione dell'Allenamento Sportivo — Bompa & Buzzichelli (Tab. 3.3) · Jack Daniels' Running Formula · Karvonen et al.</div>
+  </div>
+  <div id="ref-table"></div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════ */
+let SYS = '5';       // '5' | '6'
+let FCM = 'pct';     // 'pct' | 'karvonen'
+let GARA_KM = 5;
+
+/* ══════════════════════════════════════════════
+   ZONE DEFINITIONS
+══════════════════════════════════════════════ */
+const ZONES5 = [
+  { id:1, name:'Z1 — Recupero', color:'var(--z1)',
+    pctFC:[50,60], kPct:[50,60], vPct:[59,65],
+    lattato:'<1 mmol', rpe:'1–2', durata:'20–40 min',
+    obiettivo:'Recupero attivo, rigenerazione, riscaldamento lungo',
+    tipo:'Corsa leggera, camminata veloce', note:'La "conversazione fluente" — puoi parlare a frasi complete senza affanno.' },
+  { id:2, name:'Z2 — Base aerobica', color:'var(--z2)',
+    pctFC:[60,70], kPct:[60,72], vPct:[65,75],
+    lattato:'1–2 mmol', rpe:'3–4', durata:'45–120 min',
+    obiettivo:'Base aerobica, lipolisi, capillarizzazione',
+    tipo:'Long slow run, corsa lunga', note:'Zona più importante per il volume. 80% del chilometraggio settimanale (regola 80/20). Bompa Z5/Z6.' },
+  { id:3, name:'Z3 — Tempo / Soglia aerobica', color:'var(--z3)',
+    pctFC:[70,80], kPct:[72,82], vPct:[75,85],
+    lattato:'2–3 mmol', rpe:'5–6', durata:'20–60 min',
+    obiettivo:'Soglia aerobica, economia di corsa',
+    tipo:'Tempo run, fartlek, corsa a ritmo maratona', note:'Sforzo "svelto ma controllato". Puoi dire frasi brevi. FC 130–150 bpm tipicamente (Bompa Z5 soglia aerobica).' },
+  { id:4, name:'Z4 — Soglia anaerobica', color:'var(--z4)',
+    pctFC:[80,90], kPct:[82,92], vPct:[85,92],
+    lattato:'3–6 mmol', rpe:'7–8', durata:'10–40 min (intervalli)',
+    obiettivo:'Soglia anaerobica, tolleranza al lattato',
+    tipo:'Threshold intervals, tempo run breve', note:'Equivalente Bompa Z4 (85–90% VO₂max, 92–96% FCmax). Solo poche parole tra un respiro e l\'altro.' },
+  { id:5, name:'Z5 — VO₂max / Massimale', color:'var(--z5)',
+    pctFC:[90,100], kPct:[92,100], vPct:[92,105],
+    lattato:'>6 mmol', rpe:'9–10', durata:'1–8 min (ripetute)',
+    obiettivo:'Potenza aerobica massima, VO₂max',
+    tipo:'Ripetute 400m–1200m, sprint lunghi', note:'Bompa Z3 (90–100% VO₂max). Respiro molto affannoso, impossibile parlare. 20% del volume settimanale max.' },
+];
+
+const ZONES6 = [
+  { id:1, name:'Z1 — Anaerobico alattacido', color:'var(--z5)',
+    pctFC:[95,100], kPct:[95,100], vPct:[100,110],
+    lattato:'<3 mmol (ATP-PC)', rpe:'10', durata:'<8 sec (recupero 3–5 min)',
+    obiettivo:'Velocità massima, accelerazione, esplosività',
+    tipo:'Sprint 10–30m, salti, lanci', note:'Sistema fosfocreatina. Solo atleti esperti. Non rilevante per corsa di resistenza (Bompa pag. 53).' },
+  { id:2, name:'Z2 — Anaerobico lattacido', color:'var(--z4)',
+    pctFC:[90,95], kPct:[92,98], vPct:[95,105],
+    lattato:'>12 mmol', rpe:'9–10', durata:'10–60 sec (recupero 4–30 min)',
+    obiettivo:'Tolleranza al lattato, capacità lattacida',
+    tipo:'Ripetute 200–400m, interval training duro', note:'Lo sforzo più stressante. Max 2 volte/settimana per evitare overreaching (Bompa pag. 55).' },
+  { id:3, name:'Z3 — VO₂max', color:'#CC4444',
+    pctFC:[87,92], kPct:[88,95], vPct:[90,100],
+    lattato:'6–12 mmol', rpe:'8–9', durata:'1–6 min (6–8 ripetute)',
+    obiettivo:'Potenza aerobica massima, volume plasmatico',
+    tipo:'Ripetute 800–1200m, interval 1–6 min', note:'90–100% VO₂max. "Massimo consumo di ossigeno" (Bompa pag. 55). Z4/Z5 nello standard 5 zone.' },
+  { id:4, name:'Z4 — Soglia anaerobica', color:'var(--z3)',
+    pctFC:[82,88], kPct:[84,92], vPct:[85,92],
+    lattato:'4–6 mmol', rpe:'7–8', durata:'1–6 min (recupero 1:0.5–1:1)',
+    obiettivo:'Incremento soglia anaerobica, tolleranza lattato',
+    tipo:'Threshold intervals, corsa a ritmo 10km–HM', note:'85–90% VO₂max = 92–96% FCmax (Bompa pag. 55). Usata con Z5 nel microciclo.' },
+  { id:5, name:'Z5 — Soglia aerobica', color:'var(--z2)',
+    pctFC:[65,80], kPct:[66,82], vPct:[70,85],
+    lattato:'2–3 mmol', rpe:'4–6', durata:'20–90 min (continuo o interval >10 min)',
+    obiettivo:'Capacità aerobica, metabolismo lipidico',
+    tipo:'Corsa lunga, tempo run lento', note:'FC 130–150 bpm (Bompa pag. 56). Zona chiave per sport di resistenza. Z2/Z3 nello standard 5 zone.' },
+  { id:6, name:'Z6 — Compensazione', color:'var(--z1)',
+    pctFC:[45,65], kPct:[45,65], vPct:[50,65],
+    lattato:'<1 mmol', rpe:'1–3', durata:'5–20 min post-allenamento',
+    obiettivo:'Recupero attivo, eliminazione metaboliti',
+    tipo:'Corsa leggerissima, camminata', note:'45–60% VO₂max (Bompa pag. 57). Favorisce rigenerazione dopo Z2/Z3. Mai saltare il recupero attivo dopo alta intensità.' },
+];
+
+function getZones(){ return SYS==='5' ? ZONES5 : ZONES6; }
+
+/* ══════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════ */
+function fcRange(z, fcmax, fcrep){
+  const [lo,hi] = FCM==='karvonen' ? z.kPct : z.pctFC;
+  if(FCM==='karvonen' && fcrep>0){
+    const fcr = fcmax - fcrep;
+    return [ Math.round(fcrep + fcr*(lo/100)), Math.round(fcrep + fcr*(hi/100)) ];
+  }
+  return [ Math.round(fcmax*lo/100), Math.round(fcmax*hi/100) ];
+}
+function vRange(z, vmax){
+  if(!vmax) return null;
+  return [ (vmax*z.vPct[0]/100).toFixed(1), (vmax*z.vPct[1]/100).toFixed(1) ];
+}
+function kmhToPace(kmh){ // → "mm:ss"
+  if(!kmh||kmh<=0) return '—';
+  const secPerKm = 3600/kmh;
+  const m = Math.floor(secPerKm/60), s = Math.round(secPerKm%60);
+  return `${m}:${String(s).padStart(2,'0')}`;
+}
+function paceToKmh(min,sec){ return 3600/(min*60+sec); }
+function paceToStr(secPerKm){ const m=Math.floor(secPerKm/60),s=Math.round(secPerKm%60); return `${m}:${String(s).padStart(2,'0')}`; }
+function paceRange(z, vmax){
+  if(!vmax) return ['—','—'];
+  const vlo = vmax*z.vPct[0]/100, vhi = vmax*z.vPct[1]/100;
+  return [ kmhToPace(vhi), kmhToPace(vlo) ]; // velocità alta → pace basso
+}
+function zoneColor(z){ return z.color; }
+function fmtFC(arr){ return `${arr[0]}–${arr[1]} bpm`; }
+
+/* ══════════════════════════════════════════════
+   RENDER ZONE TABLE
+══════════════════════════════════════════════ */
+function renderZoneTable(zones, fcmax, fcrep, vmax, highlightId){
+  const rows = zones.map(z=>{
+    const fc = fcmax>0 ? fcRange(z,fcmax,fcrep) : null;
+    const pr = vmax>0 ? paceRange(z,vmax) : null;
+    const isHl = z.id===highlightId;
+    return `<tr class="${isHl?'current':''}">
+      <td>
+        <div class="zone-row">
+          <div class="zone-color-bar" style="background:${zoneColor(z)};"></div>
+          <div class="zc left">
+            <span class="zone-name">${z.name}${isHl?'<span class="current-badge">TUA ZONA</span>':''}</span>
+            <span class="zone-sys">${z.obiettivo}</span>
+          </div>
+          <div class="zc">
+            ${fc ? `<span class="zone-val">${fmtFC(fc)}</span>` : '<span class="zone-val" style="color:var(--g6)">—</span>'}
+            ${fc ? `<span class="zone-sub">${z.pctFC[0]}–${z.pctFC[1]}% FCmax</span>`:''}
+          </div>
+          <div class="zc">
+            ${pr ? `<span class="zone-val big">${pr[0]}</span><span class="zone-sub">→ ${pr[1]} /km</span>` : '<span class="zone-val" style="color:var(--g6)">—</span>'}
+          </div>
+          <div class="zc" style="min-width:60px;text-align:center;">
+            <span class="zone-val" style="color:${zoneColor(z)}">${z.rpe}</span>
+            <span class="zone-sub">RPE</span>
+          </div>
+          <div class="zc" style="min-width:80px;">
+            <span class="zone-sub" style="color:var(--mu2);font-size:9px;">${z.lattato}</span>
+            <span class="zone-sub" style="margin-top:2px;">${z.durata}</span>
+          </div>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+  return `<div class="zone-table-wrap">
+    <table class="zone-table">
+      <thead><tr><th>Zona</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   VIA A — FCmax → zone complete
+══════════════════════════════════════════════ */
+function calcA(){
+  const fcmax = parseInt(document.getElementById('a_fcmax').value)||0;
+  const fcrep = parseInt(document.getElementById('a_fcrep').value)||0;
+  const vmax  = parseFloat(document.getElementById('a_vmax').value)||0;
+  const el = document.getElementById('a_result');
+  if(!fcmax){ el.innerHTML=`<div class="empty"><div class="empty-icon">❤️</div><div class="empty-t">Inserisci FCmax per vedere le zone</div></div>`; return; }
+  const zones = getZones();
+  // formula vis
+  const fv = FCM==='karvonen' && fcrep>0
+    ? `<div class="formula-row"><span class="f-part">FC zona</span><span class="f-part"> = </span><span class="f-hi">FCrep</span><span class="f-part"> + (</span><span class="f-hi">FCmax − FCrep</span><span class="f-part">) × %</span><span class="f-part"> = </span><span class="f-hi">${fcrep}</span><span class="f-part"> + (</span><span class="f-hi">${fcmax}−${fcrep}=${fcmax-fcrep}</span><span class="f-part">) × %zona</span></div>`
+    : `<div class="formula-row"><span class="f-part">FC zona</span><span class="f-part"> = </span><span class="f-hi">FCmax</span><span class="f-part"> × %</span><span class="f-part"> = </span><span class="f-hi">${fcmax}</span><span class="f-part"> × %zona</span></div>`;
+  el.innerHTML = fv + renderZoneTable(zones, fcmax, fcrep, vmax, null);
+}
+
+/* ══════════════════════════════════════════════
+   VIA B — Pace noto → zona
+══════════════════════════════════════════════ */
+function calcB(){
+  const fcmax = parseInt(document.getElementById('b_fcmax').value)||0;
+  const fcrep = parseInt(document.getElementById('b_fcrep').value)||0;
+  const pmin  = parseInt(document.getElementById('b_pmin').value)||0;
+  const psec  = parseInt(document.getElementById('b_psec').value)||0;
+  const fcobs = parseInt(document.getElementById('b_fc').value)||0;
+  const vmax  = parseFloat(document.getElementById('b_vmax').value)||0;
+  const el = document.getElementById('b_result');
+  if(!pmin){ el.innerHTML=`<div class="empty"><div class="empty-icon">🏃</div><div class="empty-t">Inserisci FCmax e pace</div></div>`; return; }
+  const paceKmh = paceToKmh(pmin, psec);
+  const paceSec = pmin*60+psec;
+  const zones = getZones();
+
+  // Trova zona per FC o per velocità
+  let foundZone = null;
+  if(fcobs>0 && fcmax>0){
+    const fcPct = (fcobs/fcmax)*100;
+    const fcRiserva = fcmax>0&&fcrep>0 ? (fcobs-fcrep)/(fcmax-fcrep)*100 : null;
+    const refPct = FCM==='karvonen' && fcRiserva!==null ? fcRiserva : fcPct;
+    for(const z of zones){
+      const [lo,hi] = FCM==='karvonen' ? z.kPct : z.pctFC;
+      if(refPct>=lo-2 && refPct<=hi+2){ foundZone=z; break; }
+    }
+  }
+  if(!foundZone && vmax>0){
+    const vPct = (paceKmh/vmax)*100;
+    for(const z of zones){
+      if(vPct>=z.vPct[0]-2 && vPct<=z.vPct[1]+2){ foundZone=z; break; }
+    }
+  }
+
+  // Header result
+  let header = '';
+  if(foundZone){
+    header = `<div class="result-card">
+      <div class="result-main" style="border-left:4px solid ${zoneColor(foundZone)};">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
+          <div><div class="rc-lbl" style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Pace inserito</div>
+            <div class="result-val">${pmin}:${String(psec).padStart(2,'0')}<span>/km</span></div></div>
+          <div><div class="rc-lbl" style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">= ${paceKmh.toFixed(1)} km/h</div>
+            <div class="result-val" style="color:${zoneColor(foundZone)};font-size:22px;">${foundZone.name}</div></div>
+          ${fcobs>0?`<div><div class="rc-lbl" style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">FC osservata</div><div class="result-val" style="font-size:22px;">${fcobs}<span>bpm</span></div></div>`:''}
+        </div>
+        <div class="result-sub" style="margin-top:8px;">${foundZone.obiettivo} · RPE ${foundZone.rpe} · ${foundZone.lattato} lattato</div>
+        <div class="result-sub" style="margin-top:4px;font-size:10px;color:var(--mu);">${foundZone.note}</div>
+      </div>
+    </div>`;
+  }
+  el.innerHTML = header + renderZoneTable(zones, fcmax, fcrep, vmax, foundZone?.id||null);
+}
+
+/* ══════════════════════════════════════════════
+   VIA C — Tempo gara → VDOT → pace zone
+══════════════════════════════════════════════ */
+function calcC(){
+  const km   = GARA_KM==='custom' ? parseFloat(document.getElementById('c_km').value)||0 : GARA_KM;
+  const th   = parseInt(document.getElementById('c_th').value)||0;
+  const tm   = parseInt(document.getElementById('c_tm').value)||0;
+  const ts   = parseInt(document.getElementById('c_ts').value)||0;
+  const fcmax= parseInt(document.getElementById('c_fcmax').value)||0;
+  const el = document.getElementById('c_result');
+  if(!km||(!th&&!tm&&!ts)){ el.innerHTML=`<div class="empty"><div class="empty-icon">🏅</div><div class="empty-t">Inserisci distanza e tempo di gara</div></div>`; return; }
+
+  const totalSec = th*3600+tm*60+ts;
+  const paceGaraSec = totalSec/km;
+  const paceGaraKmh = 3600/paceGaraSec;
+  const paceGaraStr = paceToStr(paceGaraSec);
+
+  // Stima vVO2max da pace gara (Jack Daniels semplificato)
+  // Percentuale VO2max sostenibile per durata gara (curva Daniels approssimata)
+  let pctVO2 = 1.0;
+  if(totalSec<=600) pctVO2=0.97;
+  else if(totalSec<=1800) pctVO2=0.92;
+  else if(totalSec<=3600) pctVO2=0.88;
+  else if(totalSec<=5400) pctVO2=0.84;
+  else if(totalSec<=7200) pctVO2=0.80;
+  else if(totalSec<=10800) pctVO2=0.75;
+  else pctVO2=0.70;
+
+  const vVO2max = paceGaraKmh/pctVO2;
+
+  // Range di pace per zone in base a % vVO2max
+  const zones = getZones();
+  const rows = zones.map(z=>{
+    const vlo = vVO2max*z.vPct[0]/100, vhi = vVO2max*z.vPct[1]/100;
+    const plo = kmhToPace(vhi), phi = kmhToPace(vlo);
+    const fcR = fcmax>0 ? fcRange(z,fcmax,0) : null;
+    return `<tr>
+      <td><div class="zone-row">
+        <div class="zone-color-bar" style="background:${zoneColor(z)};"></div>
+        <div class="zc left"><span class="zone-name">${z.name}</span><span class="zone-sys">${z.obiettivo}</span></div>
+        <div class="zc"><span class="zone-val big">${plo}</span><span class="zone-sub">→ ${phi} /km</span></div>
+        <div class="zc"><span class="zone-val">${(vhi).toFixed(1)}</span><span class="zone-sub">→ ${(vlo).toFixed(1)} km/h</span></div>
+        ${fcR?`<div class="zc"><span class="zone-val">${fmtFC(fcR)}</span></div>`:''}
+        <div class="zc"><span class="zone-val" style="color:${zoneColor(z)}">${z.rpe}</span><span class="zone-sub">RPE</span></div>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card" style="margin-bottom:14px;">
+      <div class="result-main">
+        <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Pace gara</div>
+            <div class="result-val">${paceGaraStr}<span>/km</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Velocità</div>
+            <div class="result-val" style="font-size:26px;">${paceGaraKmh.toFixed(1)}<span>km/h</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">vVO₂max stimata</div>
+            <div class="result-val" style="font-size:26px;color:var(--z2);">${vVO2max.toFixed(1)}<span>km/h</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">% VO₂max in gara</div>
+            <div class="result-val" style="font-size:26px;color:var(--z3);">${Math.round(pctVO2*100)}<span>%</span></div>
+          </div>
+        </div>
+        <div class="result-sub" style="margin-top:8px;font-size:10px;color:var(--mu);">
+          Stima basata su Jack Daniels VDOT semplificato. I pace zone sono calcolati come % della vVO₂max.
+        </div>
+      </div>
+    </div>
+    <div class="zone-table-wrap"><table class="zone-table">
+      <thead><tr><th>Zona</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+}
+
+/* ══════════════════════════════════════════════
+   TABELLA DI RIFERIMENTO FISSA
+══════════════════════════════════════════════ */
+function renderRefTable(){
+  const zones = getZones();
+  const rows = zones.map(z=>`<tr>
+    <td><div class="zone-row">
+      <div class="zone-color-bar" style="background:${zoneColor(z)};"></div>
+      <div class="zc left"><span class="zone-name">${z.name}</span><span class="zone-sys">${z.obiettivo}</span></div>
+      <div class="zc"><span class="zone-val">${z.pctFC[0]}–${z.pctFC[1]}%</span><span class="zone-sub">FCmax</span></div>
+      <div class="zc"><span class="zone-val">${z.vPct[0]}–${z.vPct[1]}%</span><span class="zone-sub">vVO₂max</span></div>
+      <div class="zc"><span class="zone-val" style="color:${zoneColor(z)}">${z.rpe}</span><span class="zone-sub">RPE</span></div>
+      <div class="zc" style="min-width:80px;"><span class="zone-sub" style="color:var(--mu2)">${z.lattato}</span></div>
+      <div class="zc" style="min-width:100px;text-align:left;"><span class="zone-obiettivo">${z.tipo}</span></div>
+    </div></td>
+  </tr>`).join('');
+  document.getElementById('ref-table').innerHTML = `<div class="zone-table-wrap">
+    <table class="zone-table"><thead><tr><th>Zona</th></tr></thead><tbody>${rows}</tbody></table>
+  </div>
+  <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;padding:10px 0 4px;">
+    Note: ${zones.map(z=>`${z.name.split('—')[0].trim()}: ${z.note}`).join(' · ')}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════
+   CONTROLS
+══════════════════════════════════════════════ */
+function setSys(s,el){
+  SYS=s;
+  document.querySelectorAll('.sys-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  calcA(); calcB(); calcC(); renderRefTable();
+}
+function setFCM(m,el){
+  FCM=m;
+  document.querySelectorAll('.fcr-opt').forEach(o=>o.classList.remove('active'));
+  el.classList.add('active');
+  // mostra/nascondi FCrep
+  ['a_fcrep_wrap','b_fcrep_wrap'].forEach(id=>{
+    const w=document.getElementById(id); if(w) w.style.opacity=m==='karvonen'?'1':'0.45';
+  });
+  calcA(); calcB(); calcC();
+}
+function switchVia(via,el){
+  document.querySelectorAll('.via-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.via-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('via-'+via).classList.add('active');
+}
+function setGara(km,el){
+  GARA_KM=km;
+  document.querySelectorAll('.gara-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('c_km_wrap').style.display=km==='custom'?'flex':'none';
+  calcC();
+}
+
+renderRefTable();
+/* ══════════════════════════════════════════════
+   FC MODULE — Storage
+══════════════════════════════════════════════ */
+const FC_STORAGE_KEY = 'ppl_fc_record';
+const FC_HISTORY_KEY = 'ppl_fc_history';
+function fcGet(key){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function fcSet(key,val){ try{ localStorage.setItem(key,JSON.stringify(val)); }catch(e){} }
+let FC_SEX='M';
+function setSex(s){
+  FC_SEX=s;
+  document.getElementById('sex_m').classList.toggle('active',s==='M');
+  document.getElementById('sex_f').classList.toggle('active',s==='F');
+  calcFormule();
+}
+function toggleFCMod(id){
+  const body=document.getElementById(id);
+  const open=body.classList.toggle('open');
+  const key=id.replace('fc-','');
+  const arr=document.getElementById('arr-'+key);
+  if(arr) arr.textContent=open?'▾':'▸';
+}
+/* ── Formule FCmax ── */
+function calcFormule(){
+  const eta=parseInt(document.getElementById('fc_eta').value)||0;
+  const grid=document.getElementById('formula-grid');
+  const rec=document.getElementById('formula-rec');
+  const badge=document.getElementById('badge-formule');
+  if(!eta){ grid.innerHTML=`<div class="empty"><div class="empty-icon">🧮</div><div class="empty-t">Inserisci età</div></div>`; rec.style.display='none'; badge.textContent='Inserisci età'; return; }
+  const S=FC_SEX;
+  const formulas=[
+    { name:'Fox & Haskell', val:S==='M'?220-eta:226-eta, formula:S==='M'?`220 − ${eta}`:`226 − ${eta}`, err:'±10–15 bpm', errClass:'hi', note:'Formula più comune ma meno accurata. Non raccomandata per prescrizione precisa.', quality:'basic' },
+    { name:'Tanaka (2001)', val:Math.round(208-0.7*eta), formula:`208 − (0.7 × ${eta})`, err:'±7 bpm', errClass:'med', note:'Più accurata della classica, validata su ampia popolazione adulta. Raccomandata come stima.', quality:'best' },
+    { name:'Ball State Univ.', val:S==='M'?Math.round(214-0.8*eta):Math.round(209-0.7*eta), formula:S==='M'?`214 − (0.8 × ${eta})`:`209 − (0.7 × ${eta})`, err:'±8 bpm', errClass:'med', note:'Formula differenziata per sesso — Ball State University (Turri, Allenamento Funzionale).', quality:'ok' },
+    { name:'Cerretelli', val:Math.round(216-1.1*eta), formula:`216 − (1.1 × ${eta})`, err:'±9 bpm', errClass:'med', note:'Formula italiana per ambo i sessi.', quality:'ok' },
+    { name:S==='F'?'Gulati (donne)':'Inbar (uomini)', val:S==='F'?Math.round(206-0.88*eta):Math.round(205.8-0.685*eta), formula:S==='F'?`206 − (0.88 × ${eta})`:`205.8 − (0.685 × ${eta})`, err:'±7 bpm', errClass:'med', note:S==='F'?'Validata specificamente su donne (Gulati et al. 2010).':'Formula di Inbar, specifica per uomini.', quality:'ok' },
+  ];
+  const best=formulas.find(f=>f.quality==='best');
+  badge.textContent=`Stima Tanaka: ${best.val} bpm`; badge.className='fc-mod-badge saved';
+  grid.innerHTML=formulas.map(f=>`<div class="formula-card ${f.quality==='best'?'best':f.quality==='ok'?'ok':''}">
+    <div class="fc-name">${f.name} ${f.quality==='best'?'<span class="badge-best">CONSIGLIATA</span>':f.quality==='ok'?'<span class="badge-ok">BUONA</span>':''}</div>
+    <div class="fc-val">${f.val}</div><div class="fc-formula">${f.formula}</div>
+    <div class="fc-err ${f.errClass}">Errore medio: ${f.err}</div>
+    <div style="font-size:9px;color:var(--mu);margin-top:4px;line-height:1.4;">${f.note}</div>
+    <button class="use-record-btn" style="margin-top:8px;font-size:8px;" onclick="useFormulaResult(${f.val},'Formula ${f.name}')">→ Usa come FCmax</button>
+  </div>`).join('');
+  rec.style.display='block';
+  let recText='';
+  if(eta<40) recText=`Per ${eta} anni, <strong>Tanaka (${best.val} bpm)</strong> è la stima più affidabile. Se disponibile un cardiofrequenzimetro, esegui il <strong>Test 3 minuti massimali</strong> per misurare il valore reale — la differenza può essere di 5–15 bpm.`;
+  else if(eta<55) recText=`A ${eta} anni, le formule tendono a divergere. <strong>Tanaka (${best.val} bpm)</strong> è il punto di partenza — ma il <strong>test da campo</strong> è particolarmente importante in questa fascia d'età. Consigliato controllo medico-sportivo se non recente.`;
+  else recText=`A ${eta} anni la variabilità individuale è alta. Il <strong>test da campo supervisionato</strong> o una prova da sforzo medica sono fortemente raccomandati. Non usare le sole formule per prescrizioni di zona 4–5.`;
+  document.getElementById('formula-rec-text').innerHTML=recText;
+}
+function useFormulaResult(val,method){
+  document.getElementById('rec_fcmax').value=val;
+  document.getElementById('rec_method').value=method;
+  document.getElementById('rec_date').value=new Date().toLocaleDateString('it-IT');
+  const body=document.getElementById('fc-record');
+  if(!body.classList.contains('open')){ body.classList.add('open'); document.getElementById('arr-record').textContent='▾'; }
+  body.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+/* ── Test da campo ── */
+function useTestResult(inputId,method){
+  const val=parseInt(document.getElementById(inputId).value)||0;
+  if(!val) return;
+  document.getElementById('rec_fcmax').value=val;
+  document.getElementById('rec_method').value=method;
+  document.getElementById('rec_date').value=new Date().toLocaleDateString('it-IT');
+  const body=document.getElementById('fc-record');
+  if(!body.classList.contains('open')){ body.classList.add('open'); document.getElementById('arr-record').textContent='▾'; }
+  body.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function calcTest2(){
+  const dist=parseInt(document.getElementById('test2_dist').value)||0;
+  const fc=parseInt(document.getElementById('test2_fc').value)||0;
+  const wrap=document.getElementById('test2_result');
+  if(!dist){ wrap.style.display='none'; return; }
+  const kmh=(dist/100).toFixed(2);
+  const pace=kmhToPace(parseFloat(kmh));
+  wrap.style.display='block';
+  document.getElementById('test2_formula').innerHTML=`
+    <span class="f-part">Velocità</span><span class="f-part"> = </span><span class="f-hi">${dist}m ÷ 100</span><span class="f-part"> = </span><span class="f-eq">${kmh} km/h</span>
+    <span class="f-part" style="margin-left:12px;">Pace</span><span class="f-part"> = </span><span class="f-eq">${pace} /km</span>
+    ${fc?`<span class="f-part" style="margin-left:12px;">FC picco</span><span class="f-eq"> = ${fc} bpm</span>`:''}`;
+  document.getElementById('test2_formula').dataset.vmax=kmh;
+}
+function useTest2Vmax(){
+  const formula=document.getElementById('test2_formula');
+  const kmh=parseFloat(formula.dataset.vmax)||0;
+  if(!kmh) return;
+  document.getElementById('a_vmax').value=kmh.toFixed(1);
+  document.getElementById('b_vmax').value=kmh.toFixed(1);
+  const fc=parseInt(document.getElementById('test2_fc').value)||0;
+  if(fc) useTestResult('test2_fc','Test 6 min Cooper');
+  calcA(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function calcFCrep(){
+  const vals=[1,2,3].map(i=>parseInt(document.getElementById('fcrep'+i).value)||0).filter(v=>v>0);
+  const wrap=document.getElementById('fcrep_result');
+  if(!vals.length){ wrap.style.display='none'; return; }
+  const avg=Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  wrap.style.display='block';
+  document.getElementById('fcrep_formula').innerHTML=`
+    <span class="f-part">Media ${vals.length} gg</span><span class="f-part"> = </span><span class="f-hi">(${vals.join('+')})</span><span class="f-part"> ÷ ${vals.length} = </span><span class="f-eq">${avg} bpm</span>
+    ${avg<50?'<span style="color:var(--z2);font-size:10px;margin-left:8px;">⚡ FC riposo eccellente</span>':avg>80?'<span style="color:var(--org);font-size:10px;margin-left:8px;">⚠ FC riposo elevata — monitorare</span>':''}`;
+  document.getElementById('fcrep_formula').dataset.avg=avg;
+}
+function useFCrep(){
+  const f=document.getElementById('fcrep_formula');
+  const avg=parseInt(f.dataset.avg)||0;
+  if(!avg) return;
+  document.getElementById('rec_fcrep').value=avg;
+  document.getElementById('a_fcrep').value=avg;
+  document.getElementById('b_fcrep').value=avg;
+  const body=document.getElementById('fc-record');
+  if(!body.classList.contains('open')){ body.classList.add('open'); document.getElementById('arr-record').textContent='▾'; }
+  calcA(); calcB();
+}
+/* ── Record atleta ── */
+function saveRecord(){
+  const fcmax=parseInt(document.getElementById('rec_fcmax').value)||0;
+  const fcrep=parseInt(document.getElementById('rec_fcrep').value)||0;
+  const method=document.getElementById('rec_method').value||'—';
+  const date=document.getElementById('rec_date').value||new Date().toLocaleDateString('it-IT');
+  const note=document.getElementById('rec_note').value||'';
+  if(!fcmax){ alert('Inserisci almeno FCmax prima di salvare.'); return; }
+  const record={fcmax,fcrep,method,date,note};
+  fcSet(FC_STORAGE_KEY,record);
+  const hist=fcGet(FC_HISTORY_KEY)||[];
+  hist.unshift({...record,id:Date.now()});
+  if(hist.length>20) hist.pop();
+  fcSet(FC_HISTORY_KEY,hist);
+  renderRecord(); renderHistory();
+  const btn=event.target; btn.textContent='✓ Salvato!'; setTimeout(()=>btn.textContent='💾 Salva record',1500);
+}
+function renderRecord(){
+  const r=fcGet(FC_STORAGE_KEY);
+  const badge=document.getElementById('badge-record');
+  const btn=document.getElementById('use-record-main-btn');
+  if(!r){ badge.textContent='Nessun record'; badge.className='fc-mod-badge empty'; btn.style.display='none'; return; }
+  badge.textContent=`FCmax: ${r.fcmax} bpm · ${r.date}`; badge.className='fc-mod-badge saved'; btn.style.display='block';
+  const set=(id,val,cls)=>{ const e=document.getElementById(id); if(e){ e.textContent=val; if(cls) e.className=cls; } };
+  set('rd-fcmax',r.fcmax+' bpm','rd-val');
+  set('rd-fcrep',r.fcrep?r.fcrep+' bpm':'—',r.fcrep?'rd-val sec':'rd-val sec nd');
+  const fcr=r.fcrep&&r.fcmax?r.fcmax-r.fcrep:null;
+  set('rd-fcr',fcr?fcr+' bpm':'—',fcr?'rd-val':'rd-val nd');
+  set('rd-method',r.method,'rd-val'); set('rd-date',r.date,'rd-val');
+}
+function renderHistory(){
+  const hist=fcGet(FC_HISTORY_KEY)||[];
+  const el=document.getElementById('fc-history-list');
+  if(!hist.length){ el.innerHTML=`<div class="empty" style="padding:20px;"><div class="empty-t">Nessuna misurazione salvata</div></div>`; return; }
+  el.innerHTML=hist.map(h=>`<div class="history-item">
+    <span class="hi-date">${h.date}</span><span class="hi-val">${h.fcmax} bpm</span>
+    <span class="hi-method">${h.method}${h.fcrep?' · FCrep '+h.fcrep+' bpm':''}</span>
+    <button class="hi-del" onclick="deleteHistoryItem(${h.id})">✕</button>
+  </div>`).join('');
+}
+function deleteHistoryItem(id){
+  let hist=fcGet(FC_HISTORY_KEY)||[];
+  hist=hist.filter(h=>h.id!==id);
+  fcSet(FC_HISTORY_KEY,hist);
+  renderHistory();
+}
+function applyRecordToCalc(){
+  const r=fcGet(FC_STORAGE_KEY);
+  if(!r) return;
+  ['a_fcmax','b_fcmax','c_fcmax'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=r.fcmax; });
+  if(r.fcrep){ ['a_fcrep','b_fcrep'].forEach(id=>{ const e=document.getElementById(id); if(e) e.value=r.fcrep; }); }
+  calcA(); calcB(); calcC();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+/* init */
+renderRecord();
+renderHistory();
+
+
+
+
+function toggleNav(){
+  const nav = document.getElementById('ppl-topnav');
+  if(nav) nav.classList.toggle('nav-open');
+}
+// Close nav when clicking a link
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('tn-link')){
+    const nav = document.getElementById('ppl-topnav');
+    if(nav) nav.classList.remove('nav-open');
+  }
+});
+</script>
+</body>
+</html>
