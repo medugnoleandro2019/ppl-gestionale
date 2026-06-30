@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<title>PPL · Listino Prezzi</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  /* zone colors */
+  --z1:#6B9FCC;--z2:#4DBD74;--z3:#D4AF45;--z4:#E08C3A;--z5:#E05C5C;--z6:#9A7ACC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{padding-top:40px;background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;}
+
+.page{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── SISTEMA ZONE TAB ── */
+.topbar-l{
+  background:var(--g1);border-bottom:1px solid var(--g3);
+  padding:0 20px;height:50px;display:flex;align-items:center;gap:10px;
+  position:sticky;top:40px;z-index:100;
+}
+.page-l{max-width:1100px;margin:0 auto;padding:20px 24px 80px;}
+
+/* ══ LISTINO CARDS ══ */
+.listino-grid{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.listino-category{flex:1;min-width:280px;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.lc-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.lc-icon{font-size:16px;}
+.lc-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.lc-body{padding:6px 0;}
+.listino-item{display:flex;align-items:center;gap:10px;padding:9px 14px;cursor:pointer;transition:.15s;border-bottom:1px solid rgba(34,34,34,.6);user-select:none;}
+.listino-item:last-child{border-bottom:none;}
+.listino-item:hover{background:var(--g2);}
+.listino-item.selected{background:rgba(184,151,42,.08);}
+.li-check{width:16px;height:16px;border:1px solid var(--g5);border-radius:2px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:#000;transition:.15s;}
+.listino-item.selected .li-check{background:var(--gold);border-color:var(--gold);}
+.li-name{flex:1;font-size:11px;color:var(--mu2);}
+.listino-item.selected .li-name{color:var(--wh);}
+.li-desc{font-size:9px;color:var(--g6);display:block;margin-top:1px;}
+.li-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);white-space:nowrap;}
+.listino-item.selected .li-price{color:var(--gold2);}
+/* ══ PREVENTIVO ══ */
+.preventivo-box{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.prev-head{padding:10px 16px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:10px;}
+.prev-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.prev-body{padding:14px 16px;}
+.prev-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--g3);}
+.prev-row:last-child{border-bottom:none;}
+.prev-item-name{font-size:11px;color:var(--mu2);}
+.prev-item-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);}
+.prev-subtotal{display:flex;justify-content:space-between;align-items:center;padding:10px 0 6px;}
+.prev-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--mu);}
+.prev-value{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.prev-value.final{font-size:26px;color:var(--gold2);}
+.prev-value.saving{font-size:14px;color:var(--grn);}
+.sconto-row{display:flex;align-items:center;gap:10px;margin:10px 0;flex-wrap:wrap;}
+.sconto-presets{display:flex;gap:6px;flex-wrap:wrap;}
+.sconto-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;padding:4px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);cursor:pointer;transition:.15s;}
+.sconto-btn:hover{border-color:rgba(184,151,42,.6);color:var(--gold);}
+.sconto-btn.active{border-color:var(--gold);color:var(--gold);background:rgba(184,151,42,.08);}
+.sconto-custom{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:13px;padding:5px 8px;outline:none;width:60px;text-align:center;}
+.sconto-custom:focus{border-color:var(--gold);}
+.prev-note-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Sans',sans-serif;font-size:11px;padding:6px 10px;outline:none;width:100%;resize:vertical;min-height:40px;margin-top:8px;}
+.prev-note-inp:focus{border-color:var(--gold);}
+.prev-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.costo-medio-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--g3);margin-top:4px;}
+.costo-medio-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--teal);}
+.costo-medio-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+
+.ltab-row{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:14px;}
+.ltab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--mu);transition:.15s;user-select:none;}
+.ltab:last-child{border-right:none;}
+.ltab:hover{background:var(--g2);color:var(--wh);}
+.ltab.active{background:rgba(184,151,42,.1);color:var(--gold);border-bottom:2px solid var(--gold);}
+.lsection{display:none;}
+.lsection.active{display:block;}
+/* ══ GESTIONE PACCHETTI ══ */
+.pkg-mgr-grid{display:flex;flex-wrap:wrap;gap:14px;}
+.pkg-mgr-col{flex:1;min-width:300px;}
+.pkg-form-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px;}
+.pkg-form-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.pkg-form-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;}
+.pkg-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:120px;}
+.pkg-field-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.pkg-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;width:100%;transition:.15s;}
+.pkg-inp:focus{border-color:var(--gold);}
+.pkg-inp::placeholder{color:var(--g6);}
+select.pkg-inp{cursor:pointer;}
+.pkg-form-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.pkg-list-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.pkg-list-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.pkg-list-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.pkg-list-body{max-height:460px;overflow-y:auto;}
+.pkg-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid rgba(34,34,34,.6);transition:.15s;}
+.pkg-item:last-child{border-bottom:none;}
+.pkg-item:hover{background:var(--g2);}
+.pkg-item-cat{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;width:100px;flex-shrink:0;}
+.pkg-item-name{flex:1;font-size:11px;color:var(--wh);}
+.pkg-item-price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);margin-right:4px;}
+.pkg-item-sess{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);white-space:nowrap;margin-right:4px;}
+.pkg-item-actions{display:flex;gap:4px;flex-shrink:0;}
+.pkg-btn-sm{background:none;border:1px solid var(--g4);color:var(--mu);border-radius:2px;
+  padding:3px 7px;font-size:10px;cursor:pointer;transition:.15s;}
+.pkg-btn-sm:hover{border-color:var(--gold);color:var(--gold);}
+.pkg-btn-sm.del:hover{border-color:var(--red);color:var(--red);}
+.pkg-empty{padding:24px;text-align:center;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:2px;color:var(--g6);text-transform:uppercase;}
+/* ══ PRINT ══ */
+@media print{
+  nav.ppl-topnav,.topbar-simple,.ltab-row,#lsec-gestione{display:none!important;}
+  .lsection{display:block!important;}
+  html,body{background:white!important;color:#111!important;overflow:auto!important;}
+  .standalone-wrap,.content-scroll{height:auto!important;overflow:visible!important;}
+  .listino-item:not(.selected){display:none!important;}
+  .listino-category{break-inside:avoid;}
+  #listino-render{display:none!important;}
+  .preventivo-box{border:1px solid #ccc!important;max-width:580px;margin:20px auto;}
+  .prev-label{color:#555!important;}
+  .prev-value,.prev-item-price{color:#111!important;}
+  .prev-value.final{font-size:20px!important;}
+  .sconto-row,.prev-note-inp,.prev-actions{display:none!important;}
+  .standalone-wrap::before{content:'Phoenix Performance Lab';display:block;
+    font-family:Georgia,serif;font-size:18px;letter-spacing:3px;color:#111;
+    text-align:center;padding:20px 0 4px;}
+}
+@media(max-width:680px){
+  .listino-category{min-width:100%;}
+  .pkg-mgr-col{min-width:100%;}
+}
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link active" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="topbar-l">
+  <span class="tb-title">Listino Prezzi & Preventivo</span>
+  <div class="tb-sp"></div>
+  <button class="tbtn" onclick="window.print()">🖨 Stampa preventivo</button>
+  <button class="tbtn" onclick="resetListino()">🗑 Azzera</button>
+</div>
+<div class="page-l">
+<div class="ltab-row">
+        <div class="ltab active" onclick="switchLTab('listino',this)">💰 Listino & Preventivo</div>
+        <div class="ltab" onclick="switchLTab('gestione',this)">⚙ Gestione Pacchetti</div>
+      </div>
+
+      <!-- SECTION: LISTINO & PREVENTIVO -->
+      <div class="lsection active" id="lsec-listino">
+        <div class="warn-box">
+          <strong>Costruttore preventivo:</strong> seleziona uno o più servizi →
+          il totale e il costo medio/sessione si aggiornano in tempo reale.
+          Applica uno sconto, aggiungi note e copia il testo per WhatsApp.
+        </div>
+        <div id="listino-render"></div>
+        <div class="preventivo-box" id="preventivo-box" style="display:none;">
+          <div class="prev-head">
+            <span class="prev-title">📋 Preventivo</span>
+            <button class="btn" onclick="resetListino()">Azzera</button>
+          </div>
+          <div class="prev-body">
+            <div id="prev-items"></div>
+            <div class="sconto-row">
+              <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;">Sconto:</span>
+              <div class="sconto-presets">
+                <div class="sconto-btn" onclick="setSconto(0,this)">Nessuno</div>
+                <div class="sconto-btn" onclick="setSconto(5,this)">5%</div>
+                <div class="sconto-btn" onclick="setSconto(10,this)">10%</div>
+                <div class="sconto-btn" onclick="setSconto(15,this)">15%</div>
+                <div class="sconto-btn" onclick="setSconto(20,this)">20%</div>
+              </div>
+              <input class="sconto-custom" id="sconto-custom" type="number" min="0" max="50" placeholder="%"
+                oninput="setSconto(this.value,null)">
+              <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);">%</span>
+            </div>
+            <div id="prev-totals"></div>
+            <textarea class="prev-note-inp" id="prev-note" placeholder="Note per il cliente (opzionale)..."></textarea>
+            <div class="prev-actions">
+              <button class="btn pri" onclick="copyPreventivo()">📋 Copia testo WhatsApp</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION: GESTIONE PACCHETTI -->
+      <div class="lsection" id="lsec-gestione">
+        <div class="warn-box">
+          I pacchetti che crei qui appaiono automaticamente nel Listino e nel
+          <strong>Simulatore Break-Even</strong> (se aperto in questa sessione).
+          Modifiche salvate in localStorage — permanenti sul dispositivo.
+        </div>
+        <div class="pkg-mgr-grid">
+
+          <!-- FORM AGGIUNTA/MODIFICA -->
+          <div class="pkg-mgr-col">
+            <div class="pkg-form-card">
+              <div class="pkg-form-title">
+                <span id="form-mode-icon">✚</span>
+                <span id="form-mode-label">Nuovo pacchetto</span>
+              </div>
+              <input type="hidden" id="edit-pkg-id">
+              <div class="pkg-form-row">
+                <div class="pkg-field" style="flex:2;min-width:200px;">
+                  <span class="pkg-field-lbl">Nome pacchetto</span>
+                  <input class="pkg-inp" id="f-nome" type="text" placeholder="es. Small Class Entry (8 sess.)">
+                </div>
+              </div>
+              <div class="pkg-form-row">
+                <div class="pkg-field">
+                  <span class="pkg-field-lbl">Categoria</span>
+                  <select class="pkg-inp" id="f-cat">
+                    <option value="Valutazione">🔬 Valutazione</option>
+                    <option value="Small Class" selected>👥 Small Class</option>
+                    <option value="Personal Training">🏋️ Personal Training</option>
+                    <option value="Pacchetti Ibridi">⚡ Pacchetti Ibridi</option>
+                    <option value="Online & Extra">💻 Online & Extra</option>
+                    <option value="Sconti & Deduzioni">🏷 Sconti & Deduzioni</option>
+                  </select>
+                </div>
+                <div class="pkg-field">
+                  <span class="pkg-field-lbl">Prezzo €</span>
+                  <input class="pkg-inp" id="f-prezzo" type="number" min="-1000" max="9999" placeholder="120">
+                </div>
+              </div>
+              <div class="pkg-form-row">
+                <div class="pkg-field">
+                  <span class="pkg-field-lbl">Sessioni incluse</span>
+                  <input class="pkg-inp" id="f-sessioni" type="number" min="0" max="100" placeholder="8">
+                </div>
+                <div class="pkg-field" style="flex:2;">
+                  <span class="pkg-field-lbl">Descrizione breve</span>
+                  <input class="pkg-inp" id="f-desc" type="text" placeholder="es. Gruppo · no programmazione individuale">
+                </div>
+              </div>
+              <div class="pkg-form-actions">
+                <button class="btn pri" onclick="savePkg()">💾 Salva pacchetto</button>
+                <button class="btn" onclick="cancelEdit()">Annulla</button>
+                <button class="btn" onclick="resetPkgsToDefault()" style="margin-left:auto;">↺ Ripristina default</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- LISTA PACCHETTI -->
+          <div class="pkg-mgr-col">
+            <div class="pkg-list-card">
+              <div class="pkg-list-head">
+                <span class="pkg-list-title">Pacchetti attivi</span>
+                <span id="pkg-count" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);"></span>
+              </div>
+              <div class="pkg-list-body" id="pkg-list-body"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+</div>
+</body>
+<script>
+
+/* ══ STORAGE ══ */
+const LISTINO_KEY = 'ppl_listino_packages';
+function lsGet(k){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){return null;} }
+function lsSet(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+
+/* ══ DEFAULT PACKAGES ══ */
+const DEFAULT_PACKAGES = [
+  {id:'d1', nome:'Valutazione standard', cat:'Valutazione', prezzo:60, sessioni:1, desc:'Anamnesi + batteria test A/B/C/D · 60–75 min'},
+  {id:'d2', nome:'Valutazione performance (VOLTRA)', cat:'Valutazione', prezzo:90, sessioni:1, desc:'Batteria VOLTRA / Xenios USA · 60–75 min'},
+  {id:'d3', nome:'Deduzione val. da 1ª rata', cat:'Sconti & Deduzioni', prezzo:-60, sessioni:0, desc:'Sconto automatico se il cliente si iscrive'},
+  {id:'d4', nome:'Small Class Entry (8 sess.)', cat:'Small Class', prezzo:120, sessioni:8, desc:'Gruppo · no programmazione individuale'},
+  {id:'d5', nome:'Small Class Entry (12 sess.)', cat:'Small Class', prezzo:160, sessioni:12, desc:'Gruppo · no programmazione individuale'},
+  {id:'d6', nome:'Small Class Plus (8 sess.)', cat:'Small Class', prezzo:160, sessioni:8, desc:'Gruppo + programma individuale incluso'},
+  {id:'d7', nome:'Small Class Plus (12 sess.)', cat:'Small Class', prezzo:210, sessioni:12, desc:'Gruppo + programma individuale incluso'},
+  {id:'d8', nome:'PT Kick (8 sess. / 4 sett.)', cat:'Personal Training', prezzo:320, sessioni:8, desc:'€40/sess · Foundation cycle'},
+  {id:'d9', nome:'PT Flex (12 sess. / 6 sett.)', cat:'Personal Training', prezzo:450, sessioni:12, desc:'€37.5/sess · ciclo completo'},
+  {id:'d10', nome:'Sessione singola PT', cat:'Personal Training', prezzo:55, sessioni:1, desc:'45–50 min · programmazione inclusa'},
+  {id:'d11', nome:'Hybrid Start (4 PT + 8 SC)', cat:'Pacchetti Ibridi', prezzo:380, sessioni:12, desc:'4 PT + 8 Small Class · 4 settimane'},
+  {id:'d12', nome:'Hybrid Growth (8 PT + 12 SC)', cat:'Pacchetti Ibridi', prezzo:560, sessioni:20, desc:'8 PT + 12 Small Class · 6 settimane'},
+  {id:'d13', nome:'Elite Hybrid', cat:'Pacchetti Ibridi', prezzo:720, sessioni:24, desc:'PT premium + accesso autonomo illimitato'},
+  {id:'d14', nome:'Duo Partner (a testa)', cat:'Pacchetti Ibridi', prezzo:280, sessioni:8, desc:'8 sessioni in coppia · tariffa a testa'},
+  {id:'d15', nome:'Coaching online mensile', cat:'Online & Extra', prezzo:120, sessioni:4, desc:'Programma + check-in settimanale'},
+  {id:'d16', nome:'Scheda personalizzata', cat:'Online & Extra', prezzo:60, sessioni:0, desc:'Programma su misura senza sessioni'},
+  {id:'d17', nome:'Consulenza nutrizione', cat:'Online & Extra', prezzo:80, sessioni:1, desc:'Report + indicazioni base (no dieta medica)'},
+];
+
+const CAT_ICONS = {
+  'Valutazione':'🔬','Small Class':'👥','Personal Training':'🏋️',
+  'Pacchetti Ibridi':'⚡','Online & Extra':'💻','Sconti & Deduzioni':'🏷'
+};
+
+function getPkgs(){ return lsGet(LISTINO_KEY) || DEFAULT_PACKAGES; }
+function savePkgs(pkgs){ lsSet(LISTINO_KEY, pkgs); }
+
+/* ══ SECTION TABS ══ */
+function switchLTab(id, el){
+  document.querySelectorAll('.ltab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.lsection').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('lsec-'+id).classList.add('active');
+  if(id==='gestione') renderPkgList();
+  if(id==='listino') renderListino();
+}
+
+/* ══ RENDER LISTINO ══ */
+function renderListino(){
+  const pkgs = getPkgs();
+  const cats = [...new Set(pkgs.map(p=>p.cat))];
+  const container = document.getElementById('listino-render');
+  if(!container) return;
+
+  container.innerHTML = '<div class="listino-grid">' +
+    cats.map(cat=>{
+      const items = pkgs.filter(p=>p.cat===cat);
+      const icon = CAT_ICONS[cat]||'📦';
+      return `<div class="listino-category">
+        <div class="lc-head"><span class="lc-icon">${icon}</span><span class="lc-title">${cat}</span></div>
+        <div class="lc-body">
+          ${items.map(pkg=>`
+            <div class="listino-item" data-id="${pkg.id}" data-name="${pkg.nome}"
+              data-price="${pkg.prezzo}" data-sessioni="${pkg.sessioni||0}"
+              onclick="toggleListino(this)">
+              <div class="li-check"></div>
+              <div class="li-name">${pkg.nome}<span class="li-desc">${pkg.desc||''}</span></div>
+              <div class="li-price" style="${pkg.prezzo<0?'color:#4DBD74':''}">${pkg.prezzo>=0?'€'+pkg.prezzo:'−€'+Math.abs(pkg.prezzo)}</div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+/* ══ PREVENTIVO ══ */
+let _scontoVal = 0;
+
+function toggleListino(el){
+  el.classList.toggle('selected');
+  el.querySelector('.li-check').textContent = el.classList.contains('selected') ? '✓' : '';
+  renderPreventivo();
+}
+
+function renderPreventivo(){
+  const sel = [...document.querySelectorAll('.listino-item.selected')];
+  const box = document.getElementById('preventivo-box');
+  if(!sel.length){ box.style.display='none'; return; }
+  box.style.display = 'block';
+  let sub = 0, totalSess = 0;
+
+  document.getElementById('prev-items').innerHTML = sel.map(el=>{
+    const pr = parseFloat(el.dataset.price)||0;
+    const ss = parseInt(el.dataset.sessioni)||0;
+    sub += pr;
+    if(pr > 0) totalSess += ss;
+    const c = pr<0?'#4DBD74':'var(--gold)';
+    return `<div class="prev-row">
+      <span class="prev-item-name">${el.dataset.name}</span>
+      <span class="prev-item-price" style="color:${c}">${pr>=0?'€'+pr:'−€'+Math.abs(pr)}</span>
+    </div>`;
+  }).join('');
+
+  const sc  = Math.min(Math.max(_scontoVal,0),100);
+  const sA  = sub>0 ? Math.round(sub*sc/100) : 0;
+  const tot = sub - sA;
+  const costoMedio = totalSess>0 ? (tot/totalSess).toFixed(2) : null;
+
+  document.getElementById('prev-totals').innerHTML = `
+    <div class="prev-subtotal">
+      <span class="prev-label">Subtotale</span>
+      <span class="prev-value">€${sub}</span>
+    </div>
+    ${sc>0?`<div class="prev-subtotal">
+      <span class="prev-label">Sconto ${sc}%</span>
+      <span class="prev-value saving">−€${sA}</span>
+    </div>`:''}
+    <div class="prev-subtotal" style="border-top:2px solid var(--gold);padding-top:10px;margin-top:4px;">
+      <span class="prev-label" style="color:var(--gold);">Totale</span>
+      <span class="prev-value final">€${tot}</span>
+    </div>
+    ${costoMedio ? `<div class="costo-medio-row">
+      <div>
+        <div class="prev-label">Costo medio / sessione</div>
+        <div class="costo-medio-sub">${totalSess} sessioni incluse</div>
+      </div>
+      <div>
+        <div class="costo-medio-val">€${costoMedio}</div>
+      </div>
+    </div>` : ''}`;
+}
+
+function setSconto(val,btn){
+  _scontoVal = parseFloat(val)||0;
+  document.querySelectorAll('.sconto-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const ci = document.getElementById('sconto-custom');
+  if(!btn&&ci) ci.value=val;
+  renderPreventivo();
+}
+
+function resetListino(){
+  document.querySelectorAll('.listino-item.selected').forEach(el=>{
+    el.classList.remove('selected');
+    el.querySelector('.li-check').textContent='';
+  });
+  _scontoVal=0;
+  document.querySelectorAll('.sconto-btn').forEach(b=>b.classList.remove('active'));
+  const ci=document.getElementById('sconto-custom'); if(ci) ci.value='';
+  renderPreventivo();
+}
+
+function copyPreventivo(){
+  const sel=[...document.querySelectorAll('.listino-item.selected')];
+  if(!sel.length) return;
+  let sub=0, totalSess=0;
+  const lines=sel.map(el=>{
+    const pr=parseFloat(el.dataset.price)||0;
+    const ss=parseInt(el.dataset.sessioni)||0;
+    sub+=pr; if(pr>0) totalSess+=ss;
+    return `• ${el.dataset.name}: ${pr>=0?'€'+pr:'−€'+Math.abs(pr)}`;
+  });
+  const sc=Math.min(Math.max(_scontoVal,0),100),sA=sub>0?Math.round(sub*sc/100):0,tot=sub-sA;
+  const cm = totalSess>0?`\n💡 Costo medio/sessione: €${(tot/totalSess).toFixed(2)} su ${totalSess} sessioni`:'';
+  const note=document.getElementById('prev-note')?.value||'';
+  const txt=[
+    `Ciao! Ecco il riepilogo di quanto abbiamo discusso 🤝`,``,
+    ...lines,``,
+    sc>0?`Sconto applicato (${sc}%): −€${sA}`:'',
+    `*Totale: €${tot}*`,cm,``,note||'',``,
+    `Per qualsiasi domanda sono qui 🙌`,``,`— Leo · PPL`
+  ].filter(l=>l!==undefined).join('\n').replace(/\n{3,}/g,'\n\n');
+  navigator.clipboard.writeText(txt).then(()=>{
+    const b=event.target; b.textContent='✓ Copiato!';
+    setTimeout(()=>b.textContent='📋 Copia testo WhatsApp',1800);
+  });
+}
+
+/* ══ GESTIONE PACCHETTI ══ */
+let _editingId = null;
+
+function renderPkgList(){
+  const pkgs = getPkgs();
+  const body = document.getElementById('pkg-list-body');
+  const count = document.getElementById('pkg-count');
+  if(count) count.textContent = pkgs.length + ' pacchetti';
+  if(!pkgs.length){
+    body.innerHTML = '<div class="pkg-empty">Nessun pacchetto — aggiungine uno</div>';
+    return;
+  }
+  body.innerHTML = pkgs.map(pkg=>`
+    <div class="pkg-item" id="pkgrow-${pkg.id}">
+      <span class="pkg-item-cat">${pkg.cat}</span>
+      <div class="pkg-item-name">${pkg.nome}</div>
+      <span class="pkg-item-price" style="${pkg.prezzo<0?'color:#4DBD74':''}">${pkg.prezzo>=0?'€'+pkg.prezzo:'−€'+Math.abs(pkg.prezzo)}</span>
+      <span class="pkg-item-sess">${pkg.sessioni>0?pkg.sessioni+'sess':''}</span>
+      <div class="pkg-item-actions">
+        <button class="pkg-btn-sm" onclick="editPkg('${pkg.id}')">✏</button>
+        <button class="pkg-btn-sm del" onclick="deletePkg('${pkg.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function savePkg(){
+  const nome    = document.getElementById('f-nome').value.trim();
+  const cat     = document.getElementById('f-cat').value;
+  const prezzo  = parseFloat(document.getElementById('f-prezzo').value)||0;
+  const sessioni= parseInt(document.getElementById('f-sessioni').value)||0;
+  const desc    = document.getElementById('f-desc').value.trim();
+
+  if(!nome){ alert('Inserisci il nome del pacchetto.'); return; }
+
+  const pkgs = getPkgs();
+  if(_editingId){
+    const idx = pkgs.findIndex(p=>p.id===_editingId);
+    if(idx>=0) pkgs[idx] = {...pkgs[idx], nome, cat, prezzo, sessioni, desc};
+  } else {
+    pkgs.push({ id:'pkg_'+Date.now(), nome, cat, prezzo, sessioni, desc });
+  }
+  savePkgs(pkgs);
+  cancelEdit();
+  renderPkgList();
+  renderListino();
+
+  const btn=event.target; btn.textContent='✓ Salvato!';
+  setTimeout(()=>btn.textContent='💾 Salva pacchetto',1200);
+}
+
+function editPkg(id){
+  const pkgs = getPkgs();
+  const pkg = pkgs.find(p=>p.id===id);
+  if(!pkg) return;
+  _editingId = id;
+  document.getElementById('f-nome').value    = pkg.nome;
+  document.getElementById('f-cat').value     = pkg.cat;
+  document.getElementById('f-prezzo').value  = pkg.prezzo;
+  document.getElementById('f-sessioni').value= pkg.sessioni||0;
+  document.getElementById('f-desc').value    = pkg.desc||'';
+  document.getElementById('edit-pkg-id').value = id;
+  document.getElementById('form-mode-icon').textContent  = '✏';
+  document.getElementById('form-mode-label').textContent = 'Modifica pacchetto';
+  document.querySelector('.pkg-form-card').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function cancelEdit(){
+  _editingId = null;
+  ['f-nome','f-desc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  ['f-prezzo','f-sessioni'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('f-cat').value = 'Small Class';
+  document.getElementById('form-mode-icon').textContent  = '✚';
+  document.getElementById('form-mode-label').textContent = 'Nuovo pacchetto';
+}
+
+function deletePkg(id){
+  if(!confirm('Eliminare questo pacchetto?')) return;
+  let pkgs = getPkgs().filter(p=>p.id!==id);
+  savePkgs(pkgs);
+  renderPkgList();
+  renderListino();
+}
+
+function resetPkgsToDefault(){
+  if(!confirm('Ripristinare tutti i pacchetti ai valori di default? Le modifiche personalizzate andranno perse.')) return;
+  localStorage.removeItem(LISTINO_KEY);
+  cancelEdit();
+  renderPkgList();
+  renderListino();
+}
+
+/* ══ INIT ══ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+renderListino();
+
+
+
+
+
+function toggleNav(){
+  const nav = document.getElementById('ppl-topnav');
+  if(nav) nav.classList.toggle('nav-open');
+}
+// Close nav when clicking a link
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('tn-link')){
+    const nav = document.getElementById('ppl-topnav');
+    if(nav) nav.classList.remove('nav-open');
+  }
+});
+</script>
+</html>
