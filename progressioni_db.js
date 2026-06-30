@@ -15,7 +15,7 @@ const SKILL_META = {
   'squat':     { icon: '🦵', label: 'Squat' },
   'core':      { icon: '⚡', label: 'Core / Plank' },
   'swing':     { icon: '🔔', label: 'KB Swing' },
-  'romanian-deadlift': { icon: '🏋️', label: 'Romanian Deadlift' },
+  'stacco-rumeno': { icon: '🔥', label: 'Stacco rumeno' },
 };
 
 const PROG_DB = {
@@ -332,19 +332,41 @@ const PROG_DB = {
           { nome:'Double swing (2 KB)', schema:'3×10', note:'2 kettlebell contemporaneamente. Alta richiesta lombare e cardiovascolare.' },
         ],
         avanzamento:'Obiettivo terminale: TGU con 24–32 kg o 10 clean+press per lato.',
- romanian-deadlift: {
-  label: 'Romanian Deadlift',
-  src: 'Fonte metodologica',
+ 'stacco rumeno': {
+  label: 'Stacco rumeno',
+  src: 'Fonte (es. Project Calisthenics — Erik Neri)',
   fasi: [
     {
-      id: 'beginner', label: 'Beginner', range: 'BW',
-      desc: 'Descrizione fase...',
-      step_next: 'Obiettivo da raggiungere',
+      id: 'nk0',
+      label: 'Fase 0',
+      range: 'es. 0 ripetizioni',
+      desc: 'sei una pippa',
+      step_next: 'spingi, daje!',
       esercizi: [
-        { nome: 'RDL con bilanciere', schema: '3×8', note: 'Nota coaching' }
+        {
+          nome: 'culetto',
+          schema: '3×8–10',
+          note: 'spingi duramente'
+        },
+        {
+          nome: 'Secondo esercizio',
+          schema: '4×12',
+          note: 'Altra nota.'
+        },
       ],
-      avanzamento: 'Criterio per passare alla fase successiva'
-    }
-    ]
-  }
-};
+      avanzamento: 'Criterio preciso per passare alla fase successiva.',
+    },
+    {
+      id: 'nk1',
+      label: 'Fase 1',
+      range: 'es. 1–5 ripetizioni',
+      desc: 'Descrizione fase 1.',
+      step_next: 'Obiettivo fase 1.',
+      esercizi: [
+        { nome: 'Esercizio', schema: '3×6', note: 'Nota.' },
+      ],
+      avanzamento: 'Criterio per passare alla fase 2.',
+    },
+    // aggiungi altre fasi allo stesso modo
+  ]
+},
