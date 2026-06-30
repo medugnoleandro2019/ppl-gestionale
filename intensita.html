@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PPL Intensità 1RM">
+<link rel="manifest" href="manifest.json">
+<title>PPL · Intensità 1RM</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ══ TOKENS ══ */
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:#6B5518;
+  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  --sidebar:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+/* ══ LAYOUT ══ */
+.shell{display:flex;height:calc(100vh - 40px);overflow:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--g1);border-right:1px solid var(--g3);
+  display:flex;flex-direction:column;
+  z-index:200;
+  transition:width .22s ease;
+  overflow:hidden;min-width:0;
+}
+.sidebar.collapsed{width:48px;}
+.sb-logo{
+  padding:12px 10px;border-bottom:1px solid var(--g3);
+  display:flex;align-items:center;gap:8px;height:52px;flex-shrink:0;
+}
+.sb-logo-text{overflow:hidden;white-space:nowrap;flex:1;transition:opacity .15s .05s;}
+.sidebar.collapsed .sb-logo-text{opacity:0;width:0;flex:0;transition:opacity .05s;}
+.sb-brand{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;
+  letter-spacing:4px;color:var(--gold);text-transform:uppercase;line-height:1;}
+.sb-sub{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--mu);text-transform:uppercase;margin-top:3px;}
+.sb-toggle{
+  background:none;border:1px solid var(--g4);color:var(--mu2);
+  width:28px;height:28px;min-width:28px;border-radius:3px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:.15s;flex-shrink:0;
+}
+.sb-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden;}
+.sb-section{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--g6);text-transform:uppercase;padding:12px 14px 5px;
+  white-space:nowrap;overflow:hidden;transition:opacity .1s;}
+.sidebar.collapsed .sb-section{opacity:0;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;cursor:pointer;
+  font-size:12px;color:var(--mu2);
+  border-left:2px solid transparent;
+  transition:.15s;user-select:none;white-space:nowrap;overflow:hidden;
+}
+.sb-item:hover{color:var(--wh);background:var(--g2);}
+.sb-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(184,151,42,.06);}
+.sb-icon{font-size:16px;width:20px;min-width:20px;text-align:center;flex-shrink:0;}
+.sb-label{flex:1;overflow:hidden;white-space:nowrap;transition:opacity .1s;}
+.sidebar.collapsed .sb-label{opacity:0;width:0;overflow:hidden;}
+.sidebar.collapsed .sb-badge{display:none;}
+.sb-badge{font-family:'DM Mono',monospace;font-size:8px;background:var(--g4);
+  color:var(--mu);padding:1px 5px;border-radius:2px;flex-shrink:0;}
+.sb-badge.new{background:var(--goldd);color:var(--gold2);}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--g3);overflow:hidden;flex-shrink:0;}
+.sb-foot-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);
+  white-space:nowrap;transition:opacity .1s;}
+.sidebar.collapsed .sb-foot-t{opacity:0;}
+/* mobile overlay */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;}
+.sb-overlay.visible{display:block;}
+
+/* ══ CONTENT AREA ══ */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.topbar{
+  background:var(--g1);border-bottom:1px solid var(--g3);
+  padding:0 22px;height:48px;display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.topbar-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;}
+.topbar-sep{width:1px;height:20px;background:var(--g4);}
+.tb-sp{flex:1;}
+.tbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--gold);color:var(--gold);}
+.tbtn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
+.tbtn.pri:hover{background:var(--gold2);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--g5);transition:.3s;flex-shrink:0;}
+.sdot.uns{background:var(--org);}.sdot.sav{background:var(--grn);}
+
+.panel-area{flex:1;overflow-y:auto;overflow-x:hidden;}
+.tab-panel{display:none;height:100%;}
+.tab-panel.active{display:block;}
+
+/* ══ SHARED COMPONENTS ══ */
+.main{max-width:1380px;margin:0 auto;padding:18px 22px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+.btn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
+.btn.pri:hover{background:var(--gold2);}
+
+/* ══ DASHBOARD KPI ══ */
+.krow{display:flex;gap:10px;flex-wrap:wrap;}
+.kc{flex:1;min-width:150px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:12px 14px;border-top:2px solid var(--g4);}
+.kc.grn{border-top-color:var(--grn);}.kc.org{border-top-color:var(--org);}
+.kc.red{border-top-color:var(--red);}.kc.neu{border-top-color:var(--g4);}
+.klbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.grn{background:var(--grn);}.dot.org{background:var(--org);}
+.dot.red{background:var(--red);}.dot.neu{background:var(--g5);}
+.kval{font-family:'DM Mono',monospace;font-size:24px;line-height:1;color:var(--wh);font-weight:500;}
+.kval.dim{color:var(--mu);}
+.ksub{font-size:10px;color:var(--mu);margin-top:5px;display:flex;justify-content:space-between;}
+.kdelta{font-family:'DM Mono',monospace;font-size:10px;}
+.kdelta.pos{color:var(--grn);}.kdelta.neg{color:var(--red);}
+.crow{display:flex;gap:10px;margin-bottom:2px;flex-wrap:wrap;}
+.cb{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 16px;min-width:0;}
+.cb.f2{flex:2 1 300px;}.cb.f1{flex:1 1 200px;}
+.cbtitle{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:12px;}
+.cbwrap{position:relative;height:150px;}
+.panels{display:flex;gap:10px;flex-wrap:wrap;}
+.panel{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;flex:1;min-width:280px;}
+.ph{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--g3);}
+.ph-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.ph-arr{color:var(--mu);font-size:11px;}
+.pb{padding:14px;}.pb.closed{display:none;}
+.fg{display:flex;flex-wrap:wrap;gap:8px;}
+.fi{display:flex;flex-direction:column;gap:3px;min-width:95px;flex:1;}
+.fi.w2{min-width:200px;flex:2;}
+.filab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.finp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;
+  padding:6px 8px;outline:none;width:100%;transition:border-color .15s;}
+.finp:focus{border-color:var(--gold);}
+.finp::placeholder{color:var(--g5);}
+.finp.ta{resize:vertical;min-height:50px;font-family:'DM Sans',sans-serif;font-size:11px;}
+.fdiv{width:100%;height:1px;background:var(--g3);flex-basis:100%;margin:4px 0;}
+.fsubl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--vio);text-transform:uppercase;flex-basis:100%;padding-top:4px;}
+.irow{display:flex;gap:10px;flex-wrap:wrap;}
+.ins{flex:1;min-width:210px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:11px 13px;border-left:3px solid;}
+.ins.grn{border-left-color:var(--grn);}.ins.org{border-left-color:var(--org);}
+.ins.red{border-left-color:var(--red);}.ins.inf{border-left-color:var(--vio);}
+.ins-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.ins.grn .ins-t{color:var(--grn);}.ins.org .ins-t{color:var(--org);}
+.ins.red .ins-t{color:var(--red);}.ins.inf .ins-t{color:var(--vio);}
+.ins-m{font-size:11px;color:var(--mu2);line-height:1.55;}
+.htw{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow-x:auto;}
+.ht{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+.ht th{background:var(--g2);padding:8px 11px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  text-align:right;border-bottom:1px solid var(--g3);}
+.ht th:first-child{text-align:left;}
+.ht td{padding:8px 11px;border-bottom:1px solid var(--g2);text-align:right;
+  font-family:'DM Mono',monospace;color:var(--mu2);}
+.ht td:first-child{text-align:left;color:var(--wh);font-weight:bold;}
+.ht tr:last-child td{border-bottom:none;}
+.ht tr.act td{background:rgba(184,151,42,.05);}
+.cg{color:var(--grn)!important;}.cr{color:var(--red)!important;}
+.co{color:var(--gold)!important;}.co2{color:var(--org)!important;}
+
+/* ══ RESPONSIVE MOBILE ══ */
+@media(max-width:700px){
+  :root{ --sidebar:200px; }
+  .main{ padding:12px 12px 60px; }
+  .kc{ min-width:calc(50% - 5px); }
+  .kval{ font-size:20px; }
+  .cb.f2,.cb.f1{ flex:1 1 100%; }
+  .cbwrap{ height:130px; }
+  .panel{ min-width:100%; }
+  .ins{ min-width:100%; }
+  .topbar{ padding:0 10px; gap:6px; }
+  .topbar-sep{ display:none; }
+  .tbtn{ font-size:8px; padding:5px 7px; letter-spacing:0; }
+  .topbar-title{ font-size:9px; letter-spacing:1px; }
+  .mnav{ gap:4px; }
+  .mnavlabel{ min-width:70px; font-size:11px; }
+  .mnavbtn{ width:26px; height:26px; }
+  .sdot{ display:none; }
+  .hide-xs{ display:none; }
+  .prog-input-row{ flex-direction:column; }
+  .prog-inp-group{ min-width:100%; }
+  .bat-opt{ min-width:60px; }
+  .vfi{ min-width:calc(50% - 4px); }
+  .cli-card{ min-width:calc(50% - 5px); }
+}
+/* month nav */
+.mnav{display:flex;align-items:center;gap:8px;}
+.mnavbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  width:30px;height:30px;border-radius:3px;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;transition:.15s;}
+.mnavbtn:hover{border-color:var(--gold);color:var(--gold);}
+.mnavlabel{font-family:'DM Mono',monospace;font-size:12px;font-weight:bold;
+  color:var(--wh);letter-spacing:1px;min-width:100px;text-align:center;}
+/* settings modal */
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;
+  align-items:center;justify-content:center;}
+.ov.open{display:flex;}
+.mod{background:var(--g1);border:1px solid var(--g3);border-radius:6px;
+  width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;}
+.mh{padding:15px 20px;border-bottom:1px solid var(--g3);
+  display:flex;justify-content:space-between;align-items:center;}
+.mh-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.mx{background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;}
+.mx:hover{color:var(--wh);}
+.mb{padding:18px 20px;}.ms{margin-bottom:16px;}
+.ms-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--vio);text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--g3);}
+.mgrid{display:flex;flex-wrap:wrap;gap:10px;}
+.mf{flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px;}
+.mflab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.mfinp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;padding:6px 9px;outline:none;width:100%;}
+.mfinp:focus{border-color:var(--gold);}
+.mfhint{font-size:10px;color:var(--mu);margin-top:2px;font-style:italic;}
+.mfoot{padding:12px 20px;border-top:1px solid var(--g3);display:flex;justify-content:flex-end;gap:8px;}
+
+/* ══ VALUTAZIONE ══ */
+.val-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.val-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
+.client-select-bar{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:14px 16px;margin-bottom:16px;}
+.client-select-bar select{background:var(--g2);border:1px solid var(--g4);color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;border-radius:3px;outline:none;width:200px;}
+.client-select-bar select:focus{border-color:var(--gold);}
+/* Form fields */
+.vform-section{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  margin-bottom:10px;overflow:hidden;}
+.vform-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;
+  justify-content:space-between;align-items:center;cursor:pointer;}
+.vform-head-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.vform-body{padding:14px;}
+.vfg{display:flex;flex-wrap:wrap;gap:8px;}
+.vfi{display:flex;flex-direction:column;gap:3px;min-width:110px;flex:1;}
+.vfi.w3{min-width:240px;flex:3;}
+.vfl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.vfinp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:11px;
+  padding:6px 8px;outline:none;width:100%;transition:.15s;}
+.vfinp:focus{border-color:var(--gold);}
+.vfinp.ta{resize:vertical;min-height:55px;}
+/* battery */
+.bat-row{display:flex;gap:8px;flex-wrap:wrap;}
+.bat-opt{flex:1;min-width:80px;background:var(--g2);border:1px solid var(--g4);
+  border-radius:4px;padding:10px 8px;text-align:center;cursor:pointer;transition:.15s;}
+.bat-opt:hover{border-color:var(--gold2);}
+.bat-opt.active{border-color:var(--gold);background:rgba(184,151,42,.08);}
+.bat-letter{font-family:'DM Mono',monospace;font-size:20px;font-weight:bold;color:var(--gold);line-height:1;}
+.bat-name{font-size:9px;color:var(--mu2);margin-top:3px;line-height:1.3;}
+/* tags */
+.tag{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:8px;
+  letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:2px;cursor:pointer;
+  border:1px solid var(--g4);color:var(--mu2);transition:.15s;margin:3px 3px 3px 0;}
+.tag:hover{border-color:var(--gold2);color:var(--wh);}
+.tag.active{background:rgba(184,151,42,.15);border-color:var(--gold);color:var(--gold);}
+.tag.red{border-color:rgba(224,92,92,.4);color:#E05C5C;}
+.tag.red.active{background:rgba(224,92,92,.15);border-color:var(--red);}
+/* test table */
+.test-table{width:100%;border-collapse:collapse;font-size:11px;}
+.test-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;}
+.test-table th:last-child{text-align:right;}
+.test-table td{padding:8px 10px;border-bottom:1px solid var(--g2);vertical-align:middle;}
+.test-table tr:last-child td{border-bottom:none;}
+.test-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:20px;display:inline-block;}
+.test-name{font-weight:500;font-size:11px;}
+.test-unit{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:1px;}
+.test-result-inp{background:transparent;border:none;border-bottom:1px solid var(--g4);
+  outline:none;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);
+  text-align:right;width:90px;padding:0 0 2px;}
+.lev-row{display:flex;gap:3px;justify-content:flex-end;}
+.lev{width:14px;height:14px;border-radius:2px;cursor:pointer;background:var(--g4);transition:.15s;}
+.lev.active{opacity:1;}.lev:not(.active){opacity:.3;}
+.lev.l1{background:#E05C5C;}.lev.l2{background:#CC8822;}.lev.l3{background:#BBBB22;}
+.lev.l4{background:#5ACC44;}.lev.l5{background:#2E9B9B;}
+.lev-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:3px;text-align:right;}
+/* smart objectives */
+.smart-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;
+  border-bottom:1px solid var(--g3);}
+.smart-row:last-child{border-bottom:none;}
+.smart-num{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);
+  width:24px;flex-shrink:0;padding-top:4px;}
+.smart-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);
+  text-transform:uppercase;width:120px;flex-shrink:0;padding-top:6px;}
+/* client list */
+.cli-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.cli-card{flex:1;min-width:180px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:12px 14px;cursor:pointer;transition:.15s;border-top:2px solid var(--g4);}
+.cli-card:hover{border-color:var(--gold);}
+.cli-card.active{border-top-color:var(--gold);background:rgba(184,151,42,.04);}
+.cli-name{font-weight:500;font-size:13px;margin-bottom:3px;}
+.cli-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;}
+.cli-add{display:flex;align-items:center;justify-content:center;gap:8px;
+  min-width:140px;border-style:dashed;color:var(--mu);font-size:12px;}
+.cli-add:hover{color:var(--gold);border-color:var(--gold);}
+
+/* ══ DOCUMENTI (SOP) ══ */
+.doc-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.sop-frame{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.sop-toc{display:flex;flex-direction:column;}
+.sop-chapter{border-bottom:1px solid var(--g3);}
+.sop-chapter:last-child{border-bottom:none;}
+.sop-ch-head{display:flex;align-items:center;gap:12px;padding:11px 16px;
+  cursor:pointer;transition:.15s;}
+.sop-ch-head:hover{background:var(--g2);}
+.sop-ch-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);width:28px;flex-shrink:0;}
+.sop-ch-title{font-size:12px;color:var(--wh);font-weight:500;flex:1;}
+.sop-ch-arr{font-size:10px;color:var(--mu);}
+.sop-ch-body{display:none;padding:14px 20px 16px 56px;background:var(--g2);
+  font-size:11px;color:var(--mu2);line-height:1.7;border-top:1px solid var(--g3);}
+.sop-ch-body.open{display:block;}
+.sop-ch-body h4{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin:12px 0 6px;}
+.sop-ch-body p{margin-bottom:8px;}
+.sop-ch-body ul{padding-left:16px;margin-bottom:8px;}
+.sop-ch-body li{margin-bottom:4px;}
+.sop-ch-body strong{color:var(--wh);}
+.sop-ch-body .tag-inline{display:inline-block;background:var(--g3);border:1px solid var(--g4);
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;padding:1px 6px;border-radius:2px;color:var(--mu2);}
+.wapp-block{background:var(--g1);border:1px solid var(--g4);border-left:3px solid var(--teal);
+  border-radius:3px;padding:10px 12px;margin:8px 0;font-size:11px;font-family:'DM Sans',sans-serif;
+  line-height:1.6;color:var(--mu2);}
+.wapp-block strong{color:var(--wh);}
+
+/* ══ PROGRESSIONI AI ══ */
+.prog-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.prog-skill-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.prog-skill{flex:1;min-width:100px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:10px 12px;text-align:center;cursor:pointer;transition:.15s;}
+.prog-skill:hover{border-color:var(--gold2);}
+.prog-skill.active{border-color:var(--gold);background:rgba(184,151,42,.07);}
+.prog-skill-icon{font-size:20px;margin-bottom:4px;}
+.prog-skill-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);}
+.prog-skill.active .prog-skill-name{color:var(--gold);}
+.prog-input-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.prog-inp-group{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;}
+.prog-inp-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  color:var(--mu);text-transform:uppercase;}
+.prog-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:13px;
+  padding:7px 10px;outline:none;width:100%;transition:.15s;}
+.prog-inp:focus{border-color:var(--gold);}
+.prog-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:18px 20px;min-height:120px;position:relative;}
+.prog-result-placeholder{color:var(--mu);font-size:11px;text-align:center;
+  padding:30px 0;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.prog-loading{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:11px;}
+.prog-loading .spin{
+  width:16px;height:16px;border:2px solid var(--g4);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.prog-answer{font-size:12px;line-height:1.7;color:var(--mu2);}
+.prog-answer h3{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--gold);text-transform:uppercase;margin:14px 0 6px;}
+.prog-answer h3:first-child{margin-top:0;}
+.prog-answer p{margin-bottom:8px;}
+.prog-answer ul{padding-left:16px;margin-bottom:10px;}
+.prog-answer li{margin-bottom:5px;color:var(--wh);}
+.prog-answer strong{color:var(--wh);}
+.prog-answer em{color:var(--gold2);font-style:normal;}
+.prog-history{margin-top:16px;}
+.prog-hist-item{background:var(--g2);border:1px solid var(--g3);border-radius:3px;
+  padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.prog-hist-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);
+  letter-spacing:1px;white-space:nowrap;}
+.prog-hist-q{font-size:11px;color:var(--mu2);}
+.prog-hist-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:14px;flex-shrink:0;}
+.prog-hist-del:hover{color:var(--red);}
+
+/* ══ MISC ══ */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 20px;color:var(--mu);}
+.empty-state-icon{font-size:36px;margin-bottom:12px;opacity:.4;}
+.empty-state-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+  text-transform:uppercase;margin-bottom:6px;}
+.empty-state-s{font-size:11px;color:var(--g6);}
+.foot-note{text-align:center;font-family:'DM Mono',monospace;font-size:9px;
+  color:var(--g4);letter-spacing:2px;padding-top:14px;margin-top:8px;border-top:1px solid var(--g2);}
+
+/* ════ CALCOLATORE INTENSITÀ ════ */
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;--blu:#4A8FCC;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+/* ── TOPBAR ── */
+
+/* ── LAYOUT ── */
+/* ── SECTION LABELS ── */
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;
+  border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;
+  color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+
+/* ── PANELS ── */
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUT GROUP ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-group.wide{min-width:200px;flex:2;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+
+/* ── PROFILO ATLETICO ── */
+.profilo-row{display:flex;gap:8px;margin-bottom:16px;}
+.profilo-opt{flex:1;background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:10px 12px;cursor:pointer;transition:.15s;text-align:center;}
+.profilo-opt:hover{border-color:var(--gold2);}
+.profilo-opt.active{border-color:var(--gold);background:var(--goldd);}
+.profilo-opt.neu-active{border-color:var(--teal);background:rgba(46,155,155,.1);}
+.profilo-opt.met-active{border-color:var(--vio);background:rgba(154,122,204,.1);}
+.profilo-icon{font-size:18px;margin-bottom:4px;}
+.profilo-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);margin-bottom:2px;}
+.profilo-opt.active .profilo-name,.profilo-opt.neu-active .profilo-name{color:var(--wh);}
+.profilo-desc{font-size:9px;color:var(--mu);line-height:1.4;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  overflow:hidden;margin-bottom:12px;}
+.result-main{padding:18px 20px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:42px;font-weight:500;
+  color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:18px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+.result-grid{display:flex;flex-wrap:wrap;}
+.result-cell{flex:1;min-width:120px;padding:12px 16px;border-right:1px solid var(--g3);}
+.result-cell:last-child{border-right:none;}
+.rc-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;
+  color:var(--mu);text-transform:uppercase;margin-bottom:5px;}
+.rc-val{font-family:'DM Mono',monospace;font-size:17px;color:var(--wh);font-weight:500;}
+.rc-val.gold{color:var(--gold);}
+.rc-val.teal{color:var(--teal);}
+.rc-val.vio{color:var(--vio);}
+
+/* ── ZONA INTENSITÀ ── */
+.zona-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-bottom:16px;}
+.zona-seg{flex:1;transition:.3s;}
+.zona-seg.active{flex:3;}
+.zona-badge{display:inline-flex;align-items:center;gap:6px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  padding:4px 10px;border-radius:2px;border:1px solid;}
+.zona-badge.fmax{color:#E05C5C;border-color:rgba(224,92,92,.4);background:rgba(224,92,92,.08);}
+.zona-badge.frel{color:#CC7733;border-color:rgba(204,119,51,.4);background:rgba(204,119,51,.08);}
+.zona-badge.iper{color:#B8972A;border-color:rgba(184,151,42,.4);background:rgba(184,151,42,.08);}
+.zona-badge.pot{color:#4A8FCC;border-color:rgba(74,143,204,.4);background:rgba(74,143,204,.08);}
+.zona-badge.res{color:#4DBD74;border-color:rgba(77,189,116,.4);background:rgba(77,189,116,.08);}
+.zona-badge.aa{color:#9A7ACC;border-color:rgba(154,122,204,.4);background:rgba(154,122,204,.08);}
+.zona-badge.sovra{color:#FF6666;border-color:rgba(255,102,102,.5);background:rgba(255,102,102,.1);}
+.zona-badge.nd{color:var(--g6);border-color:var(--g4);background:transparent;}
+
+/* ── TABELLA COMPLETA ── */
+.full-table-wrap{overflow-x:auto;border-radius:4px;border:1px solid var(--g3);}
+.full-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+.full-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:center;}
+.full-table th:first-child{text-align:left;}
+.full-table td{padding:7px 12px;border-bottom:1px solid var(--g2);
+  font-family:'DM Mono',monospace;text-align:center;color:var(--mu2);}
+.full-table td:first-child{text-align:left;color:var(--wh);}
+.full-table tr:last-child td{border-bottom:none;}
+.full-table tr.highlight td{background:rgba(184,151,42,.07);}
+.full-table tr.highlight td:first-child{color:var(--gold2);}
+.zona-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+
+/* ── NOTE SCIENTIFICHE ── */
+/* ── FORMULA VIS ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:10px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:12px;color:var(--mu2);}
+.f-part.hi{color:var(--gold2);font-weight:500;}
+.f-part.op{color:var(--g6);}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--teal);font-weight:500;}
+
+/* ── RANGE REPS TABLE (Via B) ── */
+.range-table{width:100%;border-collapse:collapse;margin-top:12px;}
+.range-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  text-align:center;border-bottom:1px solid var(--g3);}
+.range-table td{padding:7px 10px;border-bottom:1px solid var(--g2);
+  font-family:'DM Mono',monospace;font-size:11px;text-align:center;color:var(--mu2);}
+.range-table tr:last-child td{border-bottom:none;}
+.range-table tr.hl td{background:rgba(184,151,42,.06);}
+.range-table td.kg{color:var(--gold2);font-weight:500;font-size:13px;}
+.range-table td.reps{color:var(--wh);}
+
+/* ── EMPTY STATE ── */
+/* ── BTN ── */
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+/* ── MOBILE ── */
+@media(max-width:600px){
+  .via-tab{padding:10px 6px;}
+  .via-num{font-size:14px;}
+  .via-lbl{font-size:7px;}
+  .result-val{font-size:32px;}
+  .result-cell{min-width:100px;}
+  .profilo-row{flex-direction:column;}
+  .inp-row{gap:8px;}
+  .inp-group{min-width:calc(50% - 4px);}
+}
+.standalone-wrap{margin-top:40px;display:flex;flex-direction:column;min-height:calc(100vh - 40px);}
+.topbar-simple{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 24px;height:50px;
+  display:flex;align-items:center;gap:10px;position:sticky;top:40px;z-index:100;flex-shrink:0;}
+.tb-title-s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.content-scroll{flex:1;overflow-y:visible;overflow-x:hidden;}
+.content-scroll .val-wrap,.content-scroll .doc-wrap,.content-scroll .prog-wrap,.content-scroll .page{
+  max-width:1100px;margin:0 auto;padding:20px 24px 80px;}
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link active" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="standalone-wrap">
+  <div class="topbar-simple">
+    <span class="tb-title-s">Calcolatore Intensità · 1RM</span>
+    <div class="tb-sp"></div>
+  </div>
+  <div class="content-scroll">
+    <div class="page">
+      <div class="tab-inner">
+
+  <!-- AVVISO SCIENTIFICO -->
+  <div class="warn-box">
+    <strong>⚠ Nota metodologica (Bompa & Buzzichelli, 2015 — Tab. 8.8):</strong>
+    Le tavole di conversione 1RM standard sono <em>approssimazioni</em> — non tengono conto del profilo individuale dell'atleta.
+    Un atleta <strong>neurologicamente efficiente</strong> esegue meno reps a parità di % rispetto ad uno <strong>metabolicamente efficiente</strong>.
+    Usa il profilo corretto per aumentare la precisione della stima.
+  </div>
+
+  <!-- PROFILO ATLETICO -->
+  <div class="slbl">Profilo atletico</div>
+  <div class="profilo-row" id="profilo-row">
+    <div class="profilo-opt active" data-profilo="std" onclick="setProfilo('std',this)">
+      <div class="profilo-icon">⚖️</div>
+      <div class="profilo-name">Standard</div>
+      <div class="profilo-desc">Formula Epley classica — punto di partenza per tutti</div>
+    </div>
+    <div class="profilo-opt" data-profilo="neu" onclick="setProfilo('neu',this)">
+      <div class="profilo-icon">⚡</div>
+      <div class="profilo-name">Neurologico</div>
+      <div class="profilo-desc">Forza alta, resistenza alla fatica bassa. Reps max inferiori a parità di %</div>
+    </div>
+    <div class="profilo-opt" data-profilo="met" onclick="setProfilo('met',this)">
+      <div class="profilo-icon">🔥</div>
+      <div class="profilo-name">Metabolico</div>
+      <div class="profilo-desc">Alta resistenza muscolare. Reps max superiori a parità di % rispetto alla norma</div>
+    </div>
+  </div>
+
+  <!-- VIA TABS -->
+  <div class="slbl">Modalità di calcolo</div>
+  <div class="via-tabs">
+    <div class="via-tab active" onclick="switchViaCalc('A',this)">
+      <div class="via-num">A</div>
+      <div class="via-lbl">Reps + Peso<br>→ 1RM e %</div>
+    </div>
+    <div class="via-tab" onclick="switchViaCalc('B',this)">
+      <div class="via-num">B</div>
+      <div class="via-lbl">1RM + %<br>→ Kg e Reps</div>
+    </div>
+    <div class="via-tab" onclick="switchViaCalc('C',this)">
+      <div class="via-num">C</div>
+      <div class="via-lbl">1RM + Reps<br>→ % e Kg</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ VIA A ═══════════ -->
+  <div class="via-panel active" id="via-A">
+    <div class="inp-row">
+      <div class="inp-group">
+        <span class="inp-lbl">Peso sollevato <span>kg</span></span>
+        <input class="inp" id="a_peso" type="number" min="1" max="400" step="0.5" placeholder="es. 80" oninput="calcA()">
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">Ripetizioni eseguite <span>n°</span></span>
+        <input class="inp" id="a_reps" type="number" min="1" max="50" step="1" placeholder="es. 8" oninput="calcA()">
+        <span class="inp-hint">Ripetizioni a fine serie (non necessariamente all'esaurimento)</span>
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">Buffer (reps in riserva) <span>RIR</span></span>
+        <input class="inp" id="a_rir" type="number" min="0" max="10" step="1" placeholder="es. 2" oninput="calcA()">
+        <span class="inp-hint">0 = esaurimento. 2 = potresti fare ancora 2 reps</span>
+      </div>
+    </div>
+
+    <div id="a_formula_vis" style="display:none;">
+      <div class="formula-row" id="a_formula"></div>
+    </div>
+
+    <div id="a_result" class="empty">
+      <div class="empty-icon">🏋️</div>
+      <div class="empty-t">Inserisci peso e ripetizioni</div>
+      <div class="empty-s">Il calcolatore stima l'1RM e la zona di intensità</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ VIA B ═══════════ -->
+  <div class="via-panel" id="via-B">
+    <div class="inp-row">
+      <div class="inp-group">
+        <span class="inp-lbl">1RM noto <span>kg</span></span>
+        <input class="inp" id="b_1rm" type="number" min="1" max="500" step="0.5" placeholder="es. 100" oninput="calcB()">
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">% intensità desiderata <span>%</span></span>
+        <input class="inp" id="b_pct" type="number" min="30" max="120" step="1" placeholder="es. 75" oninput="calcB()">
+        <span class="inp-hint">30–50% AA · 50–70% Ipert. · 70–85% Forza · 85–100% Max</span>
+      </div>
+    </div>
+
+    <div id="b_result" class="empty">
+      <div class="empty-icon">⚙️</div>
+      <div class="empty-t">Inserisci 1RM e percentuale</div>
+      <div class="empty-s">Ottieni il peso da caricare e le reps attese per quella zona</div>
+    </div>
+  </div>
+
+  <!-- ═══════════ VIA C ═══════════ -->
+  <div class="via-panel" id="via-C">
+    <div class="inp-row">
+      <div class="inp-group">
+        <span class="inp-lbl">1RM noto <span>kg</span></span>
+        <input class="inp" id="c_1rm" type="number" min="1" max="500" step="0.5" placeholder="es. 100" oninput="calcC()">
+      </div>
+      <div class="inp-group">
+        <span class="inp-lbl">Ripetizioni target <span>n°</span></span>
+        <input class="inp" id="c_reps" type="number" min="1" max="50" step="1" placeholder="es. 5" oninput="calcC()">
+        <span class="inp-hint">Quante reps vuoi prescrivere in quella serie</span>
+      </div>
+    </div>
+
+    <div id="c_result" class="empty">
+      <div class="empty-icon">🎯</div>
+      <div class="empty-t">Inserisci 1RM e ripetizioni target</div>
+      <div class="empty-s">Ottieni la % di intensità e i kg corrispondenti</div>
+    </div>
+  </div>
+
+  <!-- TABELLA ZONE DI INTENSITÀ -->
+  <div class="slbl" style="margin-top:24px;">Zone di intensità — riferimento completo</div>
+  <div class="note-box">
+    <strong>Classificazione Bompa & Buzzichelli (Tab. 8.2)</strong> integrata con le raccomandazioni di Prilepin (Tab. 8.4)
+    per le nazionali sovietiche di sollevamento pesi. La tabella mostra il range di ripetizioni per profilo
+    <span style="color:var(--teal)">neurologico</span> e <span style="color:var(--vio)">metabolico</span>.
+    <div class="note-src">Fonte: Periodizzazione dell'Allenamento Sportivo — Bompa & Buzzichelli (Calzetti Mariucci, 2015) · Allenamento Ibrido — Project inVictus</div>
+  </div>
+  <div class="full-table-wrap" id="ref-table-wrap">
+    <!-- populated by JS -->
+  </div>
+
+</div><!-- /page -->
+
+      </div><!-- /tab-intensita -->
+
+      <!-- ══════════════════════════════════════════════════
+           TAB: ZONE CORSA
+      ══════════════════════════════════════════════════ -->
+    </div>
+  </div>
+</div>
+<script>
+
+/* ════════════════════════════════════════════
+   CALCOLATORE INTENSITÀ 1RM
+════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   DATA — Zone di intensità con doppio profilo
+   Fonti: Bompa Tab 8.2, 8.4, 8.5, 8.8 · Epley (Project inVictus)
+══════════════════════════════════════════════════════ */
+const ZONES = [
+  {
+    pct:[100,100], label:'Massimale (1RM)', short:'1RM',
+    badgeClass:'fmax', color:'#E05C5C',
+    repsStd:1, repsNeu:1, repsMet:1,
+    obiettivo:'Forza massima assoluta · Test', recupero:'5–7 min',
+    nota:'Uso sporadico. Max ogni 3–4 sett. Fine macrociclo.'
+  },
+  {
+    pct:[95,99], label:'Carichi massimali', short:'>95%',
+    badgeClass:'fmax', color:'#E05C5C',
+    repsStd:1, repsNeu:1, repsMet:2,
+    obiettivo:'Forza massima relativa', recupero:'4–6 min',
+    nota:'Solo atleti esperti. Parsimonia — effetto di abbassamento del testosterone.'
+  },
+  {
+    pct:[90,94], label:'Carichi pesanti — alto', short:'90–94%',
+    badgeClass:'fmax', color:'#E06060',
+    repsStd:3, repsNeu:2, repsMet:4,
+    obiettivo:'Forza massima / Forza relativa', recupero:'3–5 min',
+    nota:'Prilepin: 1–4 reps/serie ottimali. Reclutamento UM veloci massimo.'
+  },
+  {
+    pct:[85,89], label:'Carichi pesanti — basso', short:'85–89%',
+    badgeClass:'frel', color:'#CC7733',
+    repsStd:4, repsNeu:3, repsMet:6,
+    obiettivo:'Forza massima → Ipertrofia funzionale', recupero:'3–4 min',
+    nota:'Zona di transizione. Alta densità neurale mantenendo volume accettabile.'
+  },
+  {
+    pct:[80,84], label:'Carichi medi — alto', short:'80–84%',
+    badgeClass:'iper', color:'#B8972A',
+    repsStd:6, repsNeu:4, repsMet:8,
+    obiettivo:'Ipertrofia funzionale / Forza resistente', recupero:'2–4 min',
+    nota:'Bompa: zona preferita dei powerlifter d\'élite. Prilepin: 3–6 reps/serie.'
+  },
+  {
+    pct:[75,79], label:'Carichi medi', short:'75–79%',
+    badgeClass:'iper', color:'#C8A730',
+    repsStd:8, repsNeu:6, repsMet:10,
+    obiettivo:'Ipertrofia / Resistenza muscolare breve', recupero:'2–3 min',
+    nota:'Zona ipertrofica classica. Ottimale per fase BUILD nel Phoenix Method.'
+  },
+  {
+    pct:[70,74], label:'Carichi medi — basso', short:'70–74%',
+    badgeClass:'iper', color:'#D4B840',
+    repsStd:10, repsNeu:8, repsMet:13,
+    obiettivo:'Ipertrofia / Potenza resistente', recupero:'2–3 min',
+    nota:'Prilepin: limite inferiore della zona di forza. Formula Epley meno accurata oltre le 10 reps.'
+  },
+  {
+    pct:[60,69], label:'Carichi bassi — alto', short:'60–69%',
+    badgeClass:'pot', color:'#4A8FCC',
+    repsStd:15, repsNeu:12, repsMet:20,
+    obiettivo:'Potenza (esecuzione esplosiva) / Ipertrofia volume', recupero:'2–3 min',
+    nota:'Per la potenza: reps basse (3–6) eseguite esplosivamente. Per ipertrofia: reps alte lente.'
+  },
+  {
+    pct:[50,59], label:'Carichi bassi', short:'50–59%',
+    badgeClass:'res', color:'#4DBD74',
+    repsStd:20, repsNeu:16, repsMet:28,
+    obiettivo:'Resistenza muscolare breve / Potenza resistente', recupero:'1–2 min',
+    nota:'Adattamento anatomico (AA). Foundation Cycle PPL per clienti con bassa base motoria.'
+  },
+  {
+    pct:[30,49], label:'Carichi molto bassi', short:'30–49%',
+    badgeClass:'aa', color:'#9A7ACC',
+    repsStd:30, repsNeu:25, repsMet:40,
+    obiettivo:'Adattamento anatomico / Resistenza muscolare media-lunga', recupero:'1–1.5 min',
+    nota:'Fase AA, lavoro tecnico, warm-up specifico. Bompa: fino a 200 reps per resistenza muscolare lunga.'
+  },
+];
+
+// Epley formula (Project inVictus / standard)
+function epley1RM(peso, reps){ return peso * (1 + reps / 30); }
+
+// Profilo correzione reps (Bompa Tab 8.8 — atleta neu vs met)
+const PROFILO_FACTOR = { std: 1.0, neu: 0.75, met: 1.35 };
+
+// Da % → reps stimate (con profilo)
+function pctToReps(pct, profilo){
+  // Funzione inversa approssimata della formula Epley + correzione profilo
+  if(pct >= 100) return Math.round(1 * PROFILO_FACTOR[profilo]);
+  const repsBase = (100 / pct - 1) * 30;
+  return Math.max(1, Math.round(repsBase * PROFILO_FACTOR[profilo]));
+}
+
+// Da reps → % stimata (con profilo)
+function repsTopct(reps, profilo){
+  const repsAdj = reps / PROFILO_FACTOR[profilo];
+  return Math.round(100 / (1 + repsAdj / 30));
+}
+
+// Trova zona
+function findZone(pct){
+  for(const z of ZONES){
+    if(pct >= z.pct[0] && pct <= z.pct[1]) return z;
+  }
+  if(pct > 100) return { label:'Sovramassimale (eccentrico)', short:'>100%', badgeClass:'sovra', color:'#FF6666', obiettivo:'Forza eccentrica', recupero:'5–7 min', nota:'Solo atleti esperti con spotter.' };
+  return { label:'Fuori range', short:'<30%', badgeClass:'nd', color:'#555', obiettivo:'—', recupero:'—', nota:'Carico insufficiente per stimolo di forza.' };
+}
+
+function zonaBadge(z){ return `<span class="zona-badge ${z.badgeClass}">${z.label}</span>`; }
+function zonaColor(z){ return z.color||'#555'; }
+
+let currentProfilo = 'std';
+function setProfilo(p, el){
+  currentProfilo = p;
+  document.querySelectorAll('.profilo-opt').forEach(o=>o.classList.remove('active','neu-active','met-active'));
+  el.classList.add(p==='neu'?'neu-active': p==='met'?'met-active':'active');
+  // ricalcola tutto
+  calcA(); calcB(); calcC();
+}
+
+function switchViaCalc(via, el){
+  document.querySelectorAll('.via-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.via-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('via-'+via).classList.add('active');
+}
+
+/* ══════════════════════════════════════════════════════
+   VIA A — Reps + Peso → 1RM e %
+══════════════════════════════════════════════════════ */
+function calcA(){
+  const peso = parseFloat(document.getElementById('a_peso').value);
+  const reps = parseInt(document.getElementById('a_reps').value);
+  const rir  = parseInt(document.getElementById('a_rir').value) || 0;
+  const el = document.getElementById('a_result');
+  const fvis = document.getElementById('a_formula_vis');
+  const frow = document.getElementById('a_formula');
+
+  if(!peso || !reps || isNaN(peso) || isNaN(reps)){
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🏋️</div><div class="empty-t">Inserisci peso e ripetizioni</div><div class="empty-s">Il calcolatore stima l'1RM e la zona di intensità</div></div>`;
+    fvis.style.display='none'; return;
+  }
+
+  // Reps totali stimati (eseguite + buffer)
+  const repsEffettive = reps + rir;
+  const rm1 = epley1RM(peso, repsEffettive);
+  const rm1adj = currentProfilo === 'neu' ? rm1 * 1.1 : currentProfilo === 'met' ? rm1 * 0.92 : rm1;
+  const pct = Math.round((peso / rm1adj) * 100);
+  const zona = findZone(pct);
+
+  // Formula visualizzata
+  fvis.style.display='block';
+  frow.innerHTML = `
+    <span class="f-part">1RM</span>
+    <span class="f-part op">=</span>
+    <span class="f-part hi">${peso} kg</span>
+    <span class="f-part op">×</span>
+    <span class="f-part">[1 + (${repsEffettive} / 30)]</span>
+    <span class="f-part op">=</span>
+    <span class="f-eq">${rm1adj.toFixed(1)} kg</span>
+    ${currentProfilo!=='std'?`<span class="f-part" style="color:var(--mu);font-size:10px;">(corretto per profilo ${currentProfilo})</span>`:''}
+  `;
+
+  // Tutte le % utili
+  const percents = [100,95,90,85,80,75,70,65,60,55,50];
+  const tableRows = percents.map(p => {
+    const kg = (rm1adj * p / 100).toFixed(1);
+    const r = pctToReps(p, currentProfilo);
+    const z = findZone(p);
+    const hl = p === pct ? 'highlight' : '';
+    return `<tr class="${hl}">
+      <td><span class="zona-dot" style="background:${zonaColor(z)}"></span>${p}%</td>
+      <td class="kg">${kg}</td>
+      <td>${r}</td>
+      <td>${z.short}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-main">
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">1RM stimato</div>
+            <div class="result-val">${rm1adj.toFixed(1)}<span>kg</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">% sul max</div>
+            <div class="result-val" style="color:${zonaColor(zona)}">${pct}<span>%</span></div>
+          </div>
+          <div style="margin-left:auto;">${zonaBadge(zona)}</div>
+        </div>
+        <div class="result-sub" style="margin-top:10px;">
+          ${zona.obiettivo} · Recupero consigliato: ${zona.recupero}
+          ${zona.nota ? `<br><span style="color:var(--mu);font-size:10px;">${zona.nota}</span>`:''}
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="full-table">
+          <thead><tr>
+            <th style="text-align:left;">% Intensità</th>
+            <th>Kg (su 1RM)</th>
+            <th>Reps stimate</th>
+            <th>Zona</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   VIA B — 1RM + % → Kg e Reps
+══════════════════════════════════════════════════════ */
+function calcB(){
+  const rm1 = parseFloat(document.getElementById('b_1rm').value);
+  const pct  = parseInt(document.getElementById('b_pct').value);
+  const el = document.getElementById('b_result');
+
+  if(!rm1 || !pct || isNaN(rm1) || isNaN(pct)){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">⚙️</div><div class="empty-t">Inserisci 1RM e percentuale</div><div class="empty-s">Ottieni il peso da caricare e le reps attese</div></div>`;
+    return;
+  }
+
+  const kg = (rm1 * pct / 100);
+  const zona = findZone(pct);
+  const reps = pctToReps(pct, currentProfilo);
+
+  // Tabella range ±5%
+  const ranges = [-10,-5,0,5,10].map(d => {
+    const p2 = pct + d;
+    if(p2 < 20 || p2 > 120) return '';
+    const k2 = (rm1 * p2 / 100).toFixed(1);
+    const r2 = pctToReps(p2, currentProfilo);
+    const z2 = findZone(p2);
+    return `<tr class="${d===0?'rl':''}">
+      <td style="color:${d===0?'var(--gold2)':'var(--mu2)'}">${p2}%${d===0?' ◀':''}</td>
+      <td class="kg">${k2}</td>
+      <td class="reps">${r2}</td>
+      <td><span class="zona-dot" style="background:${zonaColor(z2)}"></span>${z2.short}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-main">
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Carico da usare</div>
+            <div class="result-val">${kg.toFixed(1)}<span>kg</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Reps attese (${currentProfilo})</div>
+            <div class="result-val" style="color:var(--teal)">${reps}<span>reps</span></div>
+          </div>
+          <div style="margin-left:auto;">${zonaBadge(zona)}</div>
+        </div>
+        <div class="result-sub" style="margin-top:10px;">
+          ${zona.obiettivo} · ${zona.recupero}
+          ${zona.nota?`<br><span style="color:var(--mu);font-size:10px;">${zona.nota}</span>`:''}
+        </div>
+      </div>
+      <div style="padding:0;">
+        <table class="range-table">
+          <thead><tr>
+            <th>% Int.</th><th>Kg</th><th>Reps (${currentProfilo})</th><th>Zona</th>
+          </tr></thead>
+          <tbody>${ranges}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   VIA C — 1RM + Reps target → % e Kg
+══════════════════════════════════════════════════════ */
+function calcC(){
+  const rm1  = parseFloat(document.getElementById('c_1rm').value);
+  const reps = parseInt(document.getElementById('c_reps').value);
+  const el = document.getElementById('c_result');
+
+  if(!rm1 || !reps || isNaN(rm1) || isNaN(reps)){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">🎯</div><div class="empty-t">Inserisci 1RM e ripetizioni target</div><div class="empty-s">Ottieni la % di intensità e i kg corrispondenti</div></div>`;
+    return;
+  }
+
+  const pct = repsTopct(reps, currentProfilo);
+  const kg  = (rm1 * pct / 100);
+  const zona = findZone(pct);
+
+  // Tabella tutte le reps 1→15
+  const repRange = [1,2,3,4,5,6,7,8,10,12,15,20].map(r => {
+    const p2 = repsTopct(r, currentProfilo);
+    const k2 = (rm1 * p2 / 100).toFixed(1);
+    const z2 = findZone(p2);
+    const hl = r === reps ? 'rl' : '';
+    return `<tr class="${hl}">
+      <td style="color:${r===reps?'var(--gold2)':'var(--mu2)'}">${r} rep${r>1?'s':''}${r===reps?' ◀':''}</td>
+      <td class="kg">${k2}</td>
+      <td>${p2}%</td>
+      <td><span class="zona-dot" style="background:${zonaColor(z2)}"></span>${z2.short}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-main">
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">% intensità stimata</div>
+            <div class="result-val" style="color:${zonaColor(zona)}">${pct}<span>%</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Kg da caricare</div>
+            <div class="result-val">${kg.toFixed(1)}<span>kg</span></div>
+          </div>
+          <div style="margin-left:auto;">${zonaBadge(zona)}</div>
+        </div>
+        <div class="result-sub" style="margin-top:10px;">
+          ${zona.obiettivo} · ${zona.recupero}
+          ${zona.nota?`<br><span style="color:var(--mu);font-size:10px;">${zona.nota}</span>`:''}
+        </div>
+      </div>
+      <div style="padding:0;">
+        <table class="range-table">
+          <thead><tr>
+            <th>Reps</th><th>Kg</th><th>% Int.</th><th>Zona</th>
+          </tr></thead>
+          <tbody>${repRange}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   TABELLA RIFERIMENTO COMPLETA
+══════════════════════════════════════════════════════ */
+function renderRefTable(){
+  const rows = ZONES.map(z => `
+    <tr>
+      <td><span class="zona-dot" style="background:${z.color}"></span>${z.short}</td>
+      <td>${z.pct[0]}${z.pct[0]!==z.pct[1]?'–'+z.pct[1]:''} %</td>
+      <td class="zona-${z.badgeClass}" style="color:${z.color}">${z.repsStd}</td>
+      <td style="color:var(--teal)">${z.repsNeu}</td>
+      <td style="color:var(--vio)">${z.repsMet}</td>
+      <td style="max-width:200px;white-space:normal;font-size:10px;color:var(--mu2);">${z.obiettivo}</td>
+      <td style="font-size:10px;color:var(--mu)">${z.recupero}</td>
+    </tr>`).join('');
+
+  document.getElementById('ref-table-wrap').innerHTML = `
+    <table class="full-table">
+      <thead><tr>
+        <th style="text-align:left;">Zona</th>
+        <th>% 1RM</th>
+        <th>Reps max<br><span style="color:var(--mu);font-size:7px;">STD (Epley)</span></th>
+        <th style="color:var(--teal)">Reps max<br><span style="font-size:7px;color:var(--teal);opacity:.7;">NEUROLOGICO</span></th>
+        <th style="color:var(--vio)">Reps max<br><span style="font-size:7px;color:var(--vio);opacity:.7;">METABOLICO</span></th>
+        <th style="text-align:left;">Obiettivo</th>
+        <th>Recupero</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+renderRefTable();
+
+
+
+
+function init(){
+  // Dashboard
+  _KD = (storageGet(KD)) || {};
+  _KC = {...DCFG, ...((storageGet(KC)) || {})};
+  document.getElementById('mnlabel').textContent=kLbl(CK);
+  wf(_KD[CK]||{});
+  refresh();
+
+  // Valutazione
+  _vals = (storageGet(VK)) || {};
+  renderClientGrid();
+
+  // Progressioni
+  _progHistory = (storageGet(PK)) || [];
+  renderProgHistory();
+}
+
+
+/* ════════════════════════════════════════════
+   CALCOLATORE INTENSITÀ 1RM
+════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════
+   VIA A — Reps + Peso → 1RM e %
+══════════════════════════════════════════════════════ */
+function calcA(){
+  const peso = parseFloat(document.getElementById('a_peso').value);
+  const reps = parseInt(document.getElementById('a_reps').value);
+  const rir  = parseInt(document.getElementById('a_rir').value) || 0;
+  const el = document.getElementById('a_result');
+  const fvis = document.getElementById('a_formula_vis');
+  const frow = document.getElementById('a_formula');
+
+  if(!peso || !reps || isNaN(peso) || isNaN(reps)){
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🏋️</div><div class="empty-t">Inserisci peso e ripetizioni</div><div class="empty-s">Il calcolatore stima l'1RM e la zona di intensità</div></div>`;
+    fvis.style.display='none'; return;
+  }
+
+  // Reps totali stimati (eseguite + buffer)
+  const repsEffettive = reps + rir;
+  const rm1 = epley1RM(peso, repsEffettive);
+  const rm1adj = currentProfilo === 'neu' ? rm1 * 1.1 : currentProfilo === 'met' ? rm1 * 0.92 : rm1;
+  const pct = Math.round((peso / rm1adj) * 100);
+  const zona = findZone(pct);
+
+  // Formula visualizzata
+  fvis.style.display='block';
+  frow.innerHTML = `
+    <span class="f-part">1RM</span>
+    <span class="f-part op">=</span>
+    <span class="f-part hi">${peso} kg</span>
+    <span class="f-part op">×</span>
+    <span class="f-part">[1 + (${repsEffettive} / 30)]</span>
+    <span class="f-part op">=</span>
+    <span class="f-eq">${rm1adj.toFixed(1)} kg</span>
+    ${currentProfilo!=='std'?`<span class="f-part" style="color:var(--mu);font-size:10px;">(corretto per profilo ${currentProfilo})</span>`:''}
+  `;
+
+  // Tutte le % utili
+  const percents = [100,95,90,85,80,75,70,65,60,55,50];
+  const tableRows = percents.map(p => {
+    const kg = (rm1adj * p / 100).toFixed(1);
+    const r = pctToReps(p, currentProfilo);
+    const z = findZone(p);
+    const hl = p === pct ? 'highlight' : '';
+    return `<tr class="${hl}">
+      <td><span class="zona-dot" style="background:${zonaColor(z)}"></span>${p}%</td>
+      <td class="kg">${kg}</td>
+      <td>${r}</td>
+      <td>${z.short}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-main">
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">1RM stimato</div>
+            <div class="result-val">${rm1adj.toFixed(1)}<span>kg</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">% sul max</div>
+            <div class="result-val" style="color:${zonaColor(zona)}">${pct}<span>%</span></div>
+          </div>
+          <div style="margin-left:auto;">${zonaBadge(zona)}</div>
+        </div>
+        <div class="result-sub" style="margin-top:10px;">
+          ${zona.obiettivo} · Recupero consigliato: ${zona.recupero}
+          ${zona.nota ? `<br><span style="color:var(--mu);font-size:10px;">${zona.nota}</span>`:''}
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="full-table">
+          <thead><tr>
+            <th style="text-align:left;">% Intensità</th>
+            <th>Kg (su 1RM)</th>
+            <th>Reps stimate</th>
+            <th>Zona</th>
+          </tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   VIA B — 1RM + % → Kg e Reps
+══════════════════════════════════════════════════════ */
+function calcB(){
+  const rm1 = parseFloat(document.getElementById('b_1rm').value);
+  const pct  = parseInt(document.getElementById('b_pct').value);
+  const el = document.getElementById('b_result');
+
+  if(!rm1 || !pct || isNaN(rm1) || isNaN(pct)){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">⚙️</div><div class="empty-t">Inserisci 1RM e percentuale</div><div class="empty-s">Ottieni il peso da caricare e le reps attese</div></div>`;
+    return;
+  }
+
+  const kg = (rm1 * pct / 100);
+  const zona = findZone(pct);
+  const reps = pctToReps(pct, currentProfilo);
+
+  // Tabella range ±5%
+  const ranges = [-10,-5,0,5,10].map(d => {
+    const p2 = pct + d;
+    if(p2 < 20 || p2 > 120) return '';
+    const k2 = (rm1 * p2 / 100).toFixed(1);
+    const r2 = pctToReps(p2, currentProfilo);
+    const z2 = findZone(p2);
+    return `<tr class="${d===0?'rl':''}">
+      <td style="color:${d===0?'var(--gold2)':'var(--mu2)'}">${p2}%${d===0?' ◀':''}</td>
+      <td class="kg">${k2}</td>
+      <td class="reps">${r2}</td>
+      <td><span class="zona-dot" style="background:${zonaColor(z2)}"></span>${z2.short}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-main">
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Carico da usare</div>
+            <div class="result-val">${kg.toFixed(1)}<span>kg</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Reps attese (${currentProfilo})</div>
+            <div class="result-val" style="color:var(--teal)">${reps}<span>reps</span></div>
+          </div>
+          <div style="margin-left:auto;">${zonaBadge(zona)}</div>
+        </div>
+        <div class="result-sub" style="margin-top:10px;">
+          ${zona.obiettivo} · ${zona.recupero}
+          ${zona.nota?`<br><span style="color:var(--mu);font-size:10px;">${zona.nota}</span>`:''}
+        </div>
+      </div>
+      <div style="padding:0;">
+        <table class="range-table">
+          <thead><tr>
+            <th>% Int.</th><th>Kg</th><th>Reps (${currentProfilo})</th><th>Zona</th>
+          </tr></thead>
+          <tbody>${ranges}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   VIA C — 1RM + Reps target → % e Kg
+══════════════════════════════════════════════════════ */
+function calcC(){
+  const rm1  = parseFloat(document.getElementById('c_1rm').value);
+  const reps = parseInt(document.getElementById('c_reps').value);
+  const el = document.getElementById('c_result');
+
+  if(!rm1 || !reps || isNaN(rm1) || isNaN(reps)){
+    el.innerHTML=`<div class="empty"><div class="empty-icon">🎯</div><div class="empty-t">Inserisci 1RM e ripetizioni target</div><div class="empty-s">Ottieni la % di intensità e i kg corrispondenti</div></div>`;
+    return;
+  }
+
+  const pct = repsTopct(reps, currentProfilo);
+  const kg  = (rm1 * pct / 100);
+  const zona = findZone(pct);
+
+  // Tabella tutte le reps 1→15
+  const repRange = [1,2,3,4,5,6,7,8,10,12,15,20].map(r => {
+    const p2 = repsTopct(r, currentProfilo);
+    const k2 = (rm1 * p2 / 100).toFixed(1);
+    const z2 = findZone(p2);
+    const hl = r === reps ? 'rl' : '';
+    return `<tr class="${hl}">
+      <td style="color:${r===reps?'var(--gold2)':'var(--mu2)'}">${r} rep${r>1?'s':''}${r===reps?' ◀':''}</td>
+      <td class="kg">${k2}</td>
+      <td>${p2}%</td>
+      <td><span class="zona-dot" style="background:${zonaColor(z2)}"></span>${z2.short}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="result-card">
+      <div class="result-main">
+        <div style="display:flex;align-items:flex-end;gap:16px;flex-wrap:wrap;">
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">% intensità stimata</div>
+            <div class="result-val" style="color:${zonaColor(zona)}">${pct}<span>%</span></div>
+          </div>
+          <div>
+            <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;">Kg da caricare</div>
+            <div class="result-val">${kg.toFixed(1)}<span>kg</span></div>
+          </div>
+          <div style="margin-left:auto;">${zonaBadge(zona)}</div>
+        </div>
+        <div class="result-sub" style="margin-top:10px;">
+          ${zona.obiettivo} · ${zona.recupero}
+          ${zona.nota?`<br><span style="color:var(--mu);font-size:10px;">${zona.nota}</span>`:''}
+        </div>
+      </div>
+      <div style="padding:0;">
+        <table class="range-table">
+          <thead><tr>
+            <th>Reps</th><th>Kg</th><th>% Int.</th><th>Zona</th>
+          </tr></thead>
+          <tbody>${repRange}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════════════
+   TABELLA RIFERIMENTO COMPLETA
+══════════════════════════════════════════════════════ */
+function renderRefTable(){
+  const rows = ZONES.map(z => `
+    <tr>
+      <td><span class="zona-dot" style="background:${z.color}"></span>${z.short}</td>
+      <td>${z.pct[0]}${z.pct[0]!==z.pct[1]?'–'+z.pct[1]:''} %</td>
+      <td class="zona-${z.badgeClass}" style="color:${z.color}">${z.repsStd}</td>
+      <td style="color:var(--teal)">${z.repsNeu}</td>
+      <td style="color:var(--vio)">${z.repsMet}</td>
+      <td style="max-width:200px;white-space:normal;font-size:10px;color:var(--mu2);">${z.obiettivo}</td>
+      <td style="font-size:10px;color:var(--mu)">${z.recupero}</td>
+    </tr>`).join('');
+
+  document.getElementById('ref-table-wrap').innerHTML = `
+    <table class="full-table">
+      <thead><tr>
+        <th style="text-align:left;">Zona</th>
+        <th>% 1RM</th>
+        <th>Reps max<br><span style="color:var(--mu);font-size:7px;">STD (Epley)</span></th>
+        <th style="color:var(--teal)">Reps max<br><span style="font-size:7px;color:var(--teal);opacity:.7;">NEUROLOGICO</span></th>
+        <th style="color:var(--vio)">Reps max<br><span style="font-size:7px;color:var(--vio);opacity:.7;">METABOLICO</span></th>
+        <th style="text-align:left;">Obiettivo</th>
+        <th>Recupero</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+renderRefTable();
+
+
+
+
+
+function init(){
+  renderRefTable();
+  const ft = document.querySelector('.via-tab');
+  if(ft) ft.click();
+}
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+init();
+
+
+
+
+
+function toggleNav(){
+  const nav = document.getElementById('ppl-topnav');
+  if(nav) nav.classList.toggle('nav-open');
+}
+// Close nav when clicking a link
+document.addEventListener('click', function(e){
+  if(e.target.classList.contains('tn-link')){
+    const nav = document.getElementById('ppl-topnav');
+    if(nav) nav.classList.remove('nav-open');
+  }
+});
+</script>
+</body>
+</html>
