@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A0A0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PPL Progressioni">
+<link rel="manifest" href="manifest.json">
+<title>PPL · Progressioni</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>/* ══ TOKENS ══ */
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:#6B5518;
+  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  --sidebar:220px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+
+/* ══ LAYOUT ══ */
+.shell{display:flex;height:calc(100vh - 40px);overflow:hidden;}
+
+/* ══ SIDEBAR ══ */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;
+  background:var(--g1);border-right:1px solid var(--g3);
+  display:flex;flex-direction:column;
+  z-index:200;
+  transition:width .22s ease;
+  overflow:hidden;min-width:0;
+}
+.sidebar.collapsed{width:48px;}
+.sb-logo{
+  padding:12px 10px;border-bottom:1px solid var(--g3);
+  display:flex;align-items:center;gap:8px;height:52px;flex-shrink:0;
+}
+.sb-logo-text{overflow:hidden;white-space:nowrap;flex:1;transition:opacity .15s .05s;}
+.sidebar.collapsed .sb-logo-text{opacity:0;width:0;flex:0;transition:opacity .05s;}
+.sb-brand{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;
+  letter-spacing:4px;color:var(--gold);text-transform:uppercase;line-height:1;}
+.sb-sub{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--mu);text-transform:uppercase;margin-top:3px;}
+.sb-toggle{
+  background:none;border:1px solid var(--g4);color:var(--mu2);
+  width:28px;height:28px;min-width:28px;border-radius:3px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;transition:.15s;flex-shrink:0;
+}
+.sb-toggle:hover{border-color:var(--gold);color:var(--gold);}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden;}
+.sb-section{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
+  color:var(--g6);text-transform:uppercase;padding:12px 14px 5px;
+  white-space:nowrap;overflow:hidden;transition:opacity .1s;}
+.sidebar.collapsed .sb-section{opacity:0;}
+.sb-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 14px;cursor:pointer;
+  font-size:12px;color:var(--mu2);
+  border-left:2px solid transparent;
+  transition:.15s;user-select:none;white-space:nowrap;overflow:hidden;
+}
+.sb-item:hover{color:var(--wh);background:var(--g2);}
+.sb-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(184,151,42,.06);}
+.sb-icon{font-size:16px;width:20px;min-width:20px;text-align:center;flex-shrink:0;}
+.sb-label{flex:1;overflow:hidden;white-space:nowrap;transition:opacity .1s;}
+.sidebar.collapsed .sb-label{opacity:0;width:0;overflow:hidden;}
+.sidebar.collapsed .sb-badge{display:none;}
+.sb-badge{font-family:'DM Mono',monospace;font-size:8px;background:var(--g4);
+  color:var(--mu);padding:1px 5px;border-radius:2px;flex-shrink:0;}
+.sb-badge.new{background:var(--goldd);color:var(--gold2);}
+.sb-footer{padding:12px 10px;border-top:1px solid var(--g3);overflow:hidden;flex-shrink:0;}
+.sb-foot-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);
+  white-space:nowrap;transition:opacity .1s;}
+.sidebar.collapsed .sb-foot-t{opacity:0;}
+/* mobile overlay */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;}
+.sb-overlay.visible{display:block;}
+
+/* ══ CONTENT AREA ══ */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
+.topbar{
+  background:var(--g1);border-bottom:1px solid var(--g3);
+  padding:0 22px;height:48px;display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.topbar-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;}
+.topbar-sep{width:1px;height:20px;background:var(--g4);}
+.tb-sp{flex:1;}
+.tbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;white-space:nowrap;}
+.tbtn:hover{border-color:var(--gold);color:var(--gold);}
+.tbtn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
+.tbtn.pri:hover{background:var(--gold2);}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--g5);transition:.3s;flex-shrink:0;}
+.sdot.uns{background:var(--org);}.sdot.sav{background:var(--grn);}
+
+.panel-area{flex:1;overflow-y:auto;overflow-x:hidden;}
+.tab-panel{display:none;height:100%;}
+.tab-panel.active{display:block;}
+
+/* ══ SHARED COMPONENTS ══ */
+.main{max-width:1380px;margin:0 auto;padding:18px 22px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+.btn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold);color:var(--gold);}
+.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
+.btn.pri:hover{background:var(--gold2);}
+
+/* ══ DASHBOARD KPI ══ */
+.krow{display:flex;gap:10px;flex-wrap:wrap;}
+.kc{flex:1;min-width:150px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:12px 14px;border-top:2px solid var(--g4);}
+.kc.grn{border-top-color:var(--grn);}.kc.org{border-top-color:var(--org);}
+.kc.red{border-top-color:var(--red);}.kc.neu{border-top-color:var(--g4);}
+.klbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
+.dot{width:6px;height:6px;border-radius:50%;}
+.dot.grn{background:var(--grn);}.dot.org{background:var(--org);}
+.dot.red{background:var(--red);}.dot.neu{background:var(--g5);}
+.kval{font-family:'DM Mono',monospace;font-size:24px;line-height:1;color:var(--wh);font-weight:500;}
+.kval.dim{color:var(--mu);}
+.ksub{font-size:10px;color:var(--mu);margin-top:5px;display:flex;justify-content:space-between;}
+.kdelta{font-family:'DM Mono',monospace;font-size:10px;}
+.kdelta.pos{color:var(--grn);}.kdelta.neg{color:var(--red);}
+.crow{display:flex;gap:10px;margin-bottom:2px;flex-wrap:wrap;}
+.cb{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 16px;min-width:0;}
+.cb.f2{flex:2 1 300px;}.cb.f1{flex:1 1 200px;}
+.cbtitle{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--gold);text-transform:uppercase;margin-bottom:12px;}
+.cbwrap{position:relative;height:150px;}
+.panels{display:flex;gap:10px;flex-wrap:wrap;}
+.panel{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;flex:1;min-width:280px;}
+.ph{display:flex;justify-content:space-between;align-items:center;
+  padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--g3);}
+.ph-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
+.ph-arr{color:var(--mu);font-size:11px;}
+.pb{padding:14px;}.pb.closed{display:none;}
+.fg{display:flex;flex-wrap:wrap;gap:8px;}
+.fi{display:flex;flex-direction:column;gap:3px;min-width:95px;flex:1;}
+.fi.w2{min-width:200px;flex:2;}
+.filab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+.finp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;
+  padding:6px 8px;outline:none;width:100%;transition:border-color .15s;}
+.finp:focus{border-color:var(--gold);}
+.finp::placeholder{color:var(--g5);}
+.finp.ta{resize:vertical;min-height:50px;font-family:'DM Sans',sans-serif;font-size:11px;}
+.fdiv{width:100%;height:1px;background:var(--g3);flex-basis:100%;margin:4px 0;}
+.fsubl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--vio);text-transform:uppercase;flex-basis:100%;padding-top:4px;}
+.irow{display:flex;gap:10px;flex-wrap:wrap;}
+.ins{flex:1;min-width:210px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:11px 13px;border-left:3px solid;}
+.ins.grn{border-left-color:var(--grn);}.ins.org{border-left-color:var(--org);}
+.ins.red{border-left-color:var(--red);}.ins.inf{border-left-color:var(--vio);}
+.ins-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.ins.grn .ins-t{color:var(--grn);}.ins.org .ins-t{color:var(--org);}
+.ins.red .ins-t{color:var(--red);}.ins.inf .ins-t{color:var(--vio);}
+.ins-m{font-size:11px;color:var(--mu2);line-height:1.55;}
+.htw{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow-x:auto;}
+.ht{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
+.ht th{background:var(--g2);padding:8px 11px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  text-align:right;border-bottom:1px solid var(--g3);}
+.ht th:first-child{text-align:left;}
+.ht td{padding:8px 11px;border-bottom:1px solid var(--g2);text-align:right;
+  font-family:'DM Mono',monospace;color:var(--mu2);}
+.ht td:first-child{text-align:left;color:var(--wh);font-weight:bold;}
+.ht tr:last-child td{border-bottom:none;}
+.ht tr.act td{background:rgba(184,151,42,.05);}
+.cg{color:var(--grn)!important;}.cr{color:var(--red)!important;}
+.co{color:var(--gold)!important;}.co2{color:var(--org)!important;}
+
+/* ══ PROGRESSIONI AI ══ */
+.prog-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
+.prog-skill-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
+.prog-skill{flex:1;min-width:100px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:10px 12px;text-align:center;cursor:pointer;transition:.15s;}
+.prog-skill:hover{border-color:var(--gold2);}
+.prog-skill.active{border-color:var(--gold);background:rgba(184,151,42,.07);}
+.prog-skill-icon{font-size:20px;margin-bottom:4px;}
+.prog-skill-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);}
+.prog-skill.active .prog-skill-name{color:var(--gold);}
+.prog-input-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.prog-inp-group{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;}
+.prog-inp-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  color:var(--mu);text-transform:uppercase;}
+.prog-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:13px;
+  padding:7px 10px;outline:none;width:100%;transition:.15s;}
+.prog-inp:focus{border-color:var(--gold);}
+.prog-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
+  padding:18px 20px;min-height:120px;position:relative;}
+.prog-result-placeholder{color:var(--mu);font-size:11px;text-align:center;
+  padding:30px 0;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
+.prog-loading{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:11px;}
+.prog-loading .spin{
+  width:16px;height:16px;border:2px solid var(--g4);border-top-color:var(--gold);
+  border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.prog-answer{font-size:12px;line-height:1.7;color:var(--mu2);}
+.prog-answer h3{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+  color:var(--gold);text-transform:uppercase;margin:14px 0 6px;}
+.prog-answer h3:first-child{margin-top:0;}
+.prog-answer p{margin-bottom:8px;}
+.prog-answer ul{padding-left:16px;margin-bottom:10px;}
+.prog-answer li{margin-bottom:5px;color:var(--wh);}
+.prog-answer strong{color:var(--wh);}
+.prog-answer em{color:var(--gold2);font-style:normal;}
+.prog-history{margin-top:16px;}
+.prog-hist-item{background:var(--g2);border:1px solid var(--g3);border-radius:3px;
+  padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.prog-hist-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);
+  letter-spacing:1px;white-space:nowrap;}
+.prog-hist-q{font-size:11px;color:var(--mu2);}
+.prog-hist-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:14px;flex-shrink:0;}
+.prog-hist-del:hover{color:var(--red);}
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+.standalone-wrap{overflow:hidden;}
+
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link active" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="prog-wrap" style="max-width:1100px;margin:0 auto;padding:20px 24px 80px;margin-top:40px;">
+<div class="prog-wrap">
+
+          <div class="slbl" style="margin-top:0;">Skill</div>
+          <div class="prog-skill-grid" id="prog-skill-grid"></div>
+
+          <div class="slbl">Livello attuale — seleziona la fase</div>
+          <div id="prog-fase-row" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+          <div id="prog-result-area" style="display:none;">
+            <div class="slbl">Step successivo consigliato</div>
+            <div id="prog-step-card"></div>
+            <div class="slbl" style="margin-top:16px;">Piano completo per questa fase</div>
+            <div id="prog-full-plan"></div>
+          </div>
+
+          <div id="prog-placeholder" style="display:flex;flex-direction:column;align-items:center;padding:40px 20px;color:var(--mu);">
+            <div style="font-size:32px;opacity:.3;margin-bottom:10px;">📈</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;">Seleziona una skill e la fase del cliente</div>
+          </div>
+
+        </div>
+      </div><!-- /tab-progressioni -->
+
+      <!-- ══════════════════════════════════════════════════
+           TAB: DOCUMENTI
+      ══════════════════════════════════════════════════ -->
+      <div class="tab-panel"
+</div>
+</body>
+<script src="progressioni_db.js"></script>
+<script>
+const storageGet = (k) => { try{ const v=localStorage.getItem(k); return v?JSON.parse(v):null; }catch(e){return null;} };
+const storageSet = (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} };
+
+
+let _currentFase = null;
+
+function selectSkill(el){
+  document.querySelectorAll('.prog-skill').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  _currentSkill = el.dataset.skill;
+  _currentFase = null;
+  renderFaseRow();
+  document.getElementById('prog-result-area').style.display='none';
+  document.getElementById('prog-placeholder').style.display='flex';
+}
+
+function renderFaseRow(){
+  const db = PROG_DB[_currentSkill];
+  if(!db) return;
+  const row = document.getElementById('prog-fase-row');
+  row.innerHTML = db.fasi.map(f=>`
+    <div class="prog-skill" style="min-width:110px;text-align:left;padding:10px 12px;" 
+         data-fase="${f.id}" onclick="selectFase('${f.id}',this)">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;margin-bottom:3px;">${f.label}</div>
+      <div style="font-size:10px;color:var(--mu2);">${f.range}</div>
+    </div>`).join('');
+}
+
+function selectFase(faseId, el){
+  document.querySelectorAll('#prog-fase-row .prog-skill').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  _currentFase = faseId;
+  renderProgResult();
+}
+
+function renderProgResult(){
+  const db = PROG_DB[_currentSkill];
+  if(!db) return;
+  const fase = db.fasi.find(f=>f.id===_currentFase);
+  if(!fase) return;
+
+  document.getElementById('prog-placeholder').style.display='none';
+  document.getElementById('prog-result-area').style.display='block';
+
+  // Step card
+  document.getElementById('prog-step-card').innerHTML=`
+    <div style="background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--gold);border-radius:4px;padding:14px 16px;margin-bottom:10px;">
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:6px;">${db.label} · ${fase.label} · ${fase.range}</div>
+      <div style="font-size:12px;color:var(--wh);font-weight:500;margin-bottom:6px;">${fase.step_next}</div>
+      <div style="font-size:11px;color:var(--mu2);line-height:1.6;">${fase.desc}</div>
+    </div>`;
+
+  // Full plan table
+  const rows = fase.esercizi.map(e=>`
+    <tr>
+      <td style="font-weight:500;color:var(--wh);font-size:11px;">${e.nome}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);text-align:center;white-space:nowrap;">${e.schema}</td>
+      <td style="font-size:10px;color:var(--mu2);">${e.note}</td>
+    </tr>`).join('');
+
+  document.getElementById('prog-full-plan').innerHTML=`
+    <div style="background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr>
+          <th style="background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);text-align:left;">Esercizio</th>
+          <th style="background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);text-align:center;">Schema</th>
+          <th style="background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;border-bottom:1px solid var(--g3);">Note coaching</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div style="background:var(--g2);border:1px solid var(--g3);border-left:3px solid #4DBD74;border-radius:0 4px 4px 0;padding:10px 14px;font-size:11px;color:var(--mu2);line-height:1.6;">
+      <strong style="color:#4DBD74;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;">Criterio di avanzamento alla fase successiva</strong><br>
+      ${fase.avanzamento}
+    </div>
+    <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;padding-top:10px;">Fonte: ${db.src}</div>`;
+}
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+document.addEventListener('DOMContentLoaded', ()=>{
+  if(typeof _progHistory !== 'undefined'){
+    _progHistory = storageGet(PK) || [];
+    if(typeof renderProgHistory === 'function') renderProgHistory();
+  }
+  // renderSkillGrid handles auto-select
+  renderSkillGrid();
+});
+
+function toggleNav(){
+  const nav=document.getElementById('ppl-topnav');
+  if(nav) nav.classList.toggle('nav-open');
+}
+/* ── Skill metadata (fallback locale) ────────────────────────────────────────
+   Usato se progressioni_db.js non include SKILL_META.
+   Per aggiungere una skill: aggiungi la riga qui con icon e label.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+
+/* ══ RENDER SKILL GRID (dinamica) ═════════════════════════════════════════════
+   Genera i pulsanti skill leggendo le chiavi di PROG_DB.
+   Per aggiungere una nuova skill: aggiungi il blocco in progressioni_db.js
+   e la entry icon/label in SKILL_META_LOCAL qui sopra.
+   L'HTML non va mai toccato.
+   ═══════════════════════════════════════════════════════════════════════════ */
+function renderSkillGrid(){
+  const grid = document.getElementById('prog-skill-grid');
+  if(!grid || typeof PROG_DB === 'undefined') return;
+
+  const keys = Object.keys(PROG_DB);
+
+  grid.innerHTML = keys.map((key, i) => {
+    const meta = (typeof SKILL_META !== 'undefined' && SKILL_META[key]) ? SKILL_META[key] : { icon: '📋', label: key };
+    return `<div class="prog-skill${i===0?' active':''}"
+      data-skill="${key}" onclick="selectSkill(this)">
+      <div class="prog-skill-icon">${meta.icon}</div>
+      <div class="prog-skill-name">${meta.label}</div>
+    </div>`;
+  }).join('');
+
+  // Auto-select first
+  const first = grid.querySelector('.prog-skill');
+  if(first) selectSkill(first);
+}
+
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('tn-link')){
+    const nav=document.getElementById('ppl-topnav');
+    if(nav) nav.classList.remove('nav-open');
+  }
+});
+</script>
+</html
+
+/* Metadata locale — usato come fallback se progressioni_db.js non include SKILL_META */
+let SKILL_META_LOCAL = {
+  trazioni:  { icon: '🏋️', label: 'Trazioni' },
+  'push-up': { icon: '💪', label: 'Push-up' },
+  dip:       { icon: '🤸', label: 'Dip' },
+  squat:     { icon: '🦵', label: 'Squat' },
+  core:      { icon: '⚡', label: 'Core / Plank' },
+  swing:     { icon: '🔔', label: 'KB Swing' },
+};
+
+
+/* ══ RENDER SKILL GRID (dinamica) ══
+   Legge le chiavi di PROG_DB e genera i pulsanti automaticamente.
+   Per aggiungere una skill: aggiungila in PROG_DB e in SKILL_META
+   nel file progressioni_db.js — l'HTML non va mai toccato.
+*/
+function renderSkillGrid() {
+  const grid = document.getElementById('prog-skill-grid');
+  if (!grid || typeof PROG_DB === 'undefined') return;
+
+  const keys = Object.keys(PROG_DB);
+
+  grid.innerHTML = keys.map((key, i) => {
+    const meta  = SKILL_META_LOCAL[key]
+                  ? SKILL_META_LOCAL[key]
+                  : { icon: '📋', label: key };
+    const isFirst = i === 0;
+    return `<div class="prog-skill${isFirst ? ' active' : ''}"
+               data-skill="${key}"
+               onclick="selectSkill(this)">
+      <div class="prog-skill-icon">${meta.icon}</div>
+      <div class="prog-skill-name">${meta.label}</div>
+    </div>`;
+  }).join('');
+
+  // Auto-select first skill
+  const first = grid.querySelector('.prog-skill');
+  if (first) selectSkill(first);
+}
+>
