@@ -38,7 +38,7 @@ html,body{padding-top:40px;background:var(--bk);color:var(--wh);font-family:'DM 
   padding:0 20px;height:50px;display:flex;align-items:center;gap:10px;
   position:sticky;top:40px;z-index:100;
 }
-.page-l{max-width:1100px;margin:0 auto;padding:20px 24px 80px;}
+.page-l{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
 
 /* ══ LISTINO CARDS ══ */
 .listino-grid{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
@@ -86,10 +86,10 @@ html,body{padding-top:40px;background:var(--bk);color:var(--wh);font-family:'DM 
 .costo-medio-val{font-family:'DM Mono',monospace;font-size:16px;font-weight:500;color:var(--teal);}
 .costo-medio-sub{font-size:9px;color:var(--mu);margin-top:1px;}
 
-.ltab-row{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:14px;}
-.ltab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);
+.ltab-row{display:flex;gap:0;background:var(--g1);border:1px solid var(--g4);border-radius:4px;overflow:hidden;margin-bottom:14px;margin-top:4px;}
+.ltab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g4);
   font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;
-  color:var(--mu);transition:.15s;user-select:none;}
+  color:var(--mu2);transition:.15s;user-select:none;}
 .ltab:last-child{border-right:none;}
 .ltab:hover{background:var(--g2);color:var(--wh);}
 .ltab.active{background:rgba(184,151,42,.1);color:var(--gold);border-bottom:2px solid var(--gold);}
@@ -241,6 +241,16 @@ nav.ppl-topnav.nav-open a.tn-link{
   nav.ppl-topnav .tn-toggle{ display:flex !important; }
   nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
 }
+
+/* ── topbar buttons ── */
+.tbtn{
+  background:var(--g2);border:1px solid var(--g4);color:var(--mu2);
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
+  text-transform:uppercase;padding:6px 12px;border-radius:3px;
+  cursor:pointer;transition:.15s;white-space:nowrap;
+}
+.tbtn:hover{border-color:var(--gold2);color:var(--wh);}
+
 </style>
 </head>
 <body>
@@ -256,6 +266,7 @@ nav.ppl-topnav.nav-open a.tn-link{
   <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
   <a class="tn-link active" href="listino.html">💰 Listino</a>
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
 </nav>
