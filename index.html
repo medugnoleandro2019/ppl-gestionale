@@ -720,6 +720,13 @@ nav.ppl-topnav.nav-open a.tn-link{
   nav.ppl-topnav .tn-toggle{ display:flex !important; }
   nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
 }
+
+/* ══ SIDEBAR NASCOSTA — navigazione affidata alla topnav ══ */
+.sidebar{ display:none !important; }
+.sb-overlay{ display:none !important; }
+.content{ flex:1 !important; }
+.shell{ height:calc(100vh - 40px); }
+
 </style>
 </head>
 <body>
@@ -735,6 +742,7 @@ nav.ppl-topnav.nav-open a.tn-link{
   <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
   <a class="tn-link" href="listino.html">💰 Listino</a>
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
 </nav>
@@ -759,8 +767,11 @@ nav.ppl-topnav.nav-open a.tn-link{
 
     <!-- TOPBAR -->
     <div class="topbar" id="topbar">
-      <button class="tbtn" id="topbar-menu-btn" onclick="toggleSidebar()" style="display:none;padding:5px 10px;font-size:15px;letter-spacing:0;">☰</button>
-      <span class="topbar-title" id="topbar-title">Dashboard KPI</span>
+      
+      <span class="topbar-title" id="topbar-title">
+        <span id="topbar-brand" style="font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:4px;color:var(--gold);text-transform:uppercase;margin-right:8px;">PPL</span>
+        <span style="font-size:9px;letter-spacing:2px;color:var(--mu);">Dashboard KPI</span>
+      </span>
       <div class="topbar-sep"></div>
       <!-- Dashboard controls (shown only on dashboard tab) -->
       <div id="dash-controls" style="display:flex;align-items:center;gap:10px;">
@@ -774,6 +785,12 @@ nav.ppl-topnav.nav-open a.tn-link{
         <button class="tbtn pri" onclick="saveMonth()">Salva</button>
         <button class="tbtn" onclick="openSettings()"><span class="hide-xs">⚙ </span>Target</button>
         <button class="tbtn" onclick="doExport()"><span class="hide-xs">↓ </span>Export</button>
+        <a href="risorse.html" id="cfg-status-badge" style="display:none;text-decoration:none;
+          font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;
+          padding:4px 8px;border-radius:2px;background:rgba(224,140,58,.15);
+          border:1px solid rgba(224,140,58,.4);color:var(--org);white-space:nowrap;">
+          ⚙ Configura studio
+        </a>
       </div>
       <!-- Valutazione controls -->
       <div id="val-controls" style="display:none;align-items:center;gap:10px;">
@@ -948,7 +965,21 @@ nav.ppl-topnav.nav-open a.tn-link{
     </div>
   </div>
 </div>
-<script>
+<script>/* ══ PPL CONFIG — legge identità e connessioni da risorse.html ══════════
+   Chiave condivisa: ppl_config  ·  Modifica da: risorse.html
+   ═══════════════════════════════════════════════════════════════════════ */
+const PPL_CFG_KEY = 'ppl_config';
+function getPPLConfig(){ try{const v=localStorage.getItem(PPL_CFG_KEY);return v?JSON.parse(v):{}}catch(e){return{}} }
+
+function applyPPLConfig(){
+  const cfg = getPPLConfig();
+  const brand = document.getElementById('topbar-brand');
+  if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
+  const badge = document.getElementById('cfg-status-badge');
+  if(badge) badge.style.display = (!cfg.studio_name && !cfg.sheets_url) ? 'flex' : 'none';
+}
+
+
 
 let _sidebarCollapsed = false;
 function toggleSidebar(){
@@ -1201,7 +1232,8 @@ function init(){
   document.getElementById('mnlabel').textContent=kLbl(CK);
   wf(_KD[CK]||{});
   refresh();
-}
+    applyPPLConfig();
+  }
 /* ── PWA Service Worker ── */
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>{
