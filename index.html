@@ -727,6 +727,14 @@ nav.ppl-topnav.nav-open a.tn-link{
 .content{ flex:1 !important; }
 .shell{ height:calc(100vh - 40px); }
 
+
+/* ── Scrollbar panel-area ── */
+.panel-area::-webkit-scrollbar{ width:6px; }
+.panel-area::-webkit-scrollbar-track{ background:var(--bk); }
+.panel-area::-webkit-scrollbar-thumb{ background:var(--g4);border-radius:3px; }
+.panel-area::-webkit-scrollbar-thumb:hover{ background:var(--g5); }
+.panel-area{ scrollbar-width:thin; scrollbar-color:var(--g4) var(--bk); }
+
 </style>
 </head>
 <body>
@@ -785,11 +793,13 @@ nav.ppl-topnav.nav-open a.tn-link{
         <button class="tbtn pri" onclick="saveMonth()">Salva</button>
         <button class="tbtn" onclick="openSettings()"><span class="hide-xs">⚙ </span>Target</button>
         <button class="tbtn" onclick="doExport()"><span class="hide-xs">↓ </span>Export</button>
-        <a href="risorse.html" id="cfg-status-badge" style="display:none;text-decoration:none;
-          font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;
-          padding:4px 8px;border-radius:2px;background:rgba(224,140,58,.15);
-          border:1px solid rgba(224,140,58,.4);color:var(--org);white-space:nowrap;">
-          ⚙ Configura studio
+        <a href="risorse.html" id="cfg-status-badge"
+          style="display:none;text-decoration:none;white-space:nowrap;
+            background:var(--g2);border:1px solid var(--g4);
+            color:#AAA;font-family:'DM Mono',monospace;font-size:8px;
+            letter-spacing:1.5px;text-transform:uppercase;
+            padding:6px 12px;border-radius:3px;">
+          ⚙ Risorse
         </a>
       </div>
       <!-- Valutazione controls -->
