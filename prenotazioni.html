@@ -812,6 +812,7 @@ select.modal-inp{cursor:pointer;}
   <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
   <a class="tn-link" href="listino.html">💰 Listino</a>
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
 </nav>
@@ -952,7 +953,19 @@ function bkSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 let _bkConfig=bkGet(BK_CFG_KEY)||{url:''};
 let _bkData=bkGet(BK_CACHE_KEY)||{clienti:[],abbonamenti:[],sessioni:[],pacchetti:[]};
 let _connected=false;
-function initBooking(){const u=document.getElementById('cfg-url');if(u&&_bkConfig.url)u.value=_bkConfig.url;updateConnectionStatus();}
+function initBooking(){
+  const u = document.getElementById('cfg-url');
+  if(u && _bkConfig.url) u.value = _bkConfig.url;
+  updateConnectionStatus();
+  // Auto-sync on load if URL already configured
+  if(_bkConfig.url){
+    const status = document.getElementById('conn-result');
+    if(status) status.textContent = '⏳ Sincronizzazione automatica...';
+    syncData().then(()=>{
+      if(status) status.textContent = '';
+    });
+  }
+}
 function saveConfig(){_bkConfig.url=(document.getElementById('cfg-url').value||'').trim();bkSet(BK_CFG_KEY,_bkConfig);}
 function switchBkTab(id,el){
   document.querySelectorAll('.bk-tab').forEach(t=>t.classList.remove('active'));
@@ -976,16 +989,43 @@ async function testConnection(){
   }catch(e){res.textContent='✕ Errore: '+e.message;res.style.color='var(--red)';}
 }
 async function syncData(){
-  if(!_bkConfig.url||!_connected)return;
-  try{const r=await fetch(_bkConfig.url+'?action=getAll');_bkData=await r.json();bkSet(BK_CACHE_KEY,_bkData);renderClienti();renderSessioniForm();}
-  catch(e){console.warn('Sync error:',e);renderClienti();}
+  if(!_bkConfig.url) return;
+  try{
+    const r = await fetch(_bkConfig.url + '?action=getAll');
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    // Accept both direct array response and wrapped response
+    _bkData = {
+      clienti:     Array.isArray(data.clienti)     ? data.clienti     : [],
+      abbonamenti: Array.isArray(data.abbonamenti) ? data.abbonamenti : [],
+      sessioni:    Array.isArray(data.sessioni)    ? data.sessioni    : [],
+      pacchetti:   Array.isArray(data.pacchetti)   ? data.pacchetti   : [],
+    };
+    bkSet(BK_CACHE_KEY, _bkData);
+    _connected = true;
+    updateConnectionStatus();
+    renderClienti();
+    renderSessioniForm();
+    renderStorico();
+  } catch(e){
+    console.warn('Sync error:', e);
+    _connected = false;
+    updateConnectionStatus();
+    renderClienti();
+  }
 }
 function renderClienti(){
   const grid=document.getElementById('client-grid');
   const warn=document.getElementById('no-conn-warn');
   const cont=document.getElementById('clienti-content');
   if(!grid)return;
-  if(!_connected&&!_bkData.clienti.length){if(warn)warn.style.display='block';if(cont)cont.style.display='none';return;}
+  // Show cached data even if not currently connected
+  const clienti_check = _bkData.clienti || [];
+  if(!_bkConfig.url && !clienti_check.length){
+    if(warn) warn.style.display='block';
+    if(cont) cont.style.display='none';
+    return;
+  }
   if(warn)warn.style.display='none';if(cont)cont.style.display='block';
   const clienti=_bkData.clienti||[];
   if(!clienti.length){
@@ -1268,6 +1308,33 @@ document.addEventListener('keydown', e=>{
   }
 });
 
+
+function renderStorico(){
+  const warn  = document.getElementById('no-conn-warn3');
+  const cont  = document.getElementById('storico-content');
+  const list  = document.getElementById('storico-list');
+  if(!list) return;
+  const sessioni = (_bkData.sessioni || []).slice().reverse().slice(0, 50);
+  if(!_bkConfig.url && !sessioni.length){
+    if(warn) warn.style.display='block';
+    if(cont) cont.style.display='none';
+    return;
+  }
+  if(warn) warn.style.display='none';
+  if(cont) cont.style.display='block';
+  list.innerHTML = sessioni.length
+    ? sessioni.map(s=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;
+          border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
+          <span style="font-family:'DM Mono',monospace;font-size:9px;
+            color:var(--mu);width:75px;flex-shrink:0;">${s.Data||''}</span>
+          <span style="flex:1;color:var(--mu2);">${s.Tipo||''}</span>
+          <span style="color:var(--mu);font-size:9px;">${s.ClienteID||''}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:11px;
+            color:var(--red);">-${s.Crediti||1}</span>
+        </div>`).join('')
+    : '<div style="font-size:11px;color:var(--mu);padding:12px 0;">Nessuna sessione registrata</div>';
+}
 </script>
 
 <!-- ═══════════════════════════════════════
