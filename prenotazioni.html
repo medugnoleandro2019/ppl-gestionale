@@ -9,6 +9,7 @@
 <title>PPL · Prenotazioni</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+
 /* ══ TOKENS ══ */
 :root{
   --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
@@ -806,6 +807,7 @@ select.modal-inp{cursor:pointer;}
 .btn:hover{border-color:var(--gold2);color:var(--wh);}
 .btn.pri{background:var(--gold);border-color:var(--gold);color:#000;}
 .btn.pri:hover{background:var(--gold2);}
+
 </style>
 </head>
 <body>
@@ -829,7 +831,7 @@ select.modal-inp{cursor:pointer;}
   <div class="topbar-simple">
     <span class="tb-title-s">Prenotazioni & Crediti</span>
     <div class="tb-sp"></div>
-    <span id="conn-status" class="status-badge nd">● Non configurato</span>
+    <span id="conn-status" class="status-badge nd">● Connessione...</span>
   </div>
   <div class="content-scroll">
     <div class="bk-wrap">
@@ -841,69 +843,44 @@ select.modal-inp{cursor:pointer;}
       </div>
       <div class="bk-section active" id="bksec-setup">
         <div class="warn-box" style="margin-bottom:14px;">
-          <strong>Come funziona:</strong> questa pagina si collega a un Google Sheet come database.
-          I dati (clienti, abbonamenti, sessioni) vivono nel foglio — accessibile da qualsiasi dispositivo, gratuito.
-          Segui i passaggi qui sotto per configurarlo.
+          <strong>Firebase Realtime Database:</strong> i dati vivono nel cloud e si aggiornano
+          in tempo reale su tutti i dispositivi — nessun polling, nessun click "Sincronizza".
+          Configura le credenziali in <a href="risorse.html" style="color:var(--gold)">⚙ Risorse</a>.
         </div>
         <div class="config-card">
-          <div class="config-title">🔗 Collegamento Google Sheet</div>
-          <div class="config-row">
-            <div class="config-field">
-              <span class="config-lbl">Apps Script URL</span>
-              <input class="config-inp" id="cfg-url" type="url" readonly
-                placeholder="Configura in ⚙ Risorse"
-                style="cursor:default;color:var(--mu2);">
-              <span style="font-size:10px;color:var(--g6);margin-top:4px;">
-                L'URL viene letto da
-                <a href="risorse.html" style="color:var(--gold);text-decoration:none;">⚙ Risorse &amp; Configurazione</a>.
-                Modificalo lì per aggiornare tutte le pagine.
-              </span>
-            </div>
+          <div class="config-title">🔥 Stato connessione</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+            <span id="conn-result" style="font-size:11px;color:var(--mu);">Inizializzazione...</span>
+            <button class="btn" onclick="retryFirebase()">↻ Riprova</button>
+            <a href="risorse.html" class="btn">⚙ Configura Firebase</a>
           </div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button class="btn pri" onclick="testConnection()">▶ Testa connessione</button>
-            <button class="btn" onclick="syncData()">↻ Sincronizza dati</button>
-          </div>
-          <div id="conn-result" style="margin-top:10px;font-size:11px;color:var(--mu);"></div>
+          <div id="fb-project-info" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--g6);"></div>
         </div>
         <div class="config-card">
-          <div class="config-title">📋 Guida configurazione</div>
+          <div class="config-title">📋 Come funziona Firebase</div>
           <div class="setup-step">
             <div class="step-num">1</div>
             <div class="step-content">
-              <div class="step-title">Crea il Google Sheet</div>
-              <div class="step-desc">Vai su <strong>sheets.google.com</strong> → nuovo foglio <em>PPL Gestionale</em>.
-              Crea 4 tab: <strong>Clienti · Abbonamenti · Sessioni · Pacchetti</strong></div>
+              <div class="step-title">Aggiornamento real-time</div>
+              <div class="step-desc">La pagina rimane in ascolto del database Firebase.
+                Ogni modifica — da questa pagina, da un altro dispositivo, o direttamente dalla
+                console Firebase — viene riflessa qui in meno di 100ms automaticamente.</div>
             </div>
           </div>
           <div class="setup-step">
             <div class="step-num">2</div>
             <div class="step-content">
-              <div class="step-title">Struttura Clienti</div>
-              <div class="step-code">ID | Nome | Cognome | Email | Telefono | DataIscrizione | Note</div>
+              <div class="step-title">Percorso dati</div>
+              <div class="step-code">ppl/ → clienti/ → abbonamenti/ → sessioni/</div>
             </div>
           </div>
           <div class="setup-step">
             <div class="step-num">3</div>
             <div class="step-content">
-              <div class="step-title">Struttura Abbonamenti</div>
-              <div class="step-code">ID | ClienteID | Pacchetto | CreditiTotali | CreditiResidui | DataInizio | DataScadenza | Stato</div>
-            </div>
-          </div>
-          <div class="setup-step">
-            <div class="step-num">4</div>
-            <div class="step-content">
-              <div class="step-title">Struttura Sessioni</div>
-              <div class="step-code">ID | ClienteID | AbbonamentoID | Data | Ora | Tipo | Crediti | Coach | Note</div>
-            </div>
-          </div>
-          <div class="setup-step">
-            <div class="step-num">5</div>
-            <div class="step-content">
-              <div class="step-title">Crea Apps Script</div>
-              <div class="step-desc">Nel foglio: <strong>Estensioni → Apps Script</strong>.
-              Incolla il contenuto di <code>apps_script.gs</code> dalla repo GitHub.
-              <strong>Distribuisci → Nuova distribuzione → App Web → Chiunque</strong>. Copia l'URL qui sopra.</div>
+              <div class="step-title">Console Firebase</div>
+              <div class="step-desc">Puoi ispezionare e modificare i dati su
+                <strong>console.firebase.google.com</strong> → il tuo progetto →
+                Realtime Database → nodo /ppl</div>
             </div>
           </div>
         </div>
@@ -922,6 +899,7 @@ select.modal-inp{cursor:pointer;}
           <div class="client-grid" id="client-grid"></div>
         </div>
       </div>
+      
       <div class="bk-section" id="bksec-sessioni">
         <div class="warn-box" id="no-conn-warn2">Connetti prima il Google Sheet dalla tab <strong>⚙ Setup</strong>.</div>
         <div id="sessioni-content" style="display:none;">
@@ -952,6 +930,7 @@ select.modal-inp{cursor:pointer;}
           </div>
         </div>
       </div>
+      
       <div class="bk-section" id="bksec-storico">
         <div class="warn-box" id="no-conn-warn3">Connetti prima il Google Sheet dalla tab <strong>⚙ Setup</strong>.</div>
         <div id="storico-content" style="display:none;"><div id="storico-list"></div></div>
@@ -1086,372 +1065,469 @@ select.modal-inp{cursor:pointer;}
     </div>
   </div>
 </div>
+<!-- ═══════════════════════════════════════
+     MODAL: NUOVO CLIENTE
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-new-client" onclick="closeOnOverlay(event,'modal-new-client')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">✚ Nuovo cliente</span>
+      <button class="modal-close" onclick="closeModal('modal-new-client')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Anagrafica</div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <span class="modal-lbl">Nome *</span>
+            <input class="modal-inp" id="nc-nome" type="text" placeholder="Mario">
+          </div>
+          <div class="modal-field">
+            <span class="modal-lbl">Cognome *</span>
+            <input class="modal-inp" id="nc-cognome" type="text" placeholder="Rossi">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <span class="modal-lbl">Telefono</span>
+            <input class="modal-inp" id="nc-telefono" type="tel" placeholder="+39 333 000 0000">
+          </div>
+          <div class="modal-field">
+            <span class="modal-lbl">Email</span>
+            <input class="modal-inp" id="nc-email" type="email" placeholder="mario@email.com">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <span class="modal-lbl">Note</span>
+            <input class="modal-inp" id="nc-note" type="text" placeholder="Obiettivi, patologie, preferenze...">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-result" id="nc-result"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-new-client')">Annulla</button>
+      <button class="btn pri" onclick="submitNewClient()">✓ Aggiungi cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL: NUOVO ABBONAMENTO
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-new-abb" onclick="closeOnOverlay(event,'modal-new-abb')">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">📦 Nuovo abbonamento</span>
+      <button class="modal-close" onclick="closeModal('modal-new-abb')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section">
+        <div class="modal-section-title">Cliente</div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <span class="modal-lbl">Cliente *</span>
+            <select class="modal-inp" id="na-cliente"></select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-section">
+        <div class="modal-section-title">Pacchetto</div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <span class="modal-lbl">Nome pacchetto *</span>
+            <input class="modal-inp" id="na-pacchetto" type="text" placeholder="Small Class Plus (8 sess.)">
+          </div>
+          <div class="modal-field" style="flex:0;min-width:90px;">
+            <span class="modal-lbl">Crediti *</span>
+            <input class="modal-inp" id="na-crediti" type="number" min="1" max="200" placeholder="8">
+          </div>
+        </div>
+        <div class="modal-row">
+          <div class="modal-field">
+            <span class="modal-lbl">Data inizio</span>
+            <input class="modal-inp" id="na-inizio" type="date">
+          </div>
+          <div class="modal-field">
+            <span class="modal-lbl">Data scadenza</span>
+            <input class="modal-inp" id="na-scadenza" type="date">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-result" id="na-result"></div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-new-abb')">Annulla</button>
+      <button class="btn pri" onclick="submitNewAbb()">✓ Crea abbonamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL: DETTAGLIO CLIENTE
+     ═══════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-client-detail" onclick="closeOnOverlay(event,'modal-client-detail')">
+  <div class="modal" style="max-width:620px;">
+    <div class="modal-head">
+      <span class="modal-title" id="detail-title">Cliente</span>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn" style="font-size:9px;padding:4px 10px;" onclick="openNewAbb()">+ Abbonamento</button>
+        <button class="modal-close" onclick="closeModal('modal-client-detail')">✕</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="client-detail-grid" id="detail-stats"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);
+        text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--g3);">
+        Ultimi abbonamenti</div>
+      <div id="detail-abbs" style="margin-bottom:14px;"></div>
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);
+        text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--g3);">
+        Ultime sessioni</div>
+      <div id="detail-sess"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" onclick="closeModal('modal-client-detail')">Chiudi</button>
+    </div>
+  </div>
+</div>
+
 
 
 </body>
+<!-- Firebase SDK (compat) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 
-/* ══ CONFIG CONDIVISA (da risorse.html) ═══ */
-const PPL_CFG_KEY = 'ppl_config';
-function getPPLConfig(){try{const v=localStorage.getItem(PPL_CFG_KEY);return v?JSON.parse(v):{}}catch(e){return{}}}
+/* ══════════════════════════════════════════════════════════════════════════
+   PPL PRENOTAZIONI — Firebase Realtime Database
+   Aggiornamento in tempo reale: onValue listener su /ppl
+   Config: letta da ppl_config (impostata in risorse.html)
+   ══════════════════════════════════════════════════════════════════════════ */
 
+const BK_CACHE_KEY = 'ppl_booking_cache';
+const PPL_CFG_KEY  = 'ppl_config';
+function bkGet(k){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;} }
+function bkSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+function getPPLConfig(){ try{const v=localStorage.getItem(PPL_CFG_KEY);return v?JSON.parse(v):{};}catch(e){return{};} }
 
+let _bkData    = bkGet(BK_CACHE_KEY) || {clienti:[],abbonamenti:[],sessioni:[],pacchetti:[]};
+let _connected = false;
+let _db        = null;
+let _dbRef     = null;
 
-const BK_CFG_KEY='ppl_booking_config';const BK_CACHE_KEY='ppl_booking_cache';
-function bkGet(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
-function bkSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
-let _bkConfig=bkGet(BK_CFG_KEY)||{url:''};
-let _bkData=bkGet(BK_CACHE_KEY)||{clienti:[],abbonamenti:[],sessioni:[],pacchetti:[]};
-let _connected=false;
-function initBooking(){
-  const pplCfg=getPPLConfig();
-  if(pplCfg.sheets_url&&!_bkConfig.url){_bkConfig.url=pplCfg.sheets_url;bkSet(BK_CFG_KEY,_bkConfig);}
-  const u=document.getElementById('cfg-url');
-  if(u&&_bkConfig.url)u.value=_bkConfig.url;
-  updateConnectionStatus();
-  if(_bkConfig.url) syncData();
+/* ── Firebase init ── */
+function initFirebase(){
+  const cfg        = getPPLConfig();
+  const connResult = document.getElementById('conn-result');
+  const badge      = document.getElementById('conn-status');
+  const projInfo   = document.getElementById('fb-project-info');
+
+  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL){
+    setStatus(badge,'nd','● Firebase non configurato');
+    if(connResult) connResult.textContent = 'Credenziali mancanti — configura in ⚙ Risorse.';
+    renderClienti(); return;
+  }
+  if(projInfo) projInfo.textContent =
+    'Progetto: ' + (cfg.firebase_projectId||'—') + '  |  DB: ' + cfg.firebase_databaseURL;
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey:      cfg.firebase_apiKey,
+        authDomain:  cfg.firebase_authDomain || cfg.firebase_projectId+'.firebaseapp.com',
+        databaseURL: cfg.firebase_databaseURL,
+        projectId:   cfg.firebase_projectId,
+      });
+    }
+    _db = firebase.database();
+    setStatus(badge,'warn','● Connessione...');
+    if(connResult) connResult.textContent = '⏳ Connessione al database...';
+    startListening();
+  } catch(e){
+    console.error('Firebase init:',e);
+    setStatus(badge,'err','● Errore Firebase');
+    if(connResult) connResult.textContent = '✕ ' + e.message;
+    renderClienti();
+  }
 }
-function saveConfig(){_bkConfig.url=(document.getElementById('cfg-url').value||'').trim();bkSet(BK_CFG_KEY,_bkConfig);}
+
+function retryFirebase(){
+  if(firebase.apps.length){
+    firebase.apps[0].delete().then(()=>{ _db=null; initFirebase(); }).catch(()=>{ _db=null; initFirebase(); });
+  } else { initFirebase(); }
+}
+
+/* ── Real-time listener ── */
+function startListening(){
+  if(!_db) return;
+  const badge      = document.getElementById('conn-status');
+  const connResult = document.getElementById('conn-result');
+  _dbRef = _db.ref('ppl');
+  _dbRef.on('value', snapshot => {
+    const data = snapshot.val() || {};
+    _bkData = {
+      clienti:    objToArr(data.clienti),
+      abbonamenti:objToArr(data.abbonamenti),
+      sessioni:   objToArr(data.sessioni),
+      pacchetti:  objToArr(data.pacchetti),
+    };
+    bkSet(BK_CACHE_KEY, _bkData);
+    _connected = true;
+    setStatus(badge,'ok','● Firebase connesso');
+    if(connResult) connResult.textContent = '✓ Connesso — aggiornamento real-time attivo.';
+    renderClienti();
+    renderSessioniForm();
+    if(typeof renderStorico==='function') renderStorico();
+  }, err => {
+    console.error('Firebase listener:',err);
+    _connected = false;
+    setStatus(badge,'err','● ' + (err.code||err.message));
+    renderClienti();
+  });
+}
+
+function objToArr(obj){
+  if(!obj||typeof obj!=='object') return [];
+  return Object.entries(obj).map(([id,val])=>({ID:id,...val}));
+}
+function setStatus(el,cls,text){ if(el){el.className='status-badge '+cls;el.textContent=text;} }
+
+/* ── Tab switch ── */
 function switchBkTab(id,el){
   document.querySelectorAll('.bk-tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.bk-section').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');document.getElementById('bksec-'+id).classList.add('active');
+  el.classList.add('active');
+  document.getElementById('bksec-'+id).classList.add('active');
 }
-function updateConnectionStatus(){
-  const b=document.getElementById('conn-status');if(!b)return;
-  if(!_bkConfig.url){b.className='status-badge nd';b.textContent='● Non configurato';return;}
-  b.className=_connected?'status-badge ok':'status-badge warn';
-  b.textContent=_connected?'● Connesso':'● URL impostato · non testato';
-}
-async function testConnection(){
-  if(!_bkConfig.url){alert('Inserisci prima l\'URL dell\'Apps Script.');return;}
-  const res=document.getElementById('conn-result');
-  res.textContent='⏳ Connessione in corso...';res.style.color='var(--mu)';
-  try{
-    const r=await fetch(_bkConfig.url+'?action=ping');const data=await r.json();
-    if(data.status==='ok'){_connected=true;res.textContent='✓ Connesso';res.style.color='#4DBD74';updateConnectionStatus();syncData();}
-    else throw new Error(data.message||'Risposta inattesa');
-  }catch(e){res.textContent='✕ Errore: '+e.message;res.style.color='var(--red)';}
-}
-async function syncData(){
-  if(!_bkConfig.url){const c=getPPLConfig();if(c.sheets_url){_bkConfig.url=c.sheets_url;bkSet(BK_CFG_KEY,_bkConfig);}else return;}
-  try{
-    const r=await fetch(_bkConfig.url+'?action=getAll');
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const data=await r.json();
-    _bkData={
-      clienti:    Array.isArray(data.clienti)    ?data.clienti    :[],
-      abbonamenti:Array.isArray(data.abbonamenti)?data.abbonamenti:[],
-      sessioni:   Array.isArray(data.sessioni)   ?data.sessioni   :[],
-      pacchetti:  Array.isArray(data.pacchetti)  ?data.pacchetti  :[],
-    };
-    bkSet(BK_CACHE_KEY,_bkData);
-    _connected=true;updateConnectionStatus();
-    renderClienti();renderSessioniForm();
-    if(typeof renderStorico==='function') renderStorico();
-  }catch(e){
-    console.warn('Sync:',e);_connected=false;updateConnectionStatus();renderClienti();
-  }
-}
+
+/* ── Render clienti ── */
 function renderClienti(){
   const grid=document.getElementById('client-grid');
   const warn=document.getElementById('no-conn-warn');
   const cont=document.getElementById('clienti-content');
-  if(!grid)return;
-  if(!_bkConfig.url&&!(_bkData.clienti||[]).length){if(warn)warn.style.display='block';if(cont)cont.style.display='none';return;}
-  if(warn)warn.style.display='none';if(cont)cont.style.display='block';
+  if(!grid) return;
+  const cfg=getPPLConfig();
+  if(!cfg.firebase_apiKey&&!_bkData.clienti.length){
+    if(warn)warn.style.display='block'; if(cont)cont.style.display='none'; return;
+  }
+  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
   const clienti=_bkData.clienti||[];
   if(!clienti.length){
-    grid.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);letter-spacing:2px;text-transform:uppercase;padding:20px;">Nessun cliente — aggiungine uno dal foglio Google Sheet</div>`;
+    grid.innerHTML='<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--mu);letter-spacing:2px;text-transform:uppercase;padding:20px;">Nessun cliente — aggiungi con + Nuovo cliente</div>';
     return;
   }
   grid.innerHTML=clienti.map(c=>{
-    const abbs=(_bkData.abbonamenti||[]).filter(a=>a.ClienteID===c.ID&&a.Stato==='Attivo');
-    const tot=abbs.reduce((s,a)=>s+parseInt(a.CreditiTotali||0),0);
-    const res=abbs.reduce((s,a)=>s+parseInt(a.CreditiResidui||0),0);
+    const abbs=(_bkData.abbonamenti||[]).filter(a=>a.clienteId===c.ID&&a.stato==='Attivo');
+    const tot=abbs.reduce((s,a)=>s+parseInt(a.creditiTotali||0),0);
+    const res=abbs.reduce((s,a)=>s+parseInt(a.creditiResidui||0),0);
     const pct=tot>0?Math.round(res/tot*100):0;
     const bc=pct>50?'#4DBD74':pct>20?'var(--org)':'var(--red)';
-    const init=((c.Nome||'')[0]||(c.Cognome||'')[0]||'?').toUpperCase();
+    const init=((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
     return `<div class="client-card" onclick="openClient('${c.ID}')">
-      <div class="client-card-head"><div class="client-avatar">${init}</div>
-        <div><div class="client-name">${c.Nome||''} ${c.Cognome||''}</div>
-        <div class="client-pkg">${abbs.length>0?abbs[0].Pacchetto:'Nessun abbonamento attivo'}</div></div></div>
+      <div class="client-card-head">
+        <div class="client-avatar">${init}</div>
+        <div><div class="client-name">${c.nome||''} ${c.cognome||''}</div>
+        <div class="client-pkg">${abbs.length?abbs[0].pacchetto:'Nessun abbonamento'}</div></div>
+      </div>
       <div class="client-card-body">${tot>0?`<div class="credits-bar-wrap">
-        <div class="credits-bar-label"><span class="credits-bar-name">Crediti residui</span>
-        <span class="credits-bar-val" style="color:${bc}">${res}/${tot}</span></div>
-        <div class="credits-bar-track"><div class="credits-bar-fill" style="width:${pct}%;background:${bc};"></div></div>
-      </div>`:'<div style="font-size:10px;color:var(--mu);">Nessun abbonamento attivo</div>'}</div>
+        <div class="credits-bar-label">
+          <span class="credits-bar-name">Crediti</span>
+          <span class="credits-bar-val" style="color:${bc}">${res}/${tot}</span>
+        </div>
+        <div class="credits-bar-track"><div class="credits-bar-fill" style="width:${pct}%;background:${bc}"></div></div>
+      </div>`:'<div style="font-size:10px;color:var(--mu);">Nessun abbonamento attivo</div>'}
+      </div>
     </div>`;
   }).join('');
 }
-function filterClients(q){document.querySelectorAll('.client-card').forEach(c=>{const n=(c.querySelector('.client-name')?.textContent||'').toLowerCase();c.style.display=n.includes(q.toLowerCase())?'':'none';});}
-// openClient defined below
-// openNewClient defined below
+function filterClients(q){
+  document.querySelectorAll('.client-card').forEach(c=>{
+    c.style.display=(c.querySelector('.client-name')?.textContent||'').toLowerCase().includes(q.toLowerCase())?'':'none';
+  });
+}
+
+/* ── Render form sessioni ── */
 function renderSessioniForm(){
-  const warn=document.getElementById('no-conn-warn2');const cont=document.getElementById('sessioni-content');
-  if(!_connected&&!_bkData.clienti.length)return;
-  if(warn)warn.style.display='none';if(cont)cont.style.display='block';
+  const warn=document.getElementById('no-conn-warn2');
+  const cont=document.getElementById('sessioni-content');
+  if(!_connected&&!_bkData.clienti.length) return;
+  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
   const sel=document.getElementById('sess-client');
-  if(sel){sel.innerHTML='<option value="">Seleziona cliente...</option>'+(_bkData.clienti||[]).map(c=>`<option value="${c.ID}">${c.Nome} ${c.Cognome}</option>`).join('');sel.onchange=()=>loadAbbonamenti(sel.value);}
-  const di=document.getElementById('sess-data');if(di&&!di.value)di.value=new Date().toISOString().split('T')[0];
+  if(sel){
+    sel.innerHTML='<option value="">Seleziona cliente...</option>'+
+      (_bkData.clienti||[]).map(c=>`<option value="${c.ID}">${c.nome} ${c.cognome}</option>`).join('');
+    sel.onchange=()=>loadAbbonamenti(sel.value);
+  }
+  const di=document.getElementById('sess-data'); if(di&&!di.value)di.value=new Date().toISOString().split('T')[0];
 }
 function loadAbbonamenti(cid){
-  const sel=document.getElementById('sess-abbonamento');if(!sel)return;
-  const abbs=(_bkData.abbonamenti||[]).filter(a=>a.ClienteID===cid&&a.Stato==='Attivo');
-  sel.innerHTML=abbs.length?abbs.map(a=>`<option value="${a.ID}">${a.Pacchetto} (${a.CreditiResidui} crediti)</option>`).join(''):'<option value="">Nessun abbonamento attivo</option>';
+  const sel=document.getElementById('sess-abbonamento'); if(!sel) return;
+  const abbs=(_bkData.abbonamenti||[]).filter(a=>a.clienteId===cid&&a.stato==='Attivo');
+  sel.innerHTML=abbs.length?abbs.map(a=>`<option value="${a.ID}">${a.pacchetto} (${a.creditiResidui} crediti)</option>`).join('')
+    :'<option value="">Nessun abbonamento attivo</option>';
 }
+
+/* ── Render storico ── */
+function renderStorico(){
+  const warn=document.getElementById('no-conn-warn3');
+  const cont=document.getElementById('storico-content');
+  const list=document.getElementById('storico-list');
+  if(!list) return;
+  if(!_connected&&!_bkData.sessioni.length){if(warn)warn.style.display='block';return;}
+  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
+  const sess=[..._bkData.sessioni].reverse().slice(0,50);
+  list.innerHTML=sess.length?sess.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;">${s.data||''}</span>
+      <span style="flex:1;color:var(--mu2);">${s.tipo||''}</span>
+      <span style="font-size:9px;color:var(--g6);">${s.clienteId||''}</span>
+      <span style="font-family:'DM Mono',monospace;color:var(--red);">-${s.crediti||1}</span>
+    </div>`).join('')
+    :'<div style="font-size:11px;color:var(--mu);padding:12px 0;">Nessuna sessione registrata</div>';
+}
+
+/* ── Registra sessione ── */
 async function registraSessione(){
-  if(!_bkConfig.url){alert('Collega prima il Google Sheet.');return;}
-  const payload={action:'registraSessione',clienteId:document.getElementById('sess-client').value,
-    abbId:document.getElementById('sess-abbonamento').value,data:document.getElementById('sess-data').value,
-    ora:document.getElementById('sess-ora').value,tipo:document.getElementById('sess-tipo').value,
-    crediti:parseInt(document.getElementById('sess-crediti').value)||1,note:document.getElementById('sess-note').value};
-  if(!payload.clienteId){alert('Seleziona un cliente.');return;}
-  const res=document.getElementById('sess-result');res.textContent='⏳ Registrazione...';
-  try{
-    const r=await fetch(_bkConfig.url,{method:'POST',body:JSON.stringify(payload)});
-    const data=await r.json();
-    if(data.status==='ok'){res.textContent='✓ '+data.message;res.style.color='#4DBD74';syncData();}
-    else throw new Error(data.message);
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-}
-if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
-initBooking();
-
-
-
-
-
-function toggleNav(){
-  const nav = document.getElementById('ppl-topnav');
-  if(nav) nav.classList.toggle('nav-open');
-}
-// Close nav when clicking a link
-document.addEventListener('click', function(e){
-  if(e.target.classList.contains('tn-link')){
-    const nav = document.getElementById('ppl-topnav');
-    if(nav) nav.classList.remove('nav-open');
+  if(!_db){alert('Firebase non connesso.');return;}
+  const clienteId=document.getElementById('sess-client').value;
+  const abbId    =document.getElementById('sess-abbonamento').value;
+  const data     =document.getElementById('sess-data').value;
+  const ora      =document.getElementById('sess-ora').value;
+  const tipo     =document.getElementById('sess-tipo').value;
+  const crediti  =parseInt(document.getElementById('sess-crediti').value)||1;
+  const note     =document.getElementById('sess-note').value;
+  const res      =document.getElementById('sess-result');
+  if(!clienteId){alert('Seleziona un cliente.');return;}
+  const abb=_bkData.abbonamenti.find(a=>a.ID===abbId);
+  if(!abb){res.textContent='✕ Abbonamento non trovato';res.style.color='var(--red)';return;}
+  if(parseInt(abb.creditiResidui||0)<crediti){
+    res.textContent='✕ Crediti insufficienti: '+abb.creditiResidui;res.style.color='var(--red)';return;
   }
-});
-
-/* ══ MODAL HELPERS ══ */
-function openModal(id){
-  const m = document.getElementById(id);
-  if(m) m.classList.add('open');
-}
-function closeModal(id){
-  const m = document.getElementById(id);
-  if(m) m.classList.remove('open');
-}
-function closeOnOverlay(e, id){
-  if(e.target === e.currentTarget) closeModal(id);
+  res.textContent='⏳ Registrazione...';res.style.color='var(--mu)';
+  try{
+    const sessId='S_'+Date.now();
+    await _db.ref('ppl/sessioni/'+sessId).set({clienteId,abbId,data,ora,tipo,crediti,coach:'Leo',note});
+    const nuovi=parseInt(abb.creditiResidui)-crediti;
+    await _db.ref('ppl/abbonamenti/'+abbId).update({
+      creditiResidui:nuovi, stato:nuovi<=0?'Esaurito':'Attivo'
+    });
+    res.textContent='✓ Sessione registrata. Crediti rimasti: '+nuovi;
+    res.style.color='var(--grn)';
+  } catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
 }
 
-/* ══ MODAL: NUOVO CLIENTE ══ */
+/* ── Modal helpers ── */
+function openModal(id){const m=document.getElementById(id);if(m)m.classList.add('open');}
+function closeModal(id){const m=document.getElementById(id);if(m)m.classList.remove('open');}
+function closeOnOverlay(e,id){if(e.target===e.currentTarget)closeModal(id);}
+
 function openNewClient(){
-  // Reset fields
-  ['nc-nome','nc-cognome','nc-telefono','nc-email','nc-note'].forEach(id=>{
-    const el=document.getElementById(id); if(el) el.value='';
-  });
-  const r=document.getElementById('nc-result'); if(r){ r.textContent=''; r.style.color=''; }
+  ['nc-nome','nc-cognome','nc-telefono','nc-email','nc-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const r=document.getElementById('nc-result');if(r){r.textContent='';r.style.color='';}
   openModal('modal-new-client');
   setTimeout(()=>document.getElementById('nc-nome')?.focus(),100);
 }
-
 async function submitNewClient(){
-  const nome    = document.getElementById('nc-nome')?.value.trim();
-  const cognome = document.getElementById('nc-cognome')?.value.trim();
-  const tel     = document.getElementById('nc-telefono')?.value.trim();
-  const email   = document.getElementById('nc-email')?.value.trim();
-  const note    = document.getElementById('nc-note')?.value.trim();
-  const res     = document.getElementById('nc-result');
-
-  if(!nome || !cognome){
-    res.textContent = '⚠ Nome e cognome obbligatori.';
-    res.style.color = 'var(--org)';
-    return;
-  }
-  if(!_bkConfig.url){
-    res.textContent = '⚠ Connetti prima il Google Sheet (tab Setup).';
-    res.style.color = 'var(--org)';
-    return;
-  }
-
-  const btn = event.target;
-  btn.textContent = '⏳ Salvataggio...';
-  btn.disabled = true;
-  res.textContent = '';
-
+  if(!_db){alert('Firebase non connesso.');return;}
+  const nome   =document.getElementById('nc-nome')?.value.trim();
+  const cognome=document.getElementById('nc-cognome')?.value.trim();
+  const tel    =document.getElementById('nc-telefono')?.value.trim();
+  const email  =document.getElementById('nc-email')?.value.trim();
+  const note   =document.getElementById('nc-note')?.value.trim();
+  const res    =document.getElementById('nc-result');
+  if(!nome||!cognome){res.textContent='⚠ Nome e cognome obbligatori.';res.style.color='var(--org)';return;}
+  const btn=event.target;btn.textContent='⏳ Salvataggio...';btn.disabled=true;
   try{
-    const r2 = await fetch(_bkConfig.url, {
-      method:'POST',
-      body: JSON.stringify({ action:'nuovoCliente', nome, cognome, telefono:tel, email, note })
-    });
-    const data = await r2.json();
-    if(data.status === 'ok'){
-      res.textContent = '✓ Cliente aggiunto — ID: ' + data.id;
-      res.style.color = 'var(--grn)';
-      await syncData();
-      setTimeout(()=>closeModal('modal-new-client'), 1400);
-    } else {
-      throw new Error(data.message || 'Errore sconosciuto');
-    }
-  } catch(e){
-    res.textContent = '✕ ' + e.message;
-    res.style.color = 'var(--red)';
-  } finally {
-    btn.textContent = '✓ Aggiungi cliente';
-    btn.disabled = false;
-  }
+    const id='C_'+Date.now();
+    const oggi=new Date().toLocaleDateString('it-IT');
+    await _db.ref('ppl/clienti/'+id).set({nome,cognome,email:email||'',telefono:tel||'',note:note||'',dataIscrizione:oggi});
+    res.textContent='✓ Cliente aggiunto';res.style.color='var(--grn)';
+    setTimeout(()=>closeModal('modal-new-client'),1200);
+  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
+  finally{btn.textContent='✓ Aggiungi cliente';btn.disabled=false;}
 }
 
-/* ══ MODAL: NUOVO ABBONAMENTO ══ */
-function openNewAbb(preselectedClientId){
-  // Populate client select
-  const sel = document.getElementById('na-cliente');
-  if(sel){
-    sel.innerHTML = '<option value="">Seleziona cliente...</option>' +
-      (_bkData.clienti||[]).map(c=>
-        `<option value="${c.ID}" ${c.ID===preselectedClientId?'selected':''}>${c.Nome} ${c.Cognome}</option>`
-      ).join('');
-  }
-  // Set today as default start date
-  const oggi = new Date().toISOString().split('T')[0];
-  const di = document.getElementById('na-inizio'); if(di) di.value = oggi;
-  // Clear fields
-  ['na-pacchetto','na-crediti','na-scadenza'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el && id!=='na-inizio') el.value='';
-  });
-  const r=document.getElementById('na-result'); if(r){ r.textContent=''; r.style.color=''; }
+function openNewAbb(preselectedId){
+  const sel=document.getElementById('na-cliente');
+  if(sel) sel.innerHTML='<option value="">Seleziona cliente...</option>'+
+    (_bkData.clienti||[]).map(c=>`<option value="${c.ID}" ${c.ID===preselectedId?'selected':''}>${c.nome} ${c.cognome}</option>`).join('');
+  const oggi=new Date().toISOString().split('T')[0];
+  const di=document.getElementById('na-inizio');if(di)di.value=oggi;
+  ['na-pacchetto','na-crediti','na-scadenza'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const r=document.getElementById('na-result');if(r){r.textContent='';r.style.color='';}
   closeModal('modal-client-detail');
   openModal('modal-new-abb');
 }
-
 async function submitNewAbb(){
-  const clienteId  = document.getElementById('na-cliente')?.value;
-  const pacchetto  = document.getElementById('na-pacchetto')?.value.trim();
-  const crediti    = parseInt(document.getElementById('na-crediti')?.value)||0;
-  const dataInizio = document.getElementById('na-inizio')?.value;
-  const dataScad   = document.getElementById('na-scadenza')?.value;
-  const res        = document.getElementById('na-result');
-
-  if(!clienteId){ res.textContent='⚠ Seleziona un cliente.'; res.style.color='var(--org)'; return; }
-  if(!pacchetto){ res.textContent='⚠ Inserisci il nome del pacchetto.'; res.style.color='var(--org)'; return; }
-  if(crediti < 1){ res.textContent='⚠ Inserisci i crediti (min. 1).'; res.style.color='var(--org)'; return; }
-
-  const btn = event.target;
-  btn.textContent = '⏳ Creazione...';
-  btn.disabled = true;
-
+  if(!_db){alert('Firebase non connesso.');return;}
+  const clienteId=document.getElementById('na-cliente')?.value;
+  const pacchetto=document.getElementById('na-pacchetto')?.value.trim();
+  const crediti  =parseInt(document.getElementById('na-crediti')?.value)||0;
+  const dataI    =document.getElementById('na-inizio')?.value;
+  const dataS    =document.getElementById('na-scadenza')?.value;
+  const res      =document.getElementById('na-result');
+  if(!clienteId){res.textContent='⚠ Seleziona cliente.';res.style.color='var(--org)';return;}
+  if(!pacchetto){res.textContent='⚠ Inserisci nome pacchetto.';res.style.color='var(--org)';return;}
+  if(crediti<1){res.textContent='⚠ Crediti minimi: 1.';res.style.color='var(--org)';return;}
+  const btn=event.target;btn.textContent='⏳ Creazione...';btn.disabled=true;
   try{
-    const r2 = await fetch(_bkConfig.url, {
-      method:'POST',
-      body: JSON.stringify({
-        action:'nuovoAbbonamento',
-        clienteId, pacchetto,
-        creditiTotali: crediti,
-        dataInizio, dataScadenza: dataScad
-      })
+    const id='A_'+Date.now();
+    const oggi=new Date().toLocaleDateString('it-IT');
+    await _db.ref('ppl/abbonamenti/'+id).set({
+      clienteId,pacchetto,creditiTotali:crediti,creditiResidui:crediti,
+      dataInizio:dataI||oggi,dataScadenza:dataS||'',stato:'Attivo'
     });
-    const data = await r2.json();
-    if(data.status === 'ok'){
-      res.textContent = '✓ Abbonamento creato — ID: ' + data.id;
-      res.style.color = 'var(--grn)';
-      await syncData();
-      setTimeout(()=>closeModal('modal-new-abb'), 1400);
-    } else {
-      throw new Error(data.message || 'Errore');
-    }
-  } catch(e){
-    res.textContent = '✕ ' + e.message;
-    res.style.color = 'var(--red)';
-  } finally {
-    btn.textContent = '✓ Crea abbonamento';
-    btn.disabled = false;
-  }
+    res.textContent='✓ Abbonamento creato';res.style.color='var(--grn)';
+    setTimeout(()=>closeModal('modal-new-abb'),1200);
+  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
+  finally{btn.textContent='✓ Crea abbonamento';btn.disabled=false;}
 }
 
-/* ══ MODAL: DETTAGLIO CLIENTE ══ */
 function openClient(id){
-  const clienti = _bkData.clienti || [];
-  const c = clienti.find(x => x.ID === id);
-  if(!c) return;
-
-  // Title
-  const title = document.getElementById('detail-title');
-  if(title) title.textContent = c.Nome + ' ' + c.Cognome;
-
-  // Stats
-  const abbs = (_bkData.abbonamenti||[]).filter(a=>a.ClienteID===id);
-  const sess = (_bkData.sessioni||[]).filter(s=>s.ClienteID===id);
-  const abbsAttivi = abbs.filter(a=>a.Stato==='Attivo');
-  const totCr  = abbsAttivi.reduce((s,a)=>s+parseInt(a.CreditiTotali||0),0);
-  const resCr  = abbsAttivi.reduce((s,a)=>s+parseInt(a.CreditiResidui||0),0);
-
-  const stats = document.getElementById('detail-stats');
-  if(stats){
-    stats.innerHTML = [
-      {v: abbsAttivi.length, l:'Abb. attivi'},
-      {v: resCr,             l:'Crediti residui'},
-      {v: totCr,             l:'Crediti totali'},
-      {v: sess.length,       l:'Sessioni totali'},
-    ].map(s=>`<div class="client-stat">
-      <div class="client-stat-val">${s.v}</div>
-      <div class="client-stat-lbl">${s.l}</div>
-    </div>`).join('');
+  const c=(_bkData.clienti||[]).find(x=>x.ID===id);if(!c)return;
+  const title=document.getElementById('detail-title');if(title)title.textContent=c.nome+' '+c.cognome;
+  const abbs=(_bkData.abbonamenti||[]).filter(a=>a.clienteId===id);
+  const sess=(_bkData.sessioni||[]).filter(s=>s.clienteId===id);
+  const abbsA=abbs.filter(a=>a.stato==='Attivo');
+  const totCr=abbsA.reduce((s,a)=>s+parseInt(a.creditiTotali||0),0);
+  const resCr=abbsA.reduce((s,a)=>s+parseInt(a.creditiResidui||0),0);
+  const stats=document.getElementById('detail-stats');
+  if(stats) stats.innerHTML=[{v:abbsA.length,l:'Abb. attivi'},{v:resCr,l:'Crediti residui'},
+    {v:totCr,l:'Crediti totali'},{v:sess.length,l:'Sessioni totali'}]
+    .map(s=>`<div class="client-stat"><div class="client-stat-val">${s.v}</div><div class="client-stat-lbl">${s.l}</div></div>`).join('');
+  const da=document.getElementById('detail-abbs');
+  if(da) da.innerHTML=abbs.length?abbs.map(a=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
+      <span style="color:var(--wh)">${a.pacchetto}</span>
+      <span style="font-family:'DM Mono',monospace;font-size:10px;color:${a.stato==='Attivo'?'var(--grn)':'var(--mu)'};">${a.stato}</span>
+      <span style="font-family:'DM Mono',monospace;color:var(--gold);">${a.creditiResidui}/${a.creditiTotali}</span>
+      <span style="font-size:9px;color:var(--mu);">${a.dataScadenza||'—'}</span>
+    </div>`).join(''):'<div style="font-size:11px;color:var(--mu);">Nessun abbonamento</div>';
+  const ds=document.getElementById('detail-sess');
+  if(ds){
+    const l10=[...sess].reverse().slice(0,10);
+    ds.innerHTML=l10.length?l10.map(s=>`<div class="client-sess-row">
+      <span class="client-sess-date">${s.data||''}</span>
+      <span class="client-sess-type">${s.tipo||''}</span>
+      <span class="client-sess-cr">-${s.crediti||1}</span></div>`).join('')
+      :'<div style="font-size:11px;color:var(--mu);">Nessuna sessione</div>';
   }
-
-  // Abbonamenti
-  const detAbbs = document.getElementById('detail-abbs');
-  if(detAbbs){
-    detAbbs.innerHTML = abbs.length
-      ? abbs.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;
-          padding:7px 0;border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
-          <span style="color:var(--wh)">${a.Pacchetto}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:10px;
-            color:${a.Stato==='Attivo'?'var(--grn)':'var(--mu)'};">${a.Stato}</span>
-          <span style="font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);">
-            ${a.CreditiResidui}/${a.CreditiTotali}</span>
-          <span style="font-size:9px;color:var(--mu);">${a.DataScadenza||'—'}</span>
-        </div>`).join('')
-      : '<div style="font-size:11px;color:var(--mu);padding:8px 0;">Nessun abbonamento</div>';
-  }
-
-  // Sessioni (ultime 10)
-  const detSess = document.getElementById('detail-sess');
-  if(detSess){
-    const last10 = [...sess].reverse().slice(0,10);
-    detSess.innerHTML = last10.length
-      ? last10.map(s=>`<div class="client-sess-row">
-          <span class="client-sess-date">${s.Data||''}</span>
-          <span class="client-sess-type">${s.Tipo||''}</span>
-          <span class="client-sess-cr">−${s.Crediti||1}</span>
-        </div>`).join('')
-      : '<div style="font-size:11px;color:var(--mu);padding:8px 0;">Nessuna sessione registrata</div>';
-  }
-
   openModal('modal-client-detail');
 }
 
-/* ══ ESC key chiude i modal ══ */
-document.addEventListener('keydown', e=>{
-  if(e.key==='Escape'){
-    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
-  }
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
 });
 
-
-function toggleNav(){
-  const nav = document.getElementById('ppl-topnav');
-  if(nav) nav.classList.toggle('nav-open');
-}
-// Close nav when clicking a link
-document.addEventListener('click', function(e){
-  if(e.target.classList.contains('tn-link')){
-    const nav = document.getElementById('ppl-topnav');
-    if(nav) nav.classList.remove('nav-open');
-  }
+function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}
 });
+
+if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+document.addEventListener('DOMContentLoaded', initFirebase);
+
 </script>
 </html>
