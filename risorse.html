@@ -218,10 +218,10 @@ nav.ppl-topnav.nav-open a.tn-link{
       <div><div class="status-item-label">Target KPI</div>
            <div class="status-item-val" id="val-kpi">Default di sistema</div></div>
     </div>
-    <div class="status-item" style="opacity:.5;">
-      <div class="status-dot nd"></div>
+    <div class="status-item">
+      <div class="status-dot nd" id="dot-firebase"></div>
       <div><div class="status-item-label">Firebase</div>
-           <div class="status-item-val">In arrivo</div></div>
+           <div class="status-item-val" id="val-firebase">Non configurato</div></div>
     </div>
   </div>
 
@@ -281,27 +281,44 @@ nav.ppl-topnav.nav-open a.tn-link{
       </div>
     </div>
 
-    <div class="res-card" style="opacity:.55;">
+    <div class="res-card">
       <div class="res-card-head">
         <span class="res-card-icon">🔥</span>
-        <span class="res-card-title">Firebase Realtime DB</span>
-        <span class="res-card-badge badge-soon">In arrivo</span>
+        <span class="res-card-title">Firebase Realtime Database</span>
+        <span class="res-card-badge badge-nd" id="badge-firebase">Non configurato</span>
       </div>
       <div class="res-card-body">
-        <div class="res-field">
-          <span class="res-lbl">Project ID</span>
-          <input class="res-inp" id="cfg-firebase-id" type="text"
-            placeholder="ppl-gestionale-xxxxx" disabled>
+        <div class="res-hint" style="margin-bottom:12px;">
+          Aggiornamento real-time multi-dispositivo. I dati si sincronizzano
+          in meno di 100ms su tutti i client connessi.
         </div>
         <div class="res-field">
           <span class="res-lbl">API Key</span>
-          <input class="res-inp" id="cfg-firebase-key" type="password"
-            placeholder="AIzaSy..." disabled>
+          <input class="res-inp" id="cfg-firebase-key" type="text"
+            placeholder="AIzaSy..." oninput="markUnsaved()">
         </div>
-        <div class="res-hint" style="margin-top:4px;">
-          Sincronizzazione multi-dispositivo e accesso multi-utente.
-          Sarà disponibile nella prossima versione.
+        <div class="res-field">
+          <span class="res-lbl">Database URL</span>
+          <input class="res-inp" id="cfg-firebase-db" type="url"
+            placeholder="https://tuo-progetto-default-rtdb.firebaseio.com"
+            oninput="markUnsaved()">
         </div>
+        <div class="res-field">
+          <span class="res-lbl">Project ID</span>
+          <input class="res-inp" id="cfg-firebase-pid" type="text"
+            placeholder="tuo-progetto-xxxxx" oninput="markUnsaved()">
+        </div>
+        <div class="res-field">
+          <span class="res-lbl">Auth Domain <span style="color:var(--g6);font-size:9px;">(opzionale)</span></span>
+          <input class="res-inp" id="cfg-firebase-auth" type="text"
+            placeholder="tuo-progetto.firebaseapp.com" oninput="markUnsaved()">
+        </div>
+        <div class="res-actions" style="margin-top:12px;">
+          <button class="btn pri" onclick="saveFirebase()">✓ Salva configurazione</button>
+          <button class="btn" onclick="testFirebase()">▶ Testa connessione</button>
+        </div>
+        <div class="res-test-result" id="test-firebase-result"></div>
+        <div id="firebase-save-msg" class="res-save-msg"></div>
       </div>
     </div>
   </div>
@@ -399,10 +416,75 @@ function loadAll(){
   const brand = document.getElementById('tb-studio-name');
   if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
 
+  loadFirebase();
   updateStatus(cfg, kpi);
 }
 
 // ── STATUS INDICATORS ────────────────────────────────────────────────────────
+
+/* ── Firebase config ── */
+function loadFirebase(){
+  const cfg = cfgGet();
+  if(cfg.firebase_apiKey)   document.getElementById('cfg-firebase-key')?.setAttribute('value',cfg.firebase_apiKey);
+  if(cfg.firebase_databaseURL) document.getElementById('cfg-firebase-db')?.setAttribute('value',cfg.firebase_databaseURL);
+  if(cfg.firebase_projectId)  document.getElementById('cfg-firebase-pid')?.setAttribute('value',cfg.firebase_projectId);
+  if(cfg.firebase_authDomain) document.getElementById('cfg-firebase-auth')?.setAttribute('value',cfg.firebase_authDomain);
+  const el_k  = document.getElementById('cfg-firebase-key');
+  const el_db = document.getElementById('cfg-firebase-db');
+  const el_p  = document.getElementById('cfg-firebase-pid');
+  const el_a  = document.getElementById('cfg-firebase-auth');
+  if(el_k  && cfg.firebase_apiKey)        el_k.value  = cfg.firebase_apiKey;
+  if(el_db && cfg.firebase_databaseURL)   el_db.value = cfg.firebase_databaseURL;
+  if(el_p  && cfg.firebase_projectId)     el_p.value  = cfg.firebase_projectId;
+  if(el_a  && cfg.firebase_authDomain)    el_a.value  = cfg.firebase_authDomain;
+}
+
+function saveFirebase(){
+  const key  = document.getElementById('cfg-firebase-key')?.value.trim();
+  const db   = document.getElementById('cfg-firebase-db')?.value.trim();
+  const pid  = document.getElementById('cfg-firebase-pid')?.value.trim();
+  const auth = document.getElementById('cfg-firebase-auth')?.value.trim();
+  const cfg = cfgGet();
+  if(key)  cfg.firebase_apiKey        = key;
+  if(db)   cfg.firebase_databaseURL   = db;
+  if(pid)  cfg.firebase_projectId     = pid;
+  if(auth) cfg.firebase_authDomain    = auth || pid+'.firebaseapp.com';
+  cfgSet(cfg);
+  _unsaved = false;
+  showMsg('firebase-save-msg','✓ Configurazione Firebase salvata');
+  updateStatus(cfg, kpiGet()||{...DCFG_KPI});
+}
+
+async function testFirebase(){
+  const key = document.getElementById('cfg-firebase-key')?.value.trim();
+  const db  = document.getElementById('cfg-firebase-db')?.value.trim();
+  const pid = document.getElementById('cfg-firebase-pid')?.value.trim();
+  const res = document.getElementById('test-firebase-result');
+  if(!key||!db){ res.textContent='⚠ Inserisci API Key e Database URL.'; res.style.color='var(--org)'; return; }
+  res.textContent='⏳ Test connessione...'; res.style.color='var(--mu)';
+  try{
+    // Test: ping il database REST endpoint
+    const pingUrl = db.replace(/\/$/, '') + '/ppl/.json?shallow=true&auth=';
+    const r = await fetch(pingUrl + '&limitToFirst=1');
+    if(r.ok || r.status===200 || r.status===204 || r.status===null){
+      res.textContent = '✓ Database raggiungibile';
+      res.style.color = 'var(--grn)';
+      // Save on successful test
+      saveFirebase();
+      const badge = document.getElementById('badge-firebase');
+      if(badge){badge.className='res-card-badge badge-ok';badge.textContent='Configurato ✓';}
+    } else if(r.status===401||r.status===403){
+      res.textContent = '⚠ Connesso ma accesso negato — verifica le Security Rules (vedi istruzioni)';
+      res.style.color='var(--org)';
+    } else {
+      throw new Error('HTTP '+r.status);
+    }
+  }catch(e){
+    res.textContent='✕ '+e.message+' — verifica URL e API Key';
+    res.style.color='var(--red)';
+  }
+}
+
 function updateStatus(cfg, kpi){
   // Identity
   const hasIdentity = !!(cfg.studio_name || cfg.coach_name);
@@ -420,6 +502,11 @@ function updateStatus(cfg, kpi){
 
   // KPI
   const kpiModified = kpi && JSON.stringify(kpi) !== JSON.stringify(DCFG_KPI);
+  // Firebase
+  const hasFb = !!(cfg.firebase_apiKey && cfg.firebase_databaseURL);
+  const badge_fb = document.getElementById('badge-firebase');
+  if(badge_fb){ badge_fb.className='res-card-badge '+(hasFb?'badge-ok':'badge-nd'); badge_fb.textContent=hasFb?'Configurato ✓':'Non configurato'; }
+
   setDot('dot-kpi', kpiModified ? 'ok' : 'nd');
   document.getElementById('val-kpi').textContent = kpiModified ? 'Personalizzati' : 'Default sistema';
   document.getElementById('badge-kpi').className = 'res-card-badge ' + (kpiModified ? 'badge-ok' : 'badge-nd');
