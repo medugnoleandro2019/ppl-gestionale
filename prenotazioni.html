@@ -11,6 +11,7 @@
 <style>
 
 
+
 /* ══ TOKENS ══ */
 :root{
   --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
@@ -916,10 +917,78 @@ select.pkg-edit-inp{cursor:pointer;}
 .client-sess-type{flex:1;color:var(--mu2);}
 .client-sess-cr{font-family:'DM Mono',monospace;color:var(--red);}
 
+
+/* ── Combo searchable select ── */
+.combo-wrap{position:relative;}
+.combo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
+  padding:7px 10px;outline:none;width:100%;transition:.15s;box-sizing:border-box;}
+.combo-inp:focus{border-color:var(--gold);}
+.combo-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;
+  background:var(--g1);border:1px solid var(--g4);border-radius:3px;
+  max-height:200px;overflow-y:auto;z-index:5000;display:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.combo-drop.open{display:block;}
+.combo-opt{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--mu2);transition:.1s;}
+.combo-opt:hover,.combo-opt.active{background:var(--g3);color:var(--wh);}
+.combo-opt mark{background:none;color:var(--gold);font-style:normal;}
+.combo-none{padding:8px 12px;font-size:11px;color:var(--g6);font-style:italic;}
+/* ── Attendance rework ── */
+.att-section-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+  color:var(--mu);text-transform:uppercase;padding:7px 12px;
+  background:var(--g2);border-bottom:1px solid var(--g3);}
+.att-present-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-bottom:1px solid rgba(34,34,34,.5);background:rgba(77,189,116,.04);}
+.att-present-name{flex:1;font-size:12px;color:var(--wh);}
+.att-present-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--grn);letter-spacing:1px;}
+.att-remove-btn{background:none;border:none;color:var(--g5);font-size:14px;
+  cursor:pointer;padding:0 4px;line-height:1;transition:.15s;}
+.att-remove-btn:hover{color:var(--red);}
+.att-avail-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-bottom:1px solid rgba(34,34,34,.3);cursor:pointer;transition:.1s;}
+.att-avail-row:hover{background:var(--g2);}
+.att-avail-name{flex:1;font-size:12px;color:var(--mu2);}
+.att-avail-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;}
+.att-avail-cr{font-family:'DM Mono',monospace;font-size:10px;color:var(--g6);}
+.att-add-btn{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);
+  color:var(--gold);font-size:10px;border-radius:2px;padding:2px 8px;cursor:pointer;transition:.15s;}
+.att-add-btn:hover{background:rgba(184,151,42,.25);}
+
+/* ── Combo searchable select ── */
+.combo-wrap{position:relative;}
+.combo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
+  padding:7px 10px;outline:none;width:100%;transition:.15s;box-sizing:border-box;}
+.combo-inp:focus{border-color:var(--gold);}
+.combo-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;
+  background:var(--g1);border:1px solid var(--g4);border-radius:3px;
+  max-height:200px;overflow-y:auto;z-index:5000;display:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.combo-drop.open{display:block;}
+.combo-opt{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--mu2);transition:.1s;}
+.combo-opt:hover{background:var(--g3);color:var(--wh);}
+.combo-none{padding:8px 12px;font-size:11px;color:var(--g6);font-style:italic;}
+/* ── Attendance ── */
+.att-present-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-bottom:1px solid rgba(34,34,34,.5);background:rgba(77,189,116,.04);}
+.att-present-name{flex:1;font-size:12px;color:var(--wh);}
+.att-present-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--grn);letter-spacing:1px;}
+.att-remove-btn{background:none;border:none;color:var(--g5);font-size:14px;
+  cursor:pointer;padding:0 4px;line-height:1;transition:.15s;}
+.att-remove-btn:hover{color:var(--red);}
+.att-avail-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
+  border-bottom:1px solid rgba(34,34,34,.3);cursor:pointer;transition:.1s;}
+.att-avail-row:hover{background:var(--g2);}
+.att-avail-name{flex:1;font-size:12px;color:var(--mu2);}
+.att-avail-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);}
+.att-avail-cr{font-family:'DM Mono',monospace;font-size:10px;color:var(--g6);}
+.att-add-btn{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);
+  color:var(--gold);font-size:10px;border-radius:2px;padding:2px 8px;cursor:pointer;}
+.att-add-btn:hover{background:rgba(184,151,42,.25);}
+
 </style>
 </head>
 <body>
-
 <nav class="ppl-topnav" id="ppl-topnav">
   <span class="tn-brand">PPL</span>
   <div class="tn-links" id="tn-links">
@@ -997,17 +1066,27 @@ select.pkg-edit-inp{cursor:pointer;}
             <div class="config-title">✏ Registra sessione manuale</div>
             <div class="config-row">
               <div class="config-field"><span class="config-lbl">Cliente</span>
-                <select class="config-inp" id="sess-client" onchange="loadAbbonamenti(this.value)"></select></div>
+                <div class="combo-wrap">
+                  <input class="combo-inp config-inp" id="sess-client-input"
+                    placeholder="Cerca cliente..." autocomplete="off"
+                    oninput="comboFilter('sess-combo',this.value,_comboClients,'sess-client-val',function(v){loadAbbonamenti(v);})"
+                    onfocus="comboOpen('sess-combo',this.value,_comboClients,'sess-client-val',function(v){loadAbbonamenti(v);})"
+                    onblur="setTimeout(()=>comboClose('sess-combo'),200)">
+                  <input type="hidden" id="sess-client-val">
+                  <div class="combo-drop" id="sess-combo"></div>
+                </div></div>
               <div class="config-field"><span class="config-lbl">Abbonamento</span>
                 <select class="config-inp" id="sess-abbonamento"></select></div>
             </div>
             <div class="config-row">
               <div class="config-field"><span class="config-lbl">Data</span>
-                <input class="config-inp" id="sess-data" type="date"></div>
-              <div class="config-field"><span class="config-lbl">Ora</span>
-                <input class="config-inp" id="sess-ora" type="time"></div>
-              <div class="config-field"><span class="config-lbl">Tipo</span>
-                <input class="config-inp" id="sess-tipo" type="text" placeholder="Small Class Entry"></div>
+                <input class="config-inp" id="sess-data" type="date" onchange="loadSessOrari()"></div>
+              <div class="config-field"><span class="config-lbl">Tipo lezione</span>
+                <select class="config-inp" id="sess-tipo" onchange="loadSessOrari()"></select></div>
+              <div class="config-field"><span class="config-lbl">Ora (da calendario)</span>
+                <select class="config-inp" id="sess-ora">
+                  <option value="">— seleziona tipo e data —</option>
+                </select></div>
             </div>
             <div class="config-row">
               <div class="config-field" style="flex:2;"><span class="config-lbl">Note</span>
@@ -1026,7 +1105,16 @@ select.pkg-edit-inp{cursor:pointer;}
       <!-- STORICO -->
       <div class="bk-section" id="bksec-storico">
         <div class="warn-box" id="no-conn-warn3" style="display:none;">Configura Firebase dalla tab <strong>⚙ Setup</strong>.</div>
-        <div id="storico-content" style="display:none;"><div id="storico-list"></div></div>
+        <div id="storico-content" style="display:none;">
+          <div style="margin-bottom:12px;">
+            <input type="text" id="storico-search" placeholder="Cerca per cliente, tipo, data..."
+              style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+              color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
+              padding:7px 12px;outline:none;width:100%;box-sizing:border-box;"
+              oninput="filterStorico(this.value)">
+          </div>
+          <div id="storico-list"></div>
+        </div>
       </div>
 
       <!-- SETUP -->
@@ -1164,7 +1252,15 @@ select.pkg-edit-inp{cursor:pointer;}
       <button class="modal-close" onclick="closeModal('modal-new-abb')">✕</button></div>
     <div class="modal-body">
       <div class="modal-field" style="margin-bottom:12px;"><span class="modal-lbl">Cliente *</span>
-        <select class="modal-inp" id="na-cliente"></select></div>
+        <div class="combo-wrap">
+          <input class="combo-inp modal-inp" id="na-cliente-input"
+            placeholder="Cerca cliente..." autocomplete="off"
+            oninput="comboFilter('na-combo',this.value,_comboClients,'na-cliente-val',null)"
+            onfocus="comboOpen('na-combo',this.value,_comboClients,'na-cliente-val',null)"
+            onblur="setTimeout(()=>comboClose('na-combo'),200)">
+          <input type="hidden" id="na-cliente-val">
+          <div class="combo-drop" id="na-combo"></div>
+        </div></div>
       <div class="modal-field" style="margin-bottom:10px;"><span class="modal-lbl">Pacchetto *</span>
         <select class="modal-inp" id="na-pacchetto" onchange="onPacchettoChange(this)"></select></div>
       <div id="na-pkg-preview" style="background:var(--g2);border:1px solid var(--g3);
@@ -1200,12 +1296,16 @@ select.pkg-edit-inp{cursor:pointer;}
   <div class="modal" style="max-width:620px;">
     <div class="modal-head">
       <span class="modal-title" id="detail-title">Cliente</span>
-      <div style="display:flex;gap:6px;align-items:center;">
+      <div style="display:flex;gap:4px;align-items:center;">
         <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openNewAbb()">+ Abbonamento</button>
+        <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openEditClient()">✏ Modifica</button>
+        <button class="btn danger" style="font-size:8px;padding:4px 10px;" onclick="deleteClient()">🗑</button>
         <button class="modal-close" onclick="closeModal('modal-client-detail')">✕</button>
       </div>
     </div>
     <div class="modal-body">
+      <div id="edit-client-form" style="display:none;background:var(--g2);border:1px solid var(--g4);
+        border-radius:4px;padding:12px;margin-bottom:12px;"></div>
       <div class="client-detail-grid" id="detail-stats" style="margin-bottom:14px;"></div>
       <div class="slbl-mini">Abbonamenti</div>
       <div id="detail-abbs" style="margin-bottom:14px;"></div>
@@ -1225,17 +1325,31 @@ select.pkg-edit-inp{cursor:pointer;}
       <span class="modal-title" id="att-modal-title">Presenze</span>
       <button class="modal-close" onclick="closeModal('modal-attendance')">✕</button>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="padding-bottom:0;">
       <div id="att-lesson-info" style="background:var(--g2);border-radius:4px;
-        padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--mu2);"></div>
-      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-        color:var(--gold);text-transform:uppercase;margin-bottom:8px;">
-        Segna presenti — crediti scalati al salvataggio</div>
-      <div id="att-client-list"
-        style="background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;max-height:340px;overflow-y:auto;"></div>
+        padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--mu2);"></div>
+      <!-- Presenti -->
+      <div class="slbl-mini" style="margin-bottom:0;">Presenti (<span id="att-count">0</span>)</div>
+      <div id="att-present-list"
+        style="background:var(--g1);border:1px solid var(--g3);border-top:none;border-radius:0;
+        overflow:hidden;margin-bottom:0;min-height:36px;">
+        <div id="att-present-inner" style="max-height:160px;overflow-y:auto;"></div>
+      </div>
+      <!-- Aggiungi -->
+      <div class="slbl-mini" style="margin-top:10px;margin-bottom:0;">Aggiungi cliente</div>
+      <div style="background:var(--g1);border:1px solid var(--g3);border-top:none;border-radius:0 0 4px 4px;">
+        <div style="padding:8px 12px;border-bottom:1px solid var(--g3);">
+          <input id="att-search" type="text" placeholder="Cerca cliente disponibile..."
+            style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+            color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
+            padding:6px 10px;outline:none;width:100%;box-sizing:border-box;"
+            oninput="filterAttAvail(this.value)">
+        </div>
+        <div id="att-avail-list" style="max-height:200px;overflow-y:auto;"></div>
+      </div>
     </div>
-    <div class="modal-foot" style="justify-content:space-between;">
-      <button class="btn danger" onclick="deleteLesson()">🗑 Elimina lezione</button>
+    <div class="modal-foot" style="justify-content:space-between;margin-top:14px;">
+      <button class="btn danger" onclick="deleteLesson()">🗑 Elimina</button>
       <div style="display:flex;gap:8px;align-items:center;">
         <span id="att-result" style="font-size:11px;"></span>
         <button class="btn" onclick="closeModal('modal-attendance')">Annulla</button>
@@ -1248,7 +1362,11 @@ select.pkg-edit-inp{cursor:pointer;}
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script><!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
+
 /* ══════════════════════════════════════════════════════════════════════════
    PPL PRENOTAZIONI v3 — Firebase + Calendario + Multi-Abbonamento
    Architettura pronta per Livello B (prenotazione self-service clienti)
@@ -1326,6 +1444,7 @@ function startListening(){
     };
     cfgSet(BK_CACHE_KEY,_data);
     _connected=true;
+    buildComboClients();
     setStatus(badge,'ok','● Firebase connesso');
     if(connResult)connResult.textContent='✓ Connesso — aggiornamento real-time attivo.';
     renderClienti();
@@ -1872,54 +1991,11 @@ function onPacchettoChange(sel){
   if(preview)preview.style.display='block';
 }
 
-function openNewAbb(preselectedId){
-  const selC=document.getElementById('na-cliente');
-  const selP=document.getElementById('na-pacchetto');
-  if(selC){
-    selC.innerHTML='<option value="">Seleziona cliente...</option>'+
-      Object.entries(_data.clienti||{}).map(([id,c])=>
-        `<option value="${id}" ${id===preselectedId?'selected':''}>${c.nome} ${c.cognome}</option>`).join('');
-  }
-  if(selP){
-    selP.innerHTML='<option value="">Seleziona pacchetto...</option>'+
-      Object.entries(_data.pacchetti||{}).map(([id,p])=>
-        `<option value="${id}">${p.nome} (${p.crediti} cr. · €${p.prezzo})</option>`).join('');
-  }
-  const oggi=new Date().toISOString().split('T')[0];
-  const di=document.getElementById('na-inizio');if(di)di.value=oggi;
-  ['na-scadenza','na-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const preview=document.getElementById('na-pkg-preview');if(preview)preview.style.display='none';
-  const r=document.getElementById('na-result');if(r){r.textContent='';r.style.color='';}
-  closeModal('modal-client-detail');
-  openModal('modal-new-abb');
-}
+// openNewAbb: overridden below
 
-async function submitNewAbb(){
-  const clienteId =document.getElementById('na-cliente')?.value;
-  const pacchettoId=document.getElementById('na-pacchetto')?.value;
-  const dataI     =document.getElementById('na-inizio')?.value;
-  const dataS     =document.getElementById('na-scadenza')?.value;
-  const note      =document.getElementById('na-note')?.value.trim();
-  const res       =document.getElementById('na-result');
-  if(!clienteId){res.textContent='⚠ Seleziona cliente.';res.style.color='var(--org)';return;}
-  if(!pacchettoId){res.textContent='⚠ Seleziona pacchetto.';res.style.color='var(--org)';return;}
-  const pkg=_data.pacchetti?.[pacchettoId];
-  if(!pkg){res.textContent='⚠ Pacchetto non trovato.';res.style.color='var(--org)';return;}
-  const btn=event.target;btn.textContent='⏳ Creazione...';btn.disabled=true;
-  try{
-    const oggi=new Date().toLocaleDateString('it-IT');
-    await fbPush('ppl/abbonamenti',{
-      clienteId,pacchettoId,
-      pacchetto:pkg.nome,tipo:pkg.tipo||'',
-      creditiTotali:pkg.crediti,creditiResidui:pkg.crediti,
-      dataInizio:dataI||oggi,dataScadenza:dataS||'',
-      stato:'Attivo',note:note||''
-    });
-    res.textContent='✓ Abbonamento creato ('+pkg.crediti+' crediti)';res.style.color='var(--grn)';
-    setTimeout(()=>closeModal('modal-new-abb'),1200);
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-  finally{btn.textContent='✓ Crea abbonamento';btn.disabled=false;}
-}
+
+// submitNewAbb: overridden below
+
 
 /* ══ CLIENTI MODAL ══════════════════════════════════════════════════════ */
 function openNewClient(){
@@ -1946,114 +2022,18 @@ async function submitNewClient(){
   finally{btn.textContent='✓ Aggiungi cliente';btn.disabled=false;}
 }
 
-function openClient(cid){
-  const c=_data.clienti?.[cid];if(!c)return;
-  const title=document.getElementById('detail-title');
-  if(title)title.textContent=c.nome+' '+c.cognome;
-  const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid).map(([aid,a])=>({id:aid,...a}));
-  const sess=Object.entries(_data.sessioni||{}).filter(([,s])=>s.clienteId===cid).map(([sid,s])=>({id:sid,...s}));
-  const abbsA=abbs.filter(a=>a.stato==='Attivo');
-  const stats=document.getElementById('detail-stats');
-  if(stats)stats.innerHTML=[
-    {v:abbsA.length,l:'Abb. attivi'},
-    {v:abbsA.reduce((s,a)=>s+parseInt(a.creditiResidui||0),0),l:'Crediti tot.'},
-    {v:sess.length,l:'Sessioni'},
-  ].map(s=>`<div class="client-stat"><div class="client-stat-val">${s.v}</div><div class="client-stat-lbl">${s.l}</div></div>`).join('');
-  const da=document.getElementById('detail-abbs');
-  if(da)da.innerHTML=abbs.length?abbs.map(a=>{
-    const pkg=_data.pacchetti?.[a.pacchettoId];
-    const pct=parseInt(a.creditiTotali||0)>0?Math.round(parseInt(a.creditiResidui||0)/parseInt(a.creditiTotali||1)*100):0;
-    const bc=pct>50?'#4DBD74':pct>20?'var(--org)':'var(--red)';
-    return `<div style="background:var(--g2);border-radius:3px;padding:10px 12px;margin-bottom:6px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
-        <span style="font-size:12px;color:var(--wh);">${pkg?.nome||a.pacchetto||'—'}</span>
-        <span style="font-family:'DM Mono',monospace;font-size:11px;color:${a.stato==='Attivo'?'var(--grn)':'var(--mu)'};">${a.stato}</span>
-      </div>
-      <div class="credits-bar-track" style="margin-bottom:4px;">
-        <div class="credits-bar-fill" style="width:${pct}%;background:${bc};"></div>
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">
-        ${a.creditiResidui}/${a.creditiTotali} crediti · ${a.dataScadenza?'scad. '+a.dataScadenza:''}</div>
-    </div>`;
-  }).join(''):'<div style="font-size:11px;color:var(--mu);">Nessun abbonamento</div>';
-  const ds=document.getElementById('detail-sess');
-  if(ds){
-    const l10=[...sess].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,10);
-    ds.innerHTML=l10.length?l10.map(s=>`<div class="client-sess-row">
-      <span class="client-sess-date">${s.data||''}</span>
-      <span class="client-sess-type">${s.tipo||''}</span>
-      <span class="client-sess-cr">-${s.crediti||1}</span></div>`).join('')
-      :'<div style="font-size:11px;color:var(--mu);">Nessuna sessione</div>';
-  }
-  openModal('modal-client-detail');
-}
+// openClient: overridden below
+
 
 /* ══ SESSIONI / STORICO ════════════════════════════════════════════════ */
-function renderSessioniForm(){
-  const warn=document.getElementById('no-conn-warn2');
-  const cont=document.getElementById('sessioni-content');
-  if(!_connected&&!Object.keys(_data.clienti||{}).length)return;
-  if(warn)warn.style.display='none';if(cont)cont.style.display='block';
-  const sel=document.getElementById('sess-client');
-  if(sel){
-    sel.innerHTML='<option value="">Seleziona cliente...</option>'+
-      Object.entries(_data.clienti||{}).map(([id,c])=>`<option value="${id}">${c.nome} ${c.cognome}</option>`).join('');
-    sel.onchange=()=>loadAbbonamenti(sel.value);
-  }
-  const di=document.getElementById('sess-data');if(di&&!di.value)di.value=new Date().toISOString().split('T')[0];
-}
-function loadAbbonamenti(cid){
-  const sel=document.getElementById('sess-abbonamento');if(!sel)return;
-  const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid&&a.stato==='Attivo');
-  sel.innerHTML=abbs.length?abbs.map(([id,a])=>`<option value="${id}">${a.pacchetto||'Abb.'} (${a.creditiResidui} cr.)</option>`).join('')
-    :'<option value="">Nessun abbonamento attivo</option>';
-}
-async function registraSessione(){
-  if(!_db){alert('Firebase non connesso.');return;}
-  const clienteId=document.getElementById('sess-client').value;
-  const abbId    =document.getElementById('sess-abbonamento').value;
-  const data     =document.getElementById('sess-data').value;
-  const ora      =document.getElementById('sess-ora').value;
-  const tipo     =document.getElementById('sess-tipo').value;
-  const crediti  =parseInt(document.getElementById('sess-crediti').value)||1;
-  const note     =document.getElementById('sess-note').value;
-  const res      =document.getElementById('sess-result');
-  if(!clienteId){res.textContent='⚠ Seleziona cliente.';return;}
-  const abb=_data.abbonamenti?.[abbId];
-  if(abbId&&abb&&parseInt(abb.creditiResidui||0)<crediti){
-    res.textContent='✕ Crediti insufficienti: '+abb.creditiResidui;res.style.color='var(--red)';return;
-  }
-  res.textContent='⏳ Registrazione...';res.style.color='var(--mu)';
-  try{
-    await fbPush('ppl/sessioni',{clienteId,abbonamentoId:abbId||'',data,ora,tipo,crediti,coach:'Leo',note});
-    if(abbId&&abb){
-      const nuovi=parseInt(abb.creditiResidui)-crediti;
-      await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:nuovi<=0?'Esaurito':'Attivo'});
-    }
-    res.textContent='✓ Registrata';res.style.color='var(--grn)';
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-}
-function renderStorico(){
-  const warn=document.getElementById('no-conn-warn3');
-  const cont=document.getElementById('storico-content');
-  const list=document.getElementById('storico-list');
-  if(!list)return;
-  const sess=Object.entries(_data.sessioni||{}).map(([id,s])=>({id,...s}))
-    .sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,50);
-  if(!_connected&&!sess.length){if(warn)warn.style.display='block';return;}
-  if(warn)warn.style.display='none';if(cont)cont.style.display='block';
-  const clienti=_data.clienti||{};
-  list.innerHTML=sess.length?sess.map(s=>{
-    const c=clienti[s.clienteId]||{};
-    return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;
-      border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
-      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;">${s.data||''}</span>
-      <span style="flex:1;color:var(--mu2);">${s.tipo||''}</span>
-      <span style="color:var(--wh);">${c.nome||''} ${c.cognome||s.clienteId||''}</span>
-      <span style="font-family:'DM Mono',monospace;color:var(--red);">-${s.crediti||1}</span>
-    </div>`;
-  }).join(''):'<div style="font-size:11px;color:var(--mu);padding:12px 0;">Nessuna sessione</div>';
-}
+// renderSessioniForm: overridden below
+
+// loadAbbonamenti: overridden below
+
+// registraSessione: overridden below
+
+// renderStorico: overridden below
+
 
 /* ══ PANEL / MODAL HELPERS ════════════════════════════════════════════ */
 function openPanel(id){
@@ -2096,6 +2076,543 @@ document.addEventListener('click',function(e){
 /* ══ INIT ═════════════════════════════════════════════════════════════ */
 if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
 document.addEventListener('DOMContentLoaded',initFirebase);
+
+
+
+/* ══ NEW FEATURES ══ */
+
+/* ══ COMBO SEARCHABLE SELECT ════════════════════════════════════════════════
+   _comboClients: [{value:'C_xxx',label:'Mario Rossi'}]
+   Built from _data.clienti on every Firebase update
+   ══════════════════════════════════════════════════════════════════════════ */
+let _comboClients = [];
+   // last opened from card (for pre-select in new-abb)
+
+function buildComboClients(){
+  _comboClients = Object.entries(_data.clienti||{})
+    .map(([id,c])=>({value:id, label:(c.nome||'')+' '+(c.cognome||'')}))
+    .sort((a,b)=>a.label.localeCompare(b.label));
+}
+
+function comboFilter(dropId, query, opts, hiddenId, onSelect){
+  const drop = document.getElementById(dropId);
+  const hiddenEl = document.getElementById(hiddenId);
+  if(!drop) return;
+  const q = (query||'').toLowerCase().trim();
+  const filtered = q ? opts.filter(o=>o.label.toLowerCase().includes(q)) : opts;
+  renderComboOptions(drop, filtered, q, hiddenId, onSelect);
+  drop.classList.toggle('open', filtered.length > 0);
+  // Clear hidden value when typing
+  if(hiddenEl && hiddenEl.value){
+    const cur = opts.find(o=>o.value===hiddenEl.value);
+    if(!cur || !cur.label.toLowerCase().startsWith(q.toLowerCase())){
+      hiddenEl.value = '';
+    }
+  }
+}
+
+function comboOpen(dropId, query, opts, hiddenId, onSelect){
+  const drop = document.getElementById(dropId);
+  if(!drop) return;
+  const q = (query||'').toLowerCase();
+  const filtered = q ? opts.filter(o=>o.label.toLowerCase().includes(q)) : opts;
+  renderComboOptions(drop, filtered, q, hiddenId, onSelect);
+  drop.classList.toggle('open', filtered.length > 0);
+}
+
+function renderComboOptions(drop, filtered, q, hiddenId, onSelect){
+  if(!filtered.length){
+    drop.innerHTML = '<div class="combo-none">Nessun risultato</div>';
+    drop.classList.add('open');
+    return;
+  }
+  drop.innerHTML = filtered.slice(0,40).map(o=>{
+    const hl = q ? o.label.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', 'gi'), '<mark>$1</mark>') : o.label;
+    return `<div class="combo-opt" data-value="${o.value}"
+      onmousedown="selectCombo('${drop.id}','${hiddenId}',this.dataset.value,'${o.label.replace(/'/g,"\\'")}',${onSelect?'true':'false'})">${hl}</div>`;
+  }).join('');
+}
+
+function selectCombo(dropId, hiddenId, value, label, hasCallback){
+  const drop = document.getElementById(dropId);
+  const hidden = document.getElementById(hiddenId);
+  if(hidden) hidden.value = value;
+  // Fill the input
+  const inputId = hiddenId.replace('-val','-input');
+  const input = document.getElementById(inputId);
+  if(input) input.value = label;
+  if(drop) drop.classList.remove('open');
+  // Fire callback via ID convention
+  if(hasCallback){
+    if(hiddenId === 'sess-client-val') loadAbbonamenti(value);
+    if(hiddenId === 'na-cliente-val') { /* nothing extra */ }
+  }
+}
+
+function comboClose(dropId){
+  const drop = document.getElementById(dropId);
+  if(drop) drop.classList.remove('open');
+}
+
+// Helper: get combo value
+function getComboVal(hiddenId){ return document.getElementById(hiddenId)?.value || ''; }
+
+// Reset a combo
+function resetCombo(inputId, dropId, hiddenId){
+  const i=document.getElementById(inputId); if(i)i.value='';
+  const d=document.getElementById(dropId); if(d)d.classList.remove('open');
+  const h=document.getElementById(hiddenId); if(h)h.value='';
+}
+
+/* ══ STORICO FILTER ════════════════════════════════════════════════════════ */
+let _storicoAll = [];
+
+function renderStorico(){
+  const warn=document.getElementById('no-conn-warn3');
+  const cont=document.getElementById('storico-content');
+  const list=document.getElementById('storico-list');
+  if(!list)return;
+  _storicoAll = Object.entries(_data.sessioni||{}).map(([id,s])=>({id,...s}))
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,200);
+  if(!_connected&&!_storicoAll.length){if(warn)warn.style.display='block';return;}
+  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
+  const q = document.getElementById('storico-search')?.value||'';
+  renderStoricoList(_storicoAll, q);
+}
+
+function filterStorico(q){
+  renderStoricoList(_storicoAll, q);
+}
+
+function renderStoricoList(items, q){
+  const list=document.getElementById('storico-list'); if(!list)return;
+  const clienti=_data.clienti||{};
+  const filtered = q ? items.filter(s=>{
+    const c=clienti[s.clienteId]||{};
+    const name=(c.nome||'')+' '+(c.cognome||'');
+    return name.toLowerCase().includes(q.toLowerCase())
+      ||(s.tipo||'').toLowerCase().includes(q.toLowerCase())
+      ||(s.data||'').includes(q);
+  }) : items;
+  list.innerHTML = filtered.slice(0,100).map(s=>{
+    const c=clienti[s.clienteId]||{};
+    return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;
+      border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
+      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;">${s.data||''}</span>
+      <span style="flex:1;color:var(--mu2);">${s.tipo||''}</span>
+      <span style="color:var(--wh);">${c.nome||''} ${c.cognome||s.clienteId||''}</span>
+      <span style="font-family:'DM Mono',monospace;color:var(--red);">-${s.crediti||1}</span>
+    </div>`;
+  }).join('')||'<div style="font-size:11px;color:var(--mu);padding:12px 0;">Nessun risultato</div>';
+}
+
+/* ══ REGISTRA — ORA DINAMICA DA CALENDARIO ═════════════════════════════════ */
+function loadSessOrari(){
+  const data  = document.getElementById('sess-data')?.value;
+  const tipoEl= document.getElementById('sess-tipo');
+  const oraEl = document.getElementById('sess-ora');
+  if(!oraEl) return;
+  // Populate tipo select if empty
+  if(tipoEl && tipoEl.options.length <= 1){
+    const tipi = Object.entries(_data.tipiLezione||{});
+    tipoEl.innerHTML = '<option value="">Seleziona tipo...</option>' +
+      tipi.map(([id,t])=>`<option value="${t.tipo||id}">${t.nome||id}</option>`).join('');
+  }
+  const tipo = tipoEl?.value;
+  if(!data || !tipo){
+    oraEl.innerHTML='<option value="">— seleziona tipo e data —</option>';
+    return;
+  }
+  // Find lessons on this date with matching tipo
+  const matches = Object.entries(_data.lezioni||{})
+    .filter(([,l])=>{
+      const lt = _data.tipiLezione?.[l.tipoId];
+      return l.data === data && (lt?.tipo === tipo || l.tipoId === tipo);
+    })
+    .map(([lid,l])=>({id:lid,...l}))
+    .sort((a,b)=>a.ora.localeCompare(b.ora));
+  if(!matches.length){
+    oraEl.innerHTML='<option value="">Nessuna lezione in calendario per questa data e tipo</option>';
+  } else {
+    const tipiLezione = _data.tipiLezione||{};
+    oraEl.innerHTML = matches.map(l=>{
+      const presenti = Object.keys(l.presenti||{}).length;
+      const tipo_o = tipiLezione[l.tipoId];
+      return `<option value="${l.ora}" data-lesson-id="${l.id}">
+        ${l.ora} — ${presenti}/${tipo_o?.postiMax||'∞'} presenti
+      </option>`;
+    }).join('');
+  }
+}
+
+/* ══ ATTENDANCE MODAL REWORK ════════════════════════════════════════════════ */
+// _attendance: { clienteId: abbonamentoId }  ← presenti correnti
+
+function openAttendance(lessonId){
+  _currentLessonId = lessonId;
+  const l = _data.lezioni?.[lessonId]; if(!l)return;
+  const tipo = _data.tipiLezione?.[l.tipoId];
+  const dt = new Date(l.data);
+  document.getElementById('att-modal-title').textContent =
+    (tipo?.nome||'Lezione')+' — '+l.data+' '+l.ora;
+  const info = document.getElementById('att-lesson-info');
+  if(info) info.innerHTML = `<strong>${tipo?.nome||'—'}</strong> · ${l.data} · ${l.ora} · Coach: ${l.coach||'—'}`;
+  // Init attendance from current presenti
+  _attendance = {...(l.presenti||{})};
+  renderAttendance();
+  document.getElementById('att-search').value = '';
+  openModal('modal-attendance');
+}
+
+function renderAttendance(){
+  renderAttPresent();
+  renderAttAvail('');
+  const count = document.getElementById('att-count');
+  if(count) count.textContent = Object.keys(_attendance).length;
+}
+
+function renderAttPresent(){
+  const container = document.getElementById('att-present-inner'); if(!container)return;
+  const clienti = _data.clienti||{};
+  const presentIds = Object.keys(_attendance);
+  if(!presentIds.length){
+    container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:var(--g6);font-style:italic;">Nessun cliente segnato presente</div>';
+    return;
+  }
+  container.innerHTML = presentIds.map(cid=>{
+    const c=clienti[cid]||{};
+    const abbId=_attendance[cid];
+    const abb=abbId&&abbId!=='manual'?_data.abbonamenti?.[abbId]:null;
+    const pkg=abb?_data.pacchetti?.[abb.pacchettoId]:null;
+    return `<div class="att-present-row">
+      <div class="att-present-name">${c.nome||''} ${c.cognome||cid}</div>
+      <span class="att-present-pkg">${pkg?.nome||abb?.pacchetto||'manuale'}</span>
+      <button class="att-remove-btn" onclick="removeAttendance('${cid}')">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderAttAvail(q){
+  const container=document.getElementById('att-avail-list'); if(!container)return;
+  const l=_data.lezioni?.[_currentLessonId];
+  const tipo=_data.tipiLezione?.[l?.tipoId];
+  const clienti=Object.entries(_data.clienti||{});
+  const available = clienti.filter(([cid])=>!_attendance[cid]);
+  const filtered = q ? available.filter(([,c])=>
+    ((c.nome||'')+' '+(c.cognome||'')).toLowerCase().includes(q.toLowerCase())
+  ) : available;
+  if(!filtered.length){
+    container.innerHTML='<div class="combo-none">Nessun cliente disponibile</div>';return;
+  }
+  container.innerHTML = filtered.slice(0,50).map(([cid,c])=>{
+    // Find best matching abb
+    const abbs = Object.entries(_data.abbonamenti||{})
+      .filter(([,a])=>a.clienteId===cid&&a.stato==='Attivo')
+      .map(([aid,a])=>({id:aid,...a}));
+    const bestAbb = tipo ? (abbs.find(a=>_data.pacchetti?.[a.pacchettoId]?.tipo===tipo.tipo)||abbs[0]) : abbs[0];
+    const pkg = bestAbb?_data.pacchetti?.[bestAbb.pacchettoId]:null;
+    const hasCredits = bestAbb && parseInt(bestAbb.creditiResidui||0)>0;
+    return `<div class="att-avail-row" onclick="addAttendance('${cid}','${bestAbb?.id||'manual'}')">
+      <div class="att-avail-name">${c.nome||''} ${c.cognome||''}</div>
+      <span class="att-avail-pkg">${pkg?.nome||bestAbb?.pacchetto||'—'}</span>
+      <span class="att-avail-cr">${bestAbb?bestAbb.creditiResidui+' cr.':'—'}</span>
+      ${hasCredits?'<button class="att-add-btn">+ Aggiungi</button>':'<span style="font-size:9px;color:var(--red);">No crediti</span>'}
+    </div>`;
+  }).join('');
+}
+
+function filterAttAvail(q){ renderAttAvail(q); }
+
+function addAttendance(cid, abbId){
+  _attendance[cid] = abbId||'manual';
+  document.getElementById('att-search').value='';
+  renderAttendance();
+}
+
+function removeAttendance(cid){
+  delete _attendance[cid];
+  renderAttendance();
+}
+
+/* ══ CLIENT EDIT / DELETE ════════════════════════════════════════════════ */
+
+
+function openEditClient(){
+  const c = _data.clienti?.[_currentClientId]; if(!c)return;
+  const form = document.getElementById('edit-client-form'); if(!form)return;
+  form.style.display='block';
+  form.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+    color:var(--gold);text-transform:uppercase;margin-bottom:10px;">Modifica cliente</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <div style="flex:1;min-width:120px;"><div class="pkg-edit-lbl">Nome</div>
+        <input class="pkg-edit-inp" id="ec-nome" value="${c.nome||''}"></div>
+      <div style="flex:1;min-width:120px;"><div class="pkg-edit-lbl">Cognome</div>
+        <input class="pkg-edit-inp" id="ec-cognome" value="${c.cognome||''}"></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <div style="flex:1;"><div class="pkg-edit-lbl">Telefono</div>
+        <input class="pkg-edit-inp" id="ec-tel" value="${c.telefono||''}"></div>
+      <div style="flex:1;"><div class="pkg-edit-lbl">Email</div>
+        <input class="pkg-edit-inp" id="ec-email" value="${c.email||''}"></div>
+    </div>
+    <div style="margin-bottom:10px;"><div class="pkg-edit-lbl">Note</div>
+      <input class="pkg-edit-inp" id="ec-note" value="${c.note||''}"></div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn pri" style="flex:1;" onclick="saveEditClient()">✓ Salva</button>
+      <button class="btn" onclick="document.getElementById('edit-client-form').style.display='none'">Annulla</button>
+    </div>
+    <div id="ec-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>`;
+}
+
+async function saveEditClient(){
+  const nome   =document.getElementById('ec-nome')?.value.trim();
+  const cognome=document.getElementById('ec-cognome')?.value.trim();
+  const tel    =document.getElementById('ec-tel')?.value.trim();
+  const email  =document.getElementById('ec-email')?.value.trim();
+  const note   =document.getElementById('ec-note')?.value.trim();
+  const msg    =document.getElementById('ec-msg');
+  if(!nome||!cognome){if(msg){msg.textContent='⚠ Nome e cognome obbligatori.';msg.style.color='var(--org)';}return;}
+  try{
+    await fbUpdate('ppl/clienti/'+_currentClientId,{nome,cognome,telefono:tel||'',email:email||'',note:note||''});
+    if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
+    setTimeout(()=>{
+      document.getElementById('edit-client-form').style.display='none';
+      const title=document.getElementById('detail-title');
+      if(title)title.textContent=nome+' '+cognome;
+    },900);
+  }catch(e){if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}}
+}
+
+async function deleteClient(){
+  const c=_data.clienti?.[_currentClientId];
+  if(!c)return;
+  if(!confirm(`Eliminare il cliente ${c.nome} ${c.cognome}?\nVerranno eliminati anche tutti i suoi abbonamenti e sessioni.`))return;
+  try{
+    await fbRemove('ppl/clienti/'+_currentClientId);
+    // Remove abbonamenti
+    const abbIds=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===_currentClientId).map(([id])=>id);
+    for(const id of abbIds) await fbRemove('ppl/abbonamenti/'+id);
+    // Remove sessioni
+    const sessIds=Object.entries(_data.sessioni||{}).filter(([,s])=>s.clienteId===_currentClientId).map(([id])=>id);
+    for(const id of sessIds) await fbRemove('ppl/sessioni/'+id);
+    closeModal('modal-client-detail');
+  }catch(e){alert('Errore: '+e.message);}
+}
+
+/* ══ SUBSCRIPTION EDIT / DELETE ═════════════════════════════════════════ */
+async function deleteAbb(abbId){
+  if(!confirm('Eliminare questo abbonamento?'))return;
+  try{
+    await fbRemove('ppl/abbonamenti/'+abbId);
+  }catch(e){alert('Errore: '+e.message);}
+}
+
+function openEditAbb(abbId){
+  const abb=_data.abbonamenti?.[abbId]; if(!abb)return;
+  const el=document.getElementById('abb-edit-'+abbId); if(!el)return;
+  const pkg=_data.pacchetti?.[abb.pacchettoId];
+  el.style.display=el.style.display==='none'?'block':'none';
+  el.innerHTML=`<div style="padding:10px;background:var(--g2);border-top:1px solid var(--g4);">
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <div style="flex:1;"><div class="pkg-edit-lbl">Crediti residui</div>
+        <input class="pkg-edit-inp" id="ea-cr-${abbId}" type="number" value="${abb.creditiResidui||0}" min="0"></div>
+      <div style="flex:1;"><div class="pkg-edit-lbl">Stato</div>
+        <select class="pkg-edit-inp" id="ea-stato-${abbId}">
+          <option ${abb.stato==='Attivo'?'selected':''}>Attivo</option>
+          <option ${abb.stato==='Esaurito'?'selected':''}>Esaurito</option>
+          <option ${abb.stato==='Sospeso'?'selected':''}>Sospeso</option>
+        </select></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <div style="flex:1;"><div class="pkg-edit-lbl">Scadenza</div>
+        <input class="pkg-edit-inp" id="ea-scad-${abbId}" type="date" value="${abb.dataScadenza||''}"></div>
+    </div>
+    <div style="display:flex;gap:6px;">
+      <button class="btn pri" style="flex:1;font-size:9px;" onclick="saveEditAbb('${abbId}')">✓ Salva</button>
+      <button class="btn" style="font-size:9px;" onclick="document.getElementById('abb-edit-${abbId}').style.display='none'">Annulla</button>
+    </div>
+    <div id="ea-msg-${abbId}" style="margin-top:4px;font-size:11px;min-height:12px;"></div>
+  </div>`;
+}
+
+async function saveEditAbb(abbId){
+  const cr   =parseInt(document.getElementById('ea-cr-'+abbId)?.value)||0;
+  const stato=document.getElementById('ea-stato-'+abbId)?.value||'Attivo';
+  const scad =document.getElementById('ea-scad-'+abbId)?.value||'';
+  const msg  =document.getElementById('ea-msg-'+abbId);
+  try{
+    await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:cr,stato,dataScadenza:scad});
+    if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
+    setTimeout(()=>openClient(_currentClientId),900);
+  }catch(e){if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}}
+}
+
+/* ══ OVERRIDE openClient (store _currentClientId + enhanced detail-abbs) ═ */
+function openClient(cid){
+  _currentClientId = cid;
+  const c=_data.clienti?.[cid]; if(!c)return;
+  const title=document.getElementById('detail-title');
+  if(title)title.textContent=c.nome+' '+c.cognome;
+  // Hide edit form
+  const ef=document.getElementById('edit-client-form');if(ef)ef.style.display='none';
+  const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid).map(([aid,a])=>({id:aid,...a}));
+  const sess=Object.entries(_data.sessioni||{}).filter(([,s])=>s.clienteId===cid).map(([sid,s])=>({id:sid,...s}));
+  const abbsA=abbs.filter(a=>a.stato==='Attivo');
+  const stats=document.getElementById('detail-stats');
+  if(stats)stats.innerHTML=[
+    {v:abbsA.length,l:'Abb. attivi'},
+    {v:abbsA.reduce((s,a)=>s+parseInt(a.creditiResidui||0),0),l:'Crediti'},
+    {v:sess.length,l:'Sessioni'},
+  ].map(s=>`<div class="client-stat"><div class="client-stat-val">${s.v}</div><div class="client-stat-lbl">${s.l}</div></div>`).join('');
+  const da=document.getElementById('detail-abbs');
+  if(da)da.innerHTML=abbs.length?abbs.map(a=>{
+    const pkg=_data.pacchetti?.[a.pacchettoId];
+    const pct=parseInt(a.creditiTotali||0)>0?Math.round(parseInt(a.creditiResidui||0)/parseInt(a.creditiTotali||1)*100):0;
+    const bc=pct>50?'#4DBD74':pct>20?'var(--org)':'var(--red)';
+    return `<div style="background:var(--g2);border-radius:3px;margin-bottom:6px;overflow:hidden;">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px 6px;">
+        <span style="font-size:12px;color:var(--wh);">${pkg?.nome||a.pacchetto||'—'}</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:${a.stato==='Attivo'?'var(--grn)':'var(--mu)'};">${a.stato}</span>
+          <button class="icon-btn" onclick="openEditAbb('${a.id}')" title="Modifica">✏</button>
+          <button class="icon-btn del" onclick="deleteAbb('${a.id}')" title="Elimina">✕</button>
+        </div>
+      </div>
+      <div style="padding:0 12px 6px;">
+        <div class="credits-bar-track" style="margin-bottom:4px;">
+          <div class="credits-bar-fill" style="width:${pct}%;background:${bc};"></div>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">
+          ${a.creditiResidui}/${a.creditiTotali} crediti · ${a.dataScadenza?'scad. '+a.dataScadenza:''}</div>
+      </div>
+      <div id="abb-edit-${a.id}" style="display:none;"></div>
+    </div>`;
+  }).join(''):'<div style="font-size:11px;color:var(--mu);">Nessun abbonamento</div>';
+  const ds=document.getElementById('detail-sess');
+  if(ds){
+    const l10=[...sess].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,10);
+    ds.innerHTML=l10.length?l10.map(s=>`<div class="client-sess-row">
+      <span class="client-sess-date">${s.data||''}</span>
+      <span class="client-sess-type">${s.tipo||''}</span>
+      <span class="client-sess-cr">-${s.crediti||1}</span></div>`).join('')
+      :'<div style="font-size:11px;color:var(--mu);">Nessuna sessione</div>';
+  }
+  openModal('modal-client-detail');
+}
+
+/* ══ OVERRIDE openNewAbb — pre-select if from client card ══════════════ */
+function openNewAbb(preselectedId){
+  // If called from client detail, use _currentClientId
+  const cid = preselectedId || _currentClientId || '';
+  const selP=document.getElementById('na-pacchetto');
+  if(selP){
+    selP.innerHTML='<option value="">Seleziona pacchetto...</option>'+
+      Object.entries(_data.pacchetti||{}).map(([id,p])=>
+        `<option value="${id}">${p.nome} (${p.crediti} cr. · €${p.prezzo})</option>`).join('');
+  }
+  // Set combo
+  resetCombo('na-cliente-input','na-combo','na-cliente-val');
+  if(cid){
+    const c=_data.clienti?.[cid];
+    if(c){
+      const inputEl=document.getElementById('na-cliente-input');
+      if(inputEl)inputEl.value=c.nome+' '+c.cognome;
+      const hiddenEl=document.getElementById('na-cliente-val');
+      if(hiddenEl)hiddenEl.value=cid;
+    }
+  }
+  const preview=document.getElementById('na-pkg-preview');if(preview)preview.style.display='none';
+  const r=document.getElementById('na-result');if(r){r.textContent='';r.style.color='';}
+  closeModal('modal-client-detail');
+  openModal('modal-new-abb');
+}
+
+/* ══ OVERRIDE submitNewAbb — use combo value ════════════════════════════ */
+async function submitNewAbb(){
+  const clienteId  = getComboVal('na-cliente-val');
+  const pacchettoId= document.getElementById('na-pacchetto')?.value;
+  const dataI      = document.getElementById('na-inizio')?.value;
+  const dataS      = document.getElementById('na-scadenza')?.value;
+  const note       = document.getElementById('na-note')?.value.trim();
+  const res        = document.getElementById('na-result');
+  if(!clienteId){res.textContent='⚠ Seleziona cliente.';res.style.color='var(--org)';return;}
+  if(!pacchettoId){res.textContent='⚠ Seleziona pacchetto.';res.style.color='var(--org)';return;}
+  const pkg=_data.pacchetti?.[pacchettoId];
+  if(!pkg){res.textContent='⚠ Pacchetto non trovato.';res.style.color='var(--org)';return;}
+  const btn=event.target;btn.textContent='⏳ Creazione...';btn.disabled=true;
+  try{
+    const oggi=new Date().toLocaleDateString('it-IT');
+    await fbPush('ppl/abbonamenti',{
+      clienteId,pacchettoId,
+      pacchetto:pkg.nome,tipo:pkg.tipo||'',
+      creditiTotali:pkg.crediti,creditiResidui:pkg.crediti,
+      dataInizio:dataI||oggi,dataScadenza:dataS||'',
+      stato:'Attivo',note:note||''
+    });
+    res.textContent='✓ Abbonamento creato ('+pkg.crediti+' crediti)';res.style.color='var(--grn)';
+    setTimeout(()=>closeModal('modal-new-abb'),1200);
+  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
+  finally{btn.textContent='✓ Crea abbonamento';btn.disabled=false;}
+}
+
+/* ══ OVERRIDE registraSessione — use combo value ════════════════════════ */
+async function registraSessione(){
+  if(!_db){alert('Firebase non connesso.');return;}
+  const clienteId=getComboVal('sess-client-val');
+  const abbId    =document.getElementById('sess-abbonamento')?.value;
+  const data     =document.getElementById('sess-data')?.value;
+  const oraEl    =document.getElementById('sess-ora');
+  const ora      =oraEl?.value;
+  const tipo     =document.getElementById('sess-tipo')?.value;
+  const crediti  =parseInt(document.getElementById('sess-crediti')?.value)||1;
+  const note     =document.getElementById('sess-note')?.value;
+  const res      =document.getElementById('sess-result');
+  if(!clienteId){res.textContent='⚠ Seleziona cliente.';res.style.color='var(--org)';return;}
+  const abb=abbId?_data.abbonamenti?.[abbId]:null;
+  if(abb&&parseInt(abb.creditiResidui||0)<crediti){
+    res.textContent='✕ Crediti insufficienti: '+abb.creditiResidui;res.style.color='var(--red)';return;
+  }
+  res.textContent='⏳ Registrazione...';res.style.color='var(--mu)';
+  try{
+    await fbPush('ppl/sessioni',{clienteId,abbonamentoId:abbId||'',data,ora,tipo,crediti,coach:'Leo',note:note||''});
+    if(abb){
+      const nuovi=parseInt(abb.creditiResidui)-crediti;
+      await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:nuovi<=0?'Esaurito':'Attivo'});
+    }
+    res.textContent='✓ Registrata';res.style.color='var(--grn)';
+  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
+}
+
+/* ══ OVERRIDE renderSessioniForm — init combo + tipo ════════════════════ */
+function renderSessioniForm(){
+  const warn=document.getElementById('no-conn-warn2');
+  const cont=document.getElementById('sessioni-content');
+  if(!_connected&&!Object.keys(_data.clienti||{}).length)return;
+  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
+  buildComboClients();
+  const tipoSel=document.getElementById('sess-tipo');
+  if(tipoSel){
+    const tipi=Object.entries(_data.tipiLezione||{});
+    tipoSel.innerHTML='<option value="">Seleziona tipo...</option>'+
+      tipi.map(([id,t])=>`<option value="${t.tipo||id}">${t.nome||id}</option>`).join('');
+  }
+  const di=document.getElementById('sess-data');if(di&&!di.value)di.value=new Date().toISOString().split('T')[0];
+}
+
+function loadAbbonamenti(cid){
+  const sel=document.getElementById('sess-abbonamento');if(!sel)return;
+  const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid&&a.stato==='Attivo');
+  sel.innerHTML=abbs.length?abbs.map(([id,a])=>`<option value="${id}">${a.pacchetto||'Abb.'} (${a.creditiResidui} cr.)</option>`).join('')
+    :'<option value="">Nessun abbonamento attivo</option>';
+}
+
+/* ══ OVERRIDE renderClienti — rebuild combo clients after Firebase update ═ */
+const _origRenderClienti = renderClienti;
+function renderClienti(){
+  buildComboClients();
+  _origRenderClienti();
+}
+
 
 </script>
 </html>
