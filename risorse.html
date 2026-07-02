@@ -208,10 +208,7 @@ nav.ppl-topnav.nav-open a.tn-link{
       <div><div class="status-item-label">Identità studio</div>
            <div class="status-item-val" id="val-identity">Non configurata</div></div>
     </div>
-    <div class="status-item">
-      <div class="status-dot nd" id="dot-sheets"></div>
-      <div><div class="status-item-label">Google Sheets</div>
-           <div class="status-item-val" id="val-sheets">Non collegato</div></div>
+    
     </div>
     <div class="status-item">
       <div class="status-dot nd" id="dot-kpi"></div>
@@ -259,26 +256,7 @@ nav.ppl-topnav.nav-open a.tn-link{
 
   <div class="slbl">Connessioni</div>
   <div class="res-grid">
-    <div class="res-card">
-      <div class="res-card-head">
-        <span class="res-card-icon">📊</span>
-        <span class="res-card-title">Google Sheets — Apps Script</span>
-        <span class="res-card-badge badge-nd" id="badge-sheets">Non collegato</span>
-      </div>
-      <div class="res-card-body">
-        <div class="res-field">
-          <span class="res-lbl">URL Apps Script (webhook)</span>
-          <input class="res-inp" id="cfg-sheets-url" type="url"
-            placeholder="https://script.google.com/macros/s/.../exec"
-            oninput="markUnsaved()">
-          <span class="res-hint">Usato da: Prenotazioni · (futuro: KPI storici, Valutazioni)</span>
-        </div>
-        <div class="res-actions">
-          <button class="btn pri" onclick="saveSheets()">✓ Salva URL</button>
-          <button class="btn" onclick="testSheets()">▶ Testa connessione</button>
-        </div>
-        <div class="res-test-result" id="test-sheets-result"></div>
-      </div>
+    
     </div>
 
     <div class="res-card">
@@ -402,9 +380,6 @@ function loadAll(){
   if(cfg.coach_name){  document.getElementById('cfg-coach').value  = cfg.coach_name; }
   if(cfg.city){        document.getElementById('cfg-city').value   = cfg.city; }
 
-  // Sheets URL
-  if(cfg.sheets_url){ document.getElementById('cfg-sheets-url').value = cfg.sheets_url; }
-
   // KPI targets
   const kpiFields = {be:'kpi-be', rev:'kpi-rev', tick:'kpi-tick', cli:'kpi-cli', sat:'kpi-sat', churn:'kpi-churn'};
   Object.entries(kpiFields).forEach(([k,id])=>{
@@ -492,14 +467,6 @@ function updateStatus(cfg, kpi){
   document.getElementById('val-identity').textContent = cfg.studio_name || 'Non configurata';
   document.getElementById('badge-identity').className = 'res-card-badge ' + (hasIdentity ? 'badge-ok' : 'badge-nd');
   document.getElementById('badge-identity').textContent = hasIdentity ? 'Configurato' : 'Non configurato';
-
-  // Sheets
-  const hasSheets = !!(cfg.sheets_url);
-  setDot('dot-sheets', hasSheets ? 'warn' : 'nd'); // warn = URL set but not tested
-  document.getElementById('val-sheets').textContent = hasSheets ? 'URL configurato' : 'Non collegato';
-  document.getElementById('badge-sheets').className = 'res-card-badge ' + (hasSheets ? 'badge-warn' : 'badge-nd');
-  document.getElementById('badge-sheets').textContent = hasSheets ? 'URL impostato' : 'Non collegato';
-
   // KPI
   const kpiModified = kpi && JSON.stringify(kpi) !== JSON.stringify(DCFG_KPI);
   // Firebase
@@ -532,44 +499,9 @@ function saveIdentity(){
 }
 
 // ── SAVE SHEETS ──────────────────────────────────────────────────────────────
-function saveSheets(){
-  const url = document.getElementById('cfg-sheets-url').value.trim();
-  const cfg = cfgGet();
-  cfg.sheets_url = url;
-  cfgSet(cfg);
-  _unsaved = false;
-  updateStatus(cfg, kpiGet() || {...DCFG_KPI});
-  showMsg('test-sheets-result', '✓ URL salvato');
-}
 
-async function testSheets(){
-  const url = document.getElementById('cfg-sheets-url').value.trim();
-  const res = document.getElementById('test-sheets-result');
-  if(!url){ res.textContent = '⚠ Inserisci prima un URL.'; res.style.color='var(--org)'; return; }
-  res.textContent = '⏳ Connessione...'; res.style.color = 'var(--mu)';
-  try{
-    const r    = await fetch(url + '?action=ping');
-    const data = await r.json();
-    if(data.status === 'ok'){
-      // Save and mark as connected
-      const cfg = cfgGet();
-      cfg.sheets_url = url;
-      cfg.sheets_connected = true;
-      cfgSet(cfg);
-      res.textContent = '✓ ' + (data.message || 'Connesso');
-      res.style.color = 'var(--grn)';
-      const badge = document.getElementById('badge-sheets');
-      if(badge){ badge.className = 'res-card-badge badge-ok'; badge.textContent = 'Connesso ✓'; }
-      setDot('dot-sheets', 'ok');
-      document.getElementById('val-sheets').textContent = 'Connesso';
-    } else {
-      throw new Error(data.message || 'Risposta inattesa');
-    }
-  } catch(e){
-    res.textContent = '✕ ' + e.message;
-    res.style.color = 'var(--red)';
-  }
-}
+
+async 
 
 // ── SAVE KPI TARGETS ────────────────────────────────────────────────────────
 function saveKPI(){
