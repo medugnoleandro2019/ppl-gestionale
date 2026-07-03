@@ -986,6 +986,27 @@ select.pkg-edit-inp{cursor:pointer;}
   color:var(--gold);font-size:10px;border-radius:2px;padding:2px 8px;cursor:pointer;}
 .att-add-btn:hover{background:rgba(184,151,42,.25);}
 
+
+/* Scadenze */
+.scad-section-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2.5px;text-transform:uppercase;padding:7px 0;margin:14px 0 6px;display:flex;align-items:center;gap:10px;color:var(--mu);}
+.scad-section-lbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.scad-section-lbl.red{color:var(--red);}.scad-section-lbl.org{color:var(--org);}
+.scad-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--g4);border-radius:4px;margin-bottom:6px;cursor:pointer;transition:.15s;}
+.scad-row:hover{border-color:var(--g5);}.scad-row.alert-red{border-left-color:var(--red);}.scad-row.alert-org{border-left-color:var(--org);}
+.scad-avatar{width:32px;height:32px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);flex-shrink:0;}
+.scad-info{flex:1;min-width:0;}.scad-name{font-size:12px;color:var(--wh);margin-bottom:2px;}.scad-pkg{font-size:10px;color:var(--mu);}
+.scad-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;flex-shrink:0;}
+.scad-badge.red{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);color:var(--red);}
+.scad-badge.org{background:rgba(224,140,58,.12);border:1px solid rgba(224,140,58,.3);color:var(--org);}
+.scad-credits{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;text-align:right;flex-shrink:0;}
+.scad-action{background:none;border:1px solid var(--g4);color:var(--mu);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:3px;cursor:pointer;transition:.15s;flex-shrink:0;}
+.scad-action:hover{border-color:var(--gold2);color:var(--gold);}
+.scad-empty{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--g6);text-transform:uppercase;padding:24px;text-align:center;}
+.scad-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+.scad-filter-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.scad-days-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:4px 8px;width:60px;outline:none;text-align:center;}
+.scad-days-inp:focus{border-color:var(--gold);}
+
 </style>
 </head>
 <body>
@@ -1019,6 +1040,7 @@ select.pkg-edit-inp{cursor:pointer;}
     <div class="bk-wrap">
       <div class="bk-tab-row">
         <div class="bk-tab active" onclick="switchBkTab('clienti',this)">👥 Clienti</div>
+        <div class="bk-tab" onclick="switchBkTab('scadenze',this)" id="tab-scadenze">⚠ Scadenze</div>
         <div class="bk-tab" onclick="switchBkTab('calendario',this)">📅 Calendario</div>
         <div class="bk-tab" onclick="switchBkTab('sessioni',this)">✏ Registra</div>
         <div class="bk-tab" onclick="switchBkTab('storico',this)">📋 Storico</div>
@@ -1042,6 +1064,19 @@ select.pkg-edit-inp{cursor:pointer;}
         <div id="clienti-content" style="display:none;">
           <div class="client-grid" id="client-grid"></div>
         </div>
+      </div>
+
+
+      <!-- SCADENZE -->
+      <div class="bk-section" id="bksec-scadenze">
+        <div class="scad-filter-row">
+          <span class="scad-filter-lbl">Preavviso</span>
+          <input class="scad-days-inp" id="scad-days" type="number" min="7" max="180" value="30" oninput="renderScadenze()">
+          <span class="scad-filter-lbl">giorni</span>
+          <span style="flex:1;"></span>
+          <span id="scad-count" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);"></span>
+        </div>
+        <div id="scad-list"></div>
       </div>
 
       <!-- CALENDARIO -->
@@ -1448,6 +1483,7 @@ function startListening(){
     _connected=true;
     buildComboClients();
     setStatus(badge,'ok','● Firebase connesso');
+    checkExpiredAbbonamenti();
     if(connResult)connResult.textContent='✓ Connesso — aggiornamento real-time attivo.';
     renderClienti();
     renderSessioniForm();
@@ -1765,9 +1801,11 @@ async function saveAttendance(){
         const abb=_data.abbonamenti?.[abbId];
         if(abb&&parseInt(abb.creditiResidui||0)>0){
           const nuovi=parseInt(abb.creditiResidui)-1;
-          await fbUpdate('ppl/abbonamenti/'+abbId,{
-            creditiResidui:nuovi,stato:nuovi<=0?'Esaurito':'Attivo'
-          });
+                if(nuovi<=0){
+        await archiviaAbbonamento(abbId,'crediti_esauriti');
+      } else {
+        await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:'Attivo'});
+      }
           // Log session
           await fbPush('ppl/sessioni',{
             clienteId:cid,abbonamentoId:abbId,lezioneId:_currentLessonId,
@@ -2580,7 +2618,11 @@ async function registraSessione(){
     await fbPush('ppl/sessioni',{clienteId,abbonamentoId:abbId||'',data,ora,tipo,crediti,coach:'Leo',note:note||''});
     if(abb){
       const nuovi=parseInt(abb.creditiResidui)-crediti;
-      await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:nuovi<=0?'Esaurito':'Attivo'});
+      if(nuovi<=0){
+        await archiviaAbbonamento(abbId,'crediti_esauriti');
+      } else {
+        await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:'Attivo'});
+      }
     }
     res.textContent='✓ Registrata';res.style.color='var(--grn)';
   }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
@@ -2612,5 +2654,173 @@ function loadAbbonamenti(cid){
 /* ══ OVERRIDE renderClienti — rebuild combo clients after Firebase update ═ */
 
 
+
+/* ══ SCADENZE ═══════════════════════════════════════════════════════════
+   1. Crediti esauriti (stato Esaurito)
+   2. Abbonamenti scaduti per data (dataScadenza < oggi, ancora Attivo)
+   3. In scadenza entro N giorni
+   4. Crediti in esaurimento (<=2 rimasti)
+   Gli abbonamenti esauriti NON vengono mai cancellati — restano come storico.
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderScadenze(){
+  const list    = document.getElementById('scad-list');
+  const countEl = document.getElementById('scad-count');
+  const tab     = document.getElementById('tab-scadenze');
+  if(!list) return;
+
+  const days   = parseInt(document.getElementById('scad-days')?.value)||30;
+  const today  = new Date(); today.setHours(0,0,0,0);
+  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate()+days);
+
+  function parseScadDate(str){
+    if(!str||!str.trim()) return null;
+    if(str.includes('/')){
+      const p=str.split('/');
+      if(p.length!==3) return null;
+      return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+    }
+    if(str.includes('-')) return new Date(str+'T00:00:00');
+    return null;
+  }
+
+  const clienti = _data.clienti||{};
+  const esauriti=[],scaduti=[],inScadenza=[],lowCred=[];
+
+  Object.entries(_data.abbonamenti||{}).forEach(([id,a])=>{
+    const c = clienti[a.clienteId];
+    if(!c) return;
+    const pkg = _data.pacchetti?.[a.pacchettoId];
+    const sd  = parseScadDate(a.dataScadenza);
+    const cr  = parseInt(a.creditiResidui||0);
+    const e   = {id,a,c,pkg,sd,cr};
+    if(a.stato==='Esaurito'||a.stato==='Archiviato'){
+      // These shouldn't appear here (auto-archived) but just in case
+      return;
+    } else if(a.stato==='Attivo'){
+      if(sd && sd < today)        scaduti.push(e);
+      else if(sd && sd <= cutoff) inScadenza.push(e);
+      if(cr<=2)                   lowCred.push(e);
+    }
+  });
+
+  const sortDate = arr=>arr.sort((x,y)=>(x.sd&&y.sd)?x.sd-y.sd:x.cr-y.cr);
+  [esauriti,scaduti,inScadenza,lowCred].forEach(sortDate);
+  const total = esauriti.length+scaduti.length+inScadenza.length+lowCred.length;
+
+  if(countEl) countEl.textContent = total ? total+' alert' : 'Tutto ok \u2713';
+  if(tab) tab.textContent = total ? '\u26A0 Scadenze ('+total+')' : '\u26A0 Scadenze';
+
+  if(!total){
+    list.innerHTML='<div class="scad-empty">\u2713 Nessuna scadenza o esaurimento rilevato</div>';
+    return;
+  }
+
+  function scadRow(e, alertCls, badgeCls, badgeTxt, crColor){
+    const {a,c,pkg,sd,cr}=e;
+    const init = ((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
+    const tot  = parseInt(a.creditiTotali||0);
+    const sdStr= sd ? sd.toLocaleDateString('it-IT') : '\u2014';
+    let daysStr='';
+    if(sd){
+      const dl=Math.round((sd-today)/86400000);
+      daysStr=dl<0?'(scaduto '+Math.abs(dl)+'gg fa)':dl===0?'(scade oggi)':'('+dl+'gg)';
+    }
+    const cid = a.clienteId;
+    const pname = pkg ? pkg.nome : (a.pacchetto||'\u2014');
+    return `<div class="scad-row ${alertCls}" onclick="openClient('${cid}')">
+      <div class="scad-avatar">${init}</div>
+      <div class="scad-info">
+        <div class="scad-name">${c.nome||''} ${c.cognome||''}</div>
+        <div class="scad-pkg">${pname} &middot; scad. ${sdStr} ${daysStr}</div>
+      </div>
+      <span class="scad-badge ${badgeCls}">${badgeTxt}</span>
+      <div class="scad-credits" style="color:${crColor};">${cr}/${tot}</div>
+      <button class="scad-action" onclick="event.stopPropagation();openNewAbb('${cid}')">+ Rinnova</button>
+    </div>`;
+  }
+
+  let html='';
+  if(esauriti.length){
+    html+=`<div class="scad-section-lbl red">Crediti esauriti (${esauriti.length})</div>`;
+    html+=esauriti.map(e=>scadRow(e,'alert-red','red','Esaurito','var(--red)')).join('');
+  }
+  if(scaduti.length){
+    html+=`<div class="scad-section-lbl red">Scaduti per data (${scaduti.length})</div>`;
+    html+=scaduti.map(e=>scadRow(e,'alert-red','red','Scaduto','var(--org)')).join('');
+  }
+  if(inScadenza.length){
+    html+=`<div class="scad-section-lbl org">In scadenza entro ${days} giorni (${inScadenza.length})</div>`;
+    html+=inScadenza.map(e=>scadRow(e,'alert-org','org','In scadenza','var(--org)')).join('');
+  }
+  if(lowCred.length){
+    html+=`<div class="scad-section-lbl org">Crediti in esaurimento &mdash; &le;2 rimasti (${lowCred.length})</div>`;
+    html+=lowCred.map(e=>scadRow(e,'alert-org','org','Low credit','var(--org)')).join('');
+  }
+  list.innerHTML=html;
+}
+
+
+
+/* ══ AUTO-ARCHIVIAZIONE ABBONAMENTI ══════════════════════════════════════
+   Quando un abbonamento termina (crediti=0 o data scaduta) viene spostato
+   da /ppl/abbonamenti/ → /ppl/storico_abbonamenti/ con timestamp e motivo.
+   Il cliente vede solo abbonamenti attivi. Lo storico è consultabile su
+   Firebase Console o in futuro via tab Storico abbonamenti.
+   ════════════════════════════════════════════════════════════════════════ */
+
+async function archiviaAbbonamento(abbId, motivazione){
+  if(!_db) return;
+  const abb = _data.abbonamenti?.[abbId];
+  if(!abb) return;
+  const archivio = {
+    ...abb,
+    stato:        'Archiviato',
+    motivazione,  // 'crediti_esauriti' | 'scadenza_data'
+    terminato_il: new Date().toLocaleDateString('it-IT'),
+    terminato_ts: Date.now(),
+  };
+  try{
+    await fbSet('ppl/storico_abbonamenti/'+abbId, archivio);
+    await fbRemove('ppl/abbonamenti/'+abbId);
+    console.log('Abbonamento archiviato:', abbId, motivazione);
+  }catch(e){
+    console.error('Errore archiviazione:', e);
+  }
+}
+
+/* Controlla abbonamenti scaduti per data — chiamato ad ogni update Firebase */
+async function checkExpiredAbbonamenti(){
+  if(!_db || !_connected) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const toArchive = [];
+
+  Object.entries(_data.abbonamenti||{}).forEach(([id,a])=>{
+    if(a.stato==='Archiviato') return; // skip already archived
+    const sd = parseDataScadenza(a.dataScadenza);
+    // Auto-archive if expiry date is TODAY or earlier (not "in scadenza", ma proprio scaduto)
+    if(sd && sd <= today && a.stato==='Attivo'){
+      toArchive.push({id, motivazione:'scadenza_data'});
+    }
+    // Also catch any leftover Esaurito (from previous logic)
+    if(a.stato==='Esaurito'){
+      toArchive.push({id, motivazione:'crediti_esauriti'});
+    }
+  });
+
+  for(const {id,motivazione} of toArchive){
+    await archiviaAbbonamento(id, motivazione);
+  }
+}
+
+function parseDataScadenza(str){
+  if(!str||!str.trim()) return null;
+  if(str.includes('/')){
+    const p=str.split('/');
+    if(p.length!==3) return null;
+    return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
+  }
+  if(str.includes('-')) return new Date(str+'T00:00:00');
+  return null;
+}
 </script>
 </html>
