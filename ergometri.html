@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPL · Zone Corsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  /* zone colors */
+  --z1:#6B9FCC;--z2:#4DBD74;--z3:#D4AF45;--z4:#E08C3A;--z5:#E05C5C;--z6:#9A7ACC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+body{margin-top:40px;}
+
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;}
+
+.page{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── SISTEMA ZONE TAB ── */
+.sys-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sys-tab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.sys-tab:last-child{border-right:none;}
+.sys-tab:hover{background:var(--g2);}
+.sys-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.sys-tab-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;color:var(--mu2);}
+.sys-tab.active .sys-tab-title{color:var(--gold);}
+.sys-tab-sub{font-size:9px;color:var(--g6);margin-top:2px;line-height:1.3;}
+
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUTS ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+.inp-row-3{display:flex;gap:8px;margin-bottom:14px;}
+.inp-sm{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  padding:8px 8px;outline:none;width:70px;text-align:center;transition:.15s;}
+.inp-sm:focus{border-color:var(--gold);}
+.inp-colon{font-family:'DM Mono',monospace;font-size:18px;color:var(--mu);padding:0 2px;line-height:40px;}
+
+/* ── FCR METHOD TOGGLE ── */
+.fcr-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fcr-opt{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--mu2);transition:.15s;}
+.fcr-opt:hover{border-color:var(--gold2);color:var(--wh);}
+.fcr-opt.active{border-color:var(--gold);background:var(--goldd);color:var(--gold);}
+.fcr-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+
+/* ── WARN ── */
+.warn-box{background:rgba(184,151,42,.06);border:1px solid rgba(184,151,42,.25);border-radius:4px;
+  padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--mu2);line-height:1.6;}
+.warn-box strong{color:var(--gold2);}
+.note-box{background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--z6);
+  border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:10px;font-size:11px;color:var(--mu2);line-height:1.65;}
+.note-box strong{color:var(--wh);}
+.note-box .src{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+
+/* ── ZONE RESULT TABLE ── */
+.zone-table-wrap{border-radius:4px;overflow:hidden;border:1px solid var(--g3);}
+.zone-table{width:100%;border-collapse:collapse;}
+.zone-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;white-space:nowrap;}
+.zone-table th:not(:first-child){text-align:center;}
+.zone-table td{padding:0;border-bottom:1px solid var(--g2);}
+.zone-table tr:last-child td{border-bottom:none;}
+.zone-row{display:flex;align-items:stretch;}
+.zone-color-bar{width:5px;flex-shrink:0;}
+.zone-cells{display:flex;align-items:center;flex:1;flex-wrap:wrap;}
+.zc{padding:10px 12px;text-align:center;flex:1;min-width:80px;}
+.zc.left{text-align:left;min-width:140px;}
+.zone-name{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--wh);display:block;}
+.zone-sys{font-size:9px;color:var(--mu);display:block;margin-top:1px;}
+.zone-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--wh);}
+.zone-val.big{font-size:15px;}
+.zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);display:block;margin-top:2px;}
+.zone-obiettivo{font-size:10px;color:var(--mu2);line-height:1.4;}
+/* highlight current zone */
+.zone-table tr.current td{background:rgba(255,255,255,.03);}
+.current-badge{display:inline-block;background:var(--gold);color:#000;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;font-weight:bold;
+  padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.result-main{padding:16px 18px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:16px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+
+/* ── FORMULA ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:9px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);}
+.f-hi{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500;}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--z2);font-weight:500;}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;color:var(--mu);}
+.empty-icon{font-size:30px;opacity:.3;margin-bottom:8px;}
+.empty-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.empty-s{font-size:10px;color:var(--g6);}
+
+/* ── GARA PRESET ── */
+.gara-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.gara-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:5px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);cursor:pointer;transition:.15s;}
+.gara-btn:hover{border-color:var(--gold2);color:var(--wh);}
+.gara-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* ── FC CALCULATOR MODULE ── */
+.fc-module{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.fc-mod-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--g3);user-select:none;}
+.fc-mod-head:hover{background:var(--g2);}
+.fc-mod-icon{font-size:18px;flex-shrink:0;}
+.fc-mod-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.fc-mod-badge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;}
+.fc-mod-badge.saved{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:var(--z2);}
+.fc-mod-badge.empty{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.fc-mod-arr{color:var(--mu);font-size:11px;}
+.fc-mod-body{padding:16px;display:none;}
+.fc-mod-body.open{display:block;}
+
+/* formula compare grid */
+.formula-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.formula-card{flex:1;min-width:130px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:10px 12px;transition:.15s;}
+.formula-card.best{border-color:var(--gold);background:rgba(184,151,42,.06);}
+.formula-card.ok{border-color:rgba(46,155,155,.35);}
+.fc-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.fc-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold);line-height:1;}
+.formula-card:not(.best) .fc-val{color:var(--mu2);}
+.fc-formula{font-size:9px;color:var(--mu);margin-top:4px;font-family:'DM Mono',monospace;}
+.fc-err{font-size:9px;margin-top:3px;}
+.fc-err.hi{color:var(--red);}.fc-err.med{color:var(--org);}.fc-err.lo{color:var(--z2);}
+.badge-best{background:var(--gold);color:#000;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;font-weight:bold;}
+.badge-ok{background:rgba(46,155,155,.2);color:var(--teal);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;}
+
+/* test cards */
+.test-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.test-card{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;overflow:hidden;}
+.test-card-head{padding:10px 12px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.test-card-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gold);width:28px;flex-shrink:0;}
+.test-card-title{font-size:12px;font-weight:500;color:var(--wh);}
+.test-card-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+.test-card-body{padding:10px 12px;}
+.test-step{display:flex;gap:8px;margin-bottom:7px;font-size:10px;color:var(--mu2);line-height:1.5;}
+.test-step-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);width:14px;flex-shrink:0;padding-top:1px;}
+.test-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:2px;margin-right:4px;}
+.test-tag.easy{background:rgba(77,189,116,.15);color:var(--z2);}
+.test-tag.med{background:rgba(224,140,58,.15);color:var(--org);}
+.test-tag.hard{background:rgba(224,92,92,.15);color:var(--red);}
+.test-tag.equip{background:rgba(154,122,204,.15);color:var(--z6);}
+.test-result-input-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px;flex-wrap:wrap;}
+.test-result-note{font-size:9px;color:var(--mu);margin-top:4px;font-style:italic;}
+
+/* record atleta */
+.record-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.record-field{flex:1;min-width:120px;display:flex;flex-direction:column;gap:3px;}
+.record-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.record-lbl span{color:var(--gold);margin-left:4px;}
+.record-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:7px 9px;outline:none;width:100%;transition:.15s;}
+.record-inp:focus{border-color:var(--gold);}
+.record-display{background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+.rd-row{display:flex;flex-wrap:wrap;gap:14px;}
+.rd-item{display:flex;flex-direction:column;gap:2px;}
+.rd-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.rd-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.rd-val.sec{color:var(--teal);}
+.rd-val.nd{color:var(--g6);font-size:13px;}
+.rd-sub{font-size:9px;color:var(--mu);}
+.use-record-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;background:rgba(77,189,116,.1);border:1px solid rgba(77,189,116,.3);color:var(--z2);padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.use-record-btn:hover{background:rgba(77,189,116,.2);border-color:var(--z2);}
+.history-list{margin-top:10px;}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--g2);border:1px solid var(--g3);border-radius:3px;margin-bottom:5px;}
+.hi-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;}
+.hi-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.hi-method{font-size:9px;color:var(--mu2);flex:1;}
+.hi-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:13px;}
+.hi-del:hover{color:var(--red);}
+
+  .zc{min-width:60px;padding:8px 8px;}.zc.left{min-width:120px;}
+  .zone-name{font-size:9px;}.zone-val{font-size:12px;}.zone-val.big{font-size:13px;}
+  .result-val{font-size:30px;}
+  .sys-tab-title{font-size:9px;}.sys-tab-sub{font-size:8px;}
+  .topbar{padding:0 12px;}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ── Zone Bici specifiche ── */
+.zone-row{display:flex;align-items:stretch;gap:0;border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.zone-label{width:130px;flex-shrink:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;}
+.zone-num{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mu);}
+.zone-name{font-size:13px;font-weight:500;color:var(--wh);margin:2px 0;}
+.zone-fis{font-size:9px;color:var(--mu);font-style:italic;line-height:1.3;}
+.zone-data{flex:1;display:flex;align-items:center;padding:10px 14px;background:var(--g1);gap:16px;flex-wrap:wrap;}
+.zone-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);min-width:90px;flex-shrink:0;}
+.zone-watts{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+.zone-wkg{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);}
+.zone-bar{height:4px;border-radius:2px;margin-top:6px;transition:width .4s;}
+.calc-block{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px 18px;margin-bottom:14px;}
+.calc-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+.calc-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:110px;}
+.calc-lbl-s{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.calc-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:18px;font-weight:500;padding:8px 10px;outline:none;width:100%;transition:.15s;text-align:right;}
+.calc-inp:focus{border-color:var(--gold);}
+.calc-inp::placeholder{color:var(--g6);}
+.calc-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:4px;}
+.ss-banner{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);border-radius:4px;padding:10px 14px;margin:8px 0 4px;display:flex;align-items:center;gap:12px;}
+.ss-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex-shrink:0;}
+.ss-range{font-family:'DM Mono',monospace;font-size:18px;color:var(--gold2);}
+.ss-note{font-size:10px;color:var(--mu);flex:1;}
+.wkg-table{width:100%;border-collapse:collapse;font-size:11px;}
+.wkg-table th{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--g3);}
+.wkg-table td{padding:8px 10px;border-bottom:1px solid rgba(34,34,34,.4);color:var(--mu2);}
+.wkg-table tr:last-child td{border-bottom:none;}
+.wkg-table .val{font-family:'DM Mono',monospace;color:var(--wh);font-weight:500;}
+.ftp-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 18px;margin-bottom:10px;}
+.ftp-result-val{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:var(--gold);}
+.test-tabs{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.test-tab{flex:1;padding:10px 8px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;}
+.test-tab:last-child{border-right:none;}
+.test-tab:hover{background:var(--g2);}
+.test-tab.active{background:var(--g2);border-bottom:2px solid var(--gold);}
+.test-tab-name{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--mu2);}
+.test-tab.active .test-tab-name{color:var(--gold);}
+.test-tab-desc{font-size:9px;color:var(--g6);margin-top:2px;}
+.test-panel{display:none;}.test-panel.active{display:block;}
+.src-list{display:flex;flex-direction:column;gap:8px;font-size:11px;color:var(--mu);}
+.src-list em{color:var(--mu2);}
+@media(max-width:600px){
+  .zone-row{flex-direction:column;}
+  .zone-label{width:auto;border-bottom:1px solid var(--g3);}
+  .calc-row{flex-direction:column;}
+  .wkg-table{font-size:10px;}
+}
+
+
+/* ── Ergometri specifiche ── */
+.erg-tabs{display:flex;gap:0;border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:14px;}
+.erg-tab{flex:1;padding:12px 8px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;}
+.erg-tab:last-child{border-right:none;}
+.erg-tab:hover{background:var(--g2);}
+.erg-tab.active{background:var(--g2);border-bottom:3px solid var(--gold);}
+.erg-tab-icon{font-size:18px;margin-bottom:3px;}
+.erg-tab-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--mu2);}
+.erg-tab.active .erg-tab-name{color:var(--gold);}
+.erg-tab-note{font-size:9px;color:var(--g6);margin-top:2px;}
+.erg-panel{display:none;}.erg-panel.active{display:block;}
+.result-strip{
+  display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;overflow:hidden;margin-top:10px;
+}
+.result-cell{flex:1;padding:12px 14px;text-align:center;border-right:1px solid var(--g3);}
+.result-cell:last-child{border-right:none;}
+.result-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;margin-bottom:4px;}
+.result-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gold);}
+.result-val.nd{color:var(--g6);font-size:18px;}
+.bench-table{width:100%;border-collapse:collapse;font-size:11px;}
+.bench-table th{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;padding:7px 10px;text-align:left;border-bottom:1px solid var(--g3);}
+.bench-table td{padding:7px 10px;border-bottom:1px solid rgba(34,34,34,.4);color:var(--mu2);}
+.bench-table .mono{font-family:'DM Mono',monospace;color:var(--wh);}
+.bench-table tr:last-child td{border-bottom:none;}
+.race-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.race-card-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:10px;}
+.race-card-icon{font-size:20px;}
+.race-card-title{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.race-card-body{padding:12px 14px;}
+.race-station-row{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(34,34,34,.3);}
+.race-station-row:last-child{border-bottom:none;}
+.race-station-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);width:22px;flex-shrink:0;}
+.race-station-name{flex:1;font-size:12px;color:var(--mu2);}
+.race-station-dist{font-family:'DM Mono',monospace;font-size:11px;color:var(--wh);width:80px;text-align:right;flex-shrink:0;}
+.race-station-time{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);width:60px;text-align:right;flex-shrink:0;}
+.race-station-inp{
+  background:var(--g2);border:1px solid var(--g4);border-radius:2px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;
+  padding:4px 6px;width:70px;text-align:right;outline:none;
+}
+.race-station-inp:focus{border-color:var(--gold);}
+.race-total{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:10px 14px;background:var(--g2);
+  font-family:'DM Mono',monospace;font-size:12px;
+}
+.race-total-label{color:var(--mu);}
+.race-total-val{font-size:16px;color:var(--gold2);}
+.div-selector{
+  display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;
+}
+.div-btn{
+  padding:6px 12px;border:1px solid var(--g4);border-radius:3px;
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;color:var(--mu);transition:.15s;
+}
+.div-btn:hover{border-color:var(--gold2);color:var(--wh);}
+.div-btn.active{background:var(--gold);border-color:var(--gold);color:#000;}
+.tag-pill{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:20px;border:1px solid var(--g4);color:var(--mu);margin-right:4px;vertical-align:middle;}
+@media(max-width:680px){
+  .erg-tab-note{display:none;}
+  .result-cell{min-width:80px;}
+  .erg-tabs{flex-wrap:wrap;}
+  .erg-tab{min-width:50%;}
+}
+
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
+  <a class="tn-link active" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="topbar">
+  <span class="tb-brand">PPL</span><div class="tb-sep"></div>
+  <span class="tb-title">Ergometri</span><div class="tb-sp"></div>
+  <span class="tb-src">Concept2 · HYROX · DEKA</span>
+</div>
+<div class="page">
+
+<div class="warn-box">
+  Tutti i calcoli Concept2 utilizzano la <strong>formula ufficiale Concept2</strong>:
+  <strong>W = 2,8 / (pace in sec/m)&sup3;</strong>.
+  RowErg e SkiErg usano il pace per 500m; BikeErg per 1000m.
+  Il <strong>damper</strong> non modifica la potenza misurata — cambia la sensazione del gesto.
+</div>
+
+<!-- SELETTORE MACCHINA -->
+<div class="slbl">Macchina</div>
+<div class="erg-tabs">
+  <div class="erg-tab active" onclick="setErg('row',this)">
+    <div class="erg-tab-icon">🚣</div>
+    <div class="erg-tab-name">RowErg</div>
+    <div class="erg-tab-note">Concept2 · split 500m</div>
+  </div>
+  <div class="erg-tab" onclick="setErg('ski',this)">
+    <div class="erg-tab-icon">⛷</div>
+    <div class="erg-tab-name">SkiErg</div>
+    <div class="erg-tab-note">Concept2 · split 500m</div>
+  </div>
+  <div class="erg-tab" onclick="setErg('bike',this)">
+    <div class="erg-tab-icon">🚵</div>
+    <div class="erg-tab-name">BikeErg</div>
+    <div class="erg-tab-note">Concept2 · split 1000m</div>
+  </div>
+  <div class="erg-tab" onclick="setErg('air',this)">
+    <div class="erg-tab-icon">💨</div>
+    <div class="erg-tab-name">Air Bike</div>
+    <div class="erg-tab-note">Assault / Echo · calorie</div>
+  </div>
+</div>
+
+<!-- CALCULATORE PACE ↔ WATT -->
+<div id="erg-panel-row" class="erg-panel active">
+  <div class="slbl">Calcolatore Pace ↔ Watt — RowErg</div>
+  <div class="calc-block">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Minuti split 500m</span>
+        <input class="calc-inp" id="row-min" type="number" min="0" max="9" placeholder="1" oninput="calcErg('row')">
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">Secondi</span>
+        <input class="calc-inp" id="row-sec" type="number" min="0" max="59" placeholder="55" oninput="calcErg('row')">
+      </div>
+      <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">Watt (inverso)</span>
+        <input class="calc-inp" id="row-watt" type="number" min="0" max="2000" placeholder="200" oninput="calcErgFromWatt('row')">
+      </div>
+    </div>
+    <div class="result-strip" id="row-results">
+      <div class="result-cell"><div class="result-lbl">Watt</div><div class="result-val nd" id="row-res-watt">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Pace 500m</div><div class="result-val nd" id="row-res-pace">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Pace 2000m</div><div class="result-val nd" id="row-res-2k">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Pace 5000m</div><div class="result-val nd" id="row-res-5k">—</div></div>
+    </div>
+    <div class="calc-hint" style="margin-top:10px;">
+      Damper consigliato: 3–5 (drag factor 110–130). Stesso split = stessa potenza indipendentemente dal damper.
+      Stroke rate tipico: 24–30 spm (allenamento), fino a 36 spm (gara).
+    </div>
+  </div>
+  <div class="slbl">Benchmark RowErg per livello</div>
+  <div class="calc-block" style="padding:0;overflow:hidden;">
+    <table class="bench-table">
+      <thead><tr><th>Livello</th><th>2000m Uomini</th><th>2000m Donne</th><th>500m pace</th></tr></thead>
+      <tbody>
+        <tr><td>Principiante</td><td class="mono">&gt; 7:30</td><td class="mono">&gt; 8:30</td><td class="mono">&gt; 2:15/500m</td></tr>
+        <tr><td>Intermedio</td><td class="mono">7:00–7:30</td><td class="mono">8:00–8:30</td><td class="mono">1:55–2:10/500m</td></tr>
+        <tr><td>Avanzato</td><td class="mono">6:30–7:00</td><td class="mono">7:20–8:00</td><td class="mono">1:40–1:55/500m</td></tr>
+        <tr><td>Elite / Agonista</td><td class="mono">&lt; 6:00</td><td class="mono">&lt; 7:00</td><td class="mono">&lt; 1:35/500m</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div id="erg-panel-ski" class="erg-panel">
+  <div class="slbl">Calcolatore Pace ↔ Watt — SkiErg</div>
+  <div class="calc-block">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Minuti split 500m</span>
+        <input class="calc-inp" id="ski-min" type="number" min="0" max="9" placeholder="1" oninput="calcErg('ski')">
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">Secondi</span>
+        <input class="calc-inp" id="ski-sec" type="number" min="0" max="59" placeholder="50" oninput="calcErg('ski')">
+      </div>
+      <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">Watt (inverso)</span>
+        <input class="calc-inp" id="ski-watt" type="number" min="0" max="2000" placeholder="180" oninput="calcErgFromWatt('ski')">
+      </div>
+    </div>
+    <div class="result-strip">
+      <div class="result-cell"><div class="result-lbl">Watt</div><div class="result-val nd" id="ski-res-watt">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Pace 500m</div><div class="result-val nd" id="ski-res-pace">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Tempo 1000m</div><div class="result-val nd" id="ski-res-1k">—</div></div>
+    </div>
+    <div class="calc-hint" style="margin-top:10px;">Stroke rate tipico: 30–40 spm. Upper body: dorsali, spalle, tricipiti, core. Zero impatto articolare.</div>
+  </div>
+</div>
+
+<div id="erg-panel-bike" class="erg-panel">
+  <div class="slbl">Calcolatore Pace ↔ Watt — BikeErg</div>
+  <div class="calc-block">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Minuti split 1000m</span>
+        <input class="calc-inp" id="bike-min" type="number" min="0" max="9" placeholder="3" oninput="calcErg('bike')">
+      </div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">Secondi</span>
+        <input class="calc-inp" id="bike-sec" type="number" min="0" max="59" placeholder="30" oninput="calcErg('bike')">
+      </div>
+      <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">Watt (inverso)</span>
+        <input class="calc-inp" id="bike-watt" type="number" min="0" max="2000" placeholder="200" oninput="calcErgFromWatt('bike')">
+      </div>
+    </div>
+    <div class="result-strip">
+      <div class="result-cell"><div class="result-lbl">Watt</div><div class="result-val nd" id="bike-res-watt">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Pace 1000m</div><div class="result-val nd" id="bike-res-pace">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Rpm consigliato</div><div class="result-val nd" id="bike-rpm">60–100</div></div>
+    </div>
+    <div class="calc-hint" style="margin-top:10px;">Split in 1000m (non 500m come RowErg/SkiErg). Stessa formula Concept2. Cadenza libera 60–100 RPM.</div>
+  </div>
+</div>
+
+<div id="erg-panel-air" class="erg-panel">
+  <div class="slbl">Air Bike (Assault / Echo Bike)</div>
+  <div class="calc-block">
+    <div class="warn-box" style="margin-bottom:12px;">
+      Gli Air Bike non usano la formula Concept2. I watt visualizzati variano per marca/modello
+      e non sono comparabili. Il riferimento per DEKA e allenamento sono le <strong>calorie</strong>,
+      non il pace.
+    </div>
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Calorie target</span>
+        <input class="calc-inp" id="air-cal" type="number" min="1" max="200" placeholder="25" oninput="calcAir()">
+      </div>
+      <div class="calc-field">
+        <span class="calc-lbl-s">RPM medio stimato</span>
+        <input class="calc-inp" id="air-rpm" type="number" min="40" max="150" placeholder="75" oninput="calcAir()">
+      </div>
+    </div>
+    <div class="result-strip">
+      <div class="result-cell"><div class="result-lbl">Tempo stimato</div><div class="result-val nd" id="air-time">—</div></div>
+      <div class="result-cell"><div class="result-lbl">Cal/min</div><div class="result-val nd" id="air-calmin">—</div></div>
+    </div>
+    <div class="calc-hint" style="margin-top:10px;">
+      Stima basata su ~11–14 cal/min a ritmo sostenuto (dati Assault Fitness).
+      La stima varia significativamente con l'intensità reale.
+    </div>
+  </div>
+  <div class="slbl">Riferimenti Air Bike</div>
+  <div class="calc-block" style="padding:0;overflow:hidden;">
+    <table class="bench-table">
+      <thead><tr><th>Intensit&agrave;</th><th>RPM approx.</th><th>Cal/min approx.</th><th>Sensazione</th></tr></thead>
+      <tbody>
+        <tr><td>Recupero attivo</td><td class="mono">40–55</td><td class="mono">5–8</td><td>Conversazionale</td></tr>
+        <tr><td>Aerobico</td><td class="mono">55–75</td><td class="mono">8–11</td><td>Respiro sostenuto</td></tr>
+        <tr><td>Soglia</td><td class="mono">75–90</td><td class="mono">11–15</td><td>Difficile parlare</td></tr>
+        <tr><td>Sprint</td><td class="mono">&gt; 90</td><td class="mono">&gt; 15</td><td>Massimale, &lt;30 sec</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- DAMPER / DRAG FACTOR -->
+<div class="slbl" style="margin-top:20px;">Damper e Drag Factor — Concept2</div>
+<div class="calc-block" style="padding:0;overflow:hidden;">
+  <table class="bench-table">
+    <thead><tr><th>Damper</th><th>Drag factor approx.</th><th>Sensazione</th><th>Uso tipico</th></tr></thead>
+    <tbody>
+      <tr><td class="mono">1–2</td><td class="mono">80–100</td><td>Molto leggero</td><td>Recupero, tecnica</td></tr>
+      <tr><td class="mono">3–4</td><td class="mono">100–120</td><td>Leggero — simile acqua</td><td>Allenamento tecnico, gare Concept2</td></tr>
+      <tr><td class="mono"><strong>3–5</strong> ✓</td><td class="mono"><strong>110–130</strong></td><td><strong>Ideale</strong></td><td>La maggior parte degli allenatori e atleti competitivi</td></tr>
+      <tr><td class="mono">6–7</td><td class="mono">130–160</td><td>Medio-pesante</td><td>Lavoro di forza specifica</td></tr>
+      <tr><td class="mono">8–10</td><td class="mono">160–210+</td><td>Pesante</td><td>Forza massima, breve durata</td></tr>
+    </tbody>
+  </table>
+</div>
+<div style="font-size:10px;color:var(--mu);margin-top:6px;padding:0 2px;">
+  Il damper fisico su macchine diverse non corrisponde allo stesso drag factor.
+  Un drag factor 120 su macchina A e B produce la stessa resistenza aerodinamica → stessa potenza → stesso split.
+</div>
+
+<!-- HYROX CALCULATOR -->
+<div class="slbl" style="margin-top:20px;">Calcolatore HYROX</div>
+<div class="race-card">
+  <div class="race-card-head">
+    <span class="race-card-icon">⚡</span>
+    <span class="race-card-title">HYROX — 8km corsa + 8 stazioni</span>
+    <div class="div-selector" style="margin-bottom:0;">
+      <button class="div-btn active" onclick="setHyroxDiv('open_w',this)">Open D</button>
+      <button class="div-btn" onclick="setHyroxDiv('open_m',this)">Open U</button>
+      <button class="div-btn" onclick="setHyroxDiv('pro_m',this)">Pro U</button>
+      <button class="div-btn" onclick="setHyroxDiv('pro_w',this)">Pro D</button>
+    </div>
+  </div>
+  <div class="race-card-body">
+    <div class="race-station-row" style="border-bottom:2px solid var(--g3);margin-bottom:4px;">
+      <span class="race-station-n" style="color:var(--gold);font-size:9px;">STEP</span>
+      <span class="race-station-name" style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;">Attivit&agrave;</span>
+      <span class="race-station-dist" style="color:var(--mu);font-size:8px;">Dist/Reps</span>
+      <span class="race-station-dist" style="color:var(--mu);font-size:8px;width:100px;">Carico</span>
+      <span class="race-station-time" style="color:var(--mu);font-size:8px;">Pace / Input</span>
+      <span class="race-station-time" style="color:var(--mu);font-size:8px;">Tempo</span>
+    </div>
+    <div id="hyrox-stations"></div>
+    <div class="race-total">
+      <span class="race-total-label">TOTALE STAZIONI</span>
+      <span class="race-total-val" id="hyrox-total">—</span>
+    </div>
+    <div style="font-size:10px;color:var(--mu);margin-top:8px;">
+      Inserisci il pace corsa (min/km), il pace SkiErg e RowErg (min:sec/500m) e i tempi stimati per le stazioni fisiche.
+      Il totale non include la corsa (8×1km) — sommala separatamente.
+    </div>
+  </div>
+</div>
+
+<!-- DEKA CALCULATOR -->
+<div class="slbl" style="margin-top:20px;">Calcolatore DEKA FIT</div>
+<div class="race-card">
+  <div class="race-card-head">
+    <span class="race-card-icon">🔥</span>
+    <span class="race-card-title">DEKA FIT — 10 zone + 500m corsa prima di ogni zona (5km tot)</span>
+  </div>
+  <div class="race-card-body">
+    <div class="race-station-row" style="border-bottom:2px solid var(--g3);margin-bottom:4px;">
+      <span class="race-station-n" style="color:var(--gold);font-size:9px;">ZONA</span>
+      <span class="race-station-name" style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;">Esercizio</span>
+      <span class="race-station-dist" style="color:var(--mu);font-size:8px;">Standard</span>
+      <span class="race-station-time" style="color:var(--mu);font-size:8px;">Pace / Input</span>
+      <span class="race-station-time" style="color:var(--mu);font-size:8px;">Tempo</span>
+    </div>
+    <div id="deka-stations"></div>
+    <div class="race-total">
+      <span class="race-total-label">TOTALE ZONE + CORSA</span>
+      <span class="race-total-val" id="deka-total">—</span>
+    </div>
+    <div style="font-size:10px;color:var(--mu);margin-top:8px;">
+      Inserisci il pace corsa (min/km) per i tratti da 500m, il pace RowErg e SkiErg (min:sec/500m) e i tempi stimati per le zone fisiche.
+    </div>
+  </div>
+</div>
+
+<!-- FONTI -->
+<div class="slbl" style="margin-top:20px;">Fonti</div>
+<div class="calc-block">
+  <div class="src-list">
+    <div>· <strong>Concept2 formula ufficiale</strong>: concept2.com/indoor-rowing/training/calculators — W = 2,8 / pace&sup3;</div>
+    <div>· <strong>Concept2 PM5 User Guide</strong>: drag factor, stroke rate, split interpretation.</div>
+    <div>· <strong>HYROX formato ufficiale 2025–26</strong>: hyrox.com — stazioni, pesi per divisione, regole gara.</div>
+    <div>· <strong>DEKA formato ufficiale 2025</strong>: spartan.com/deka — 10 zone, distanze macchine, categorie.</div>
+    <div>· Seiler S. Structure of endurance performance. <em>Int J Sports Physiol Perf</em>, 2010.</div>
+  </div>
+</div>
+
+</div>
+</body>
+<script>
+
+/* ══ ERGOMETRI ═══════════════════════════════════════════════════════════ */
+
+/* ── Macchina selector ── */
+let _currentErg = 'row';
+function setErg(id, el){
+  _currentErg = id;
+  document.querySelectorAll('.erg-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.erg-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('erg-panel-'+id).classList.add('active');
+}
+
+/* ── Concept2 formula: W = 2.8 / split^3 where split in sec/m ── */
+function paceToWatt(splitSec, machineType){
+  // splitSec is per 500m for row/ski, per 1000m for bike
+  const secPerM = splitSec / (machineType==='bike' ? 1000 : 500);
+  return 2.8 / Math.pow(secPerM, 3);
+}
+function wattToPace(watts, machineType){
+  const secPerM = Math.pow(2.8 / watts, 1/3);
+  return secPerM * (machineType==='bike' ? 1000 : 500);
+}
+function fmtSplit(secs){
+  const m = Math.floor(secs/60);
+  const s = Math.round(secs % 60);
+  return m + ':' + String(s).padStart(2,'0');
+}
+function fmtTime(secs){
+  const h = Math.floor(secs/3600);
+  const m = Math.floor((secs%3600)/60);
+  const s = Math.round(secs%60);
+  if(h>0) return h+'h '+String(m).padStart(2,'0')+'m '+String(s).padStart(2,'0')+'s';
+  return m+'m '+String(s).padStart(2,'0')+'s';
+}
+
+function calcErg(type){
+  const min = parseFloat(document.getElementById(type+'-min')?.value)||0;
+  const sec = parseFloat(document.getElementById(type+'-sec')?.value)||0;
+  const totalSec = min*60 + sec;
+  if(totalSec <= 0) return;
+  const watts = paceToWatt(totalSec, type);
+  // Update watt input
+  const wEl = document.getElementById(type+'-watt');
+  if(wEl) wEl.value = Math.round(watts);
+  updateErgResults(type, totalSec, watts);
+}
+
+function calcErgFromWatt(type){
+  const watts = parseFloat(document.getElementById(type+'-watt')?.value)||0;
+  if(watts <= 0) return;
+  const splitSec = wattToPace(watts, type);
+  const m = Math.floor(splitSec/60);
+  const s = Math.round(splitSec%60);
+  const minEl = document.getElementById(type+'-min');
+  const secEl = document.getElementById(type+'-sec');
+  if(minEl) minEl.value = m;
+  if(secEl) secEl.value = s;
+  updateErgResults(type, splitSec, watts);
+}
+
+function updateErgResults(type, splitSec, watts){
+  const set = (id, val) => { const el=document.getElementById(id); if(el){el.textContent=val;el.classList.remove('nd');} };
+  if(type==='row'){
+    set('row-res-watt', Math.round(watts)+' W');
+    set('row-res-pace', fmtSplit(splitSec)+'/500m');
+    set('row-res-2k',   fmtTime(splitSec/500*2000));
+    set('row-res-5k',   fmtTime(splitSec/500*5000));
+  } else if(type==='ski'){
+    set('ski-res-watt', Math.round(watts)+' W');
+    set('ski-res-pace', fmtSplit(splitSec)+'/500m');
+    set('ski-res-1k',   fmtTime(splitSec/500*1000));
+  } else if(type==='bike'){
+    set('bike-res-watt', Math.round(watts)+' W');
+    set('bike-res-pace', fmtSplit(splitSec)+'/1000m');
+  }
+  // Update HYROX/DEKA calcs
+  calcHyrox(); calcDeka();
+}
+
+/* ── Air Bike ── */
+function calcAir(){
+  const cal = parseFloat(document.getElementById('air-cal')?.value)||0;
+  const rpm = parseFloat(document.getElementById('air-rpm')?.value)||75;
+  if(cal<=0) return;
+  // Approximate: calories per minute based on RPM interpolation
+  const calPerMin = rpm < 55 ? 7 : rpm < 70 ? 9 : rpm < 85 ? 12 : 16;
+  const timeSec = (cal / calPerMin) * 60;
+  const te = document.getElementById('air-time');
+  const cm = document.getElementById('air-calmin');
+  if(te){ te.textContent = fmtTime(timeSec); te.classList.remove('nd'); }
+  if(cm){ cm.textContent = calPerMin.toFixed(0)+' cal/min'; cm.classList.remove('nd'); }
+}
+
+/* ══ HYROX ═══════════════════════════════════════════════════════════════ */
+const HYROX_DIVS = {
+  open_w: {label:'Open Donne', weights:{ski:'—',sled_push:'102 kg',sled_pull:'78 kg',kb:'2×16 kg',bag:'10 kg',wb:'4 kg'}},
+  open_m: {label:'Open Uomini',weights:{ski:'—',sled_push:'152 kg',sled_pull:'103 kg',kb:'2×24 kg',bag:'20 kg',wb:'6 kg'}},
+  pro_m:  {label:'Pro Uomini', weights:{ski:'—',sled_push:'202 kg',sled_pull:'153 kg',kb:'2×32 kg',bag:'30 kg',wb:'9 kg'}},
+  pro_w:  {label:'Pro Donne',  weights:{ski:'—',sled_push:'152 kg',sled_pull:'103 kg',kb:'2×24 kg',bag:'20 kg',wb:'9 kg'}},
+};
+let _hyroxDiv = 'open_w';
+
+const HYROX_STATIONS = [
+  {n:1, name:'SkiErg',              dist:'1.000 m', type:'ski_erg',  wKey:'ski'},
+  {n:2, name:'Sled Push',           dist:'50 m',    type:'sled_push',wKey:'sled_push'},
+  {n:3, name:'Sled Pull',           dist:'50 m',    type:'sled_pull',wKey:'sled_pull'},
+  {n:4, name:'Burpee Broad Jump',   dist:'80 m',    type:'physical', wKey:null},
+  {n:5, name:'Rowing (RowErg)',      dist:'1.000 m', type:'row_erg',  wKey:null},
+  {n:6, name:'KB Farmers Carry',    dist:'200 m',   type:'physical', wKey:'kb'},
+  {n:7, name:'Sandbag Lunges',      dist:'100 m',   type:'physical', wKey:'bag'},
+  {n:8, name:'Wall Balls',          dist:'100 reps',type:'physical', wKey:'wb'},
+];
+
+function setHyroxDiv(div, el){
+  _hyroxDiv = div;
+  document.querySelectorAll('.div-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderHyroxStations();
+  calcHyrox();
+}
+
+function renderHyroxStations(){
+  const container = document.getElementById('hyrox-stations'); if(!container)return;
+  const div = HYROX_DIVS[_hyroxDiv];
+  container.innerHTML = HYROX_STATIONS.map(st=>{
+    const carico = st.wKey ? (div.weights[st.wKey]||'—') : '—';
+    let inputHtml = '';
+    if(st.type==='ski_erg'){
+      inputHtml = `<input class="race-station-inp" id="hyrox-inp-${st.n}" placeholder="mm:ss" oninput="calcHyrox()">`;
+    } else if(st.type==='row_erg'){
+      inputHtml = `<input class="race-station-inp" id="hyrox-inp-${st.n}" placeholder="mm:ss" oninput="calcHyrox()">`;
+    } else {
+      inputHtml = `<input class="race-station-inp" id="hyrox-inp-${st.n}" placeholder="mm:ss" oninput="calcHyrox()">`;
+    }
+    return `<div class="race-station-row">
+      <span class="race-station-n">${st.n}</span>
+      <span class="race-station-name">${st.name}</span>
+      <span class="race-station-dist">${st.dist}</span>
+      <span class="race-station-dist" style="font-size:10px;color:var(--mu);">${carico}</span>
+      ${inputHtml}
+      <span class="race-station-time" id="hyrox-time-${st.n}" style="color:var(--mu);">—</span>
+    </div>`;
+  }).join('');
+  // Also add running input
+  container.insertAdjacentHTML('afterbegin', `<div class="race-station-row" style="background:rgba(46,155,155,.06);">
+    <span class="race-station-n" style="color:var(--teal);">🏃</span>
+    <span class="race-station-name">Corsa (pace/km)</span>
+    <span class="race-station-dist">8 × 1 km</span>
+    <span class="race-station-dist"></span>
+    <input class="race-station-inp" id="hyrox-run-pace" placeholder="4:30" oninput="calcHyrox()" value="5:00">
+    <span class="race-station-time" id="hyrox-run-time" style="color:var(--teal);">40:00</span>
+  </div>`);
+}
+
+function parseMMSS(val){
+  if(!val||!val.trim()) return 0;
+  const parts = val.split(':');
+  if(parts.length===2) return parseInt(parts[0]||0)*60 + parseFloat(parts[1]||0);
+  return parseFloat(val)||0;
+}
+
+function calcHyrox(){
+  let totalSec = 0;
+  // Running
+  const runPace = parseMMSS(document.getElementById('hyrox-run-pace')?.value||'5:00');
+  const runSec = runPace * 8;
+  const runTimeEl = document.getElementById('hyrox-run-time');
+  if(runTimeEl) runTimeEl.textContent = fmtTime(runSec);
+  totalSec += runSec;
+  // Erg stations: auto-fill from calculator if pace set
+  HYROX_STATIONS.forEach(st=>{
+    const inpEl = document.getElementById('hyrox-inp-'+st.n);
+    const timeEl = document.getElementById('hyrox-time-'+st.n);
+    let stSec = 0;
+    if(st.type==='ski_erg'){
+      // Try from pace input OR from ski calculator
+      const val = inpEl?.value;
+      if(val && val.trim()){
+        const split = parseMMSS(val);
+        stSec = split / 500 * 1000; // 1000m
+      } else {
+        const skSec = (parseFloat(document.getElementById('ski-min')?.value)||0)*60 +
+                      (parseFloat(document.getElementById('ski-sec')?.value)||0);
+        if(skSec>0){ stSec = skSec/500*1000; if(inpEl)inpEl.placeholder=fmtSplit(skSec); }
+      }
+    } else if(st.type==='row_erg'){
+      const val = inpEl?.value;
+      if(val && val.trim()){
+        stSec = parseMMSS(val)/500*1000;
+      } else {
+        const rowSec = (parseFloat(document.getElementById('row-min')?.value)||0)*60 +
+                       (parseFloat(document.getElementById('row-sec')?.value)||0);
+        if(rowSec>0){ stSec = rowSec/500*1000; if(inpEl)inpEl.placeholder=fmtSplit(rowSec); }
+      }
+    } else {
+      stSec = parseMMSS(inpEl?.value);
+    }
+    if(timeEl) timeEl.textContent = stSec>0 ? fmtTime(stSec) : '—';
+    totalSec += stSec;
+  });
+  const tot = document.getElementById('hyrox-total');
+  if(tot) tot.textContent = totalSec > 0 ? fmtTime(totalSec) : '—';
+}
+
+/* ══ DEKA FIT ════════════════════════════════════════════════════════════ */
+const DEKA_STATIONS = [
+  {n:1, name:'RAM Reverse Lunge',  dist:'30 reps',  type:'physical'},
+  {n:2, name:'Rowing (RowErg)',     dist:'500 m',    type:'row_erg'},
+  {n:3, name:'Box Jump / Step 24"',dist:'20 reps',  type:'physical'},
+  {n:4, name:'Med Ball Sit-Up',    dist:'25 reps',  type:'physical'},
+  {n:5, name:'SkiErg',             dist:'500 m',    type:'ski_erg'},
+  {n:6, name:'Farmer\'s Carry',   dist:'100 m',    type:'physical'},
+  {n:7, name:'Air Bike',           dist:'25 cal',   type:'air_bike'},
+  {n:8, name:'Dead Ball Wall Over',dist:'25 reps',  type:'physical'},
+  {n:9, name:'Sled',               dist:'varia',    type:'physical'},
+  {n:10,name:'RAM Burpees',        dist:'30 reps',  type:'physical'},
+];
+
+function renderDekaStations(){
+  const container = document.getElementById('deka-stations'); if(!container)return;
+  // Running row (500m before each zone)
+  const runRow = `<div class="race-station-row" style="background:rgba(46,155,155,.06);">
+    <span class="race-station-n" style="color:var(--teal);">🏃</span>
+    <span class="race-station-name">Corsa (pace/km)</span>
+    <span class="race-station-dist">10 × 500m</span>
+    <input class="race-station-inp" id="deka-run-pace" placeholder="5:00" oninput="calcDeka()" value="5:30">
+    <span class="race-station-time" id="deka-run-time" style="color:var(--teal);">—</span>
+  </div>`;
+  container.innerHTML = runRow + DEKA_STATIONS.map(st=>{
+    return `<div class="race-station-row">
+      <span class="race-station-n">${st.n}</span>
+      <span class="race-station-name">${st.name}</span>
+      <span class="race-station-dist">${st.dist}</span>
+      <input class="race-station-inp" id="deka-inp-${st.n}" placeholder="mm:ss" oninput="calcDeka()">
+      <span class="race-station-time" id="deka-time-${st.n}" style="color:var(--mu);">—</span>
+    </div>`;
+  }).join('');
+}
+
+function calcDeka(){
+  let totalSec = 0;
+  // Running 10 × 500m
+  const runPace = parseMMSS(document.getElementById('deka-run-pace')?.value||'5:30');
+  const runSec = runPace * 10 / 2; // 500m = pace/km / 2
+  const runTimeEl = document.getElementById('deka-run-time');
+  if(runTimeEl) runTimeEl.textContent = fmtTime(runSec);
+  totalSec += runSec;
+
+  DEKA_STATIONS.forEach(st=>{
+    const inpEl = document.getElementById('deka-inp-'+st.n);
+    const timeEl = document.getElementById('deka-time-'+st.n);
+    let stSec = 0;
+    if(st.type==='row_erg'){
+      const val = inpEl?.value;
+      if(val && val.trim()){
+        stSec = parseMMSS(val);
+      } else {
+        const rowSec = (parseFloat(document.getElementById('row-min')?.value)||0)*60 +
+                       (parseFloat(document.getElementById('row-sec')?.value)||0);
+        if(rowSec>0){ stSec = rowSec; if(inpEl)inpEl.placeholder=fmtSplit(rowSec); }
+      }
+    } else if(st.type==='ski_erg'){
+      const val = inpEl?.value;
+      if(val && val.trim()){
+        stSec = parseMMSS(val);
+      } else {
+        const skiSec = (parseFloat(document.getElementById('ski-min')?.value)||0)*60 +
+                       (parseFloat(document.getElementById('ski-sec')?.value)||0);
+        if(skiSec>0){ stSec = skiSec; if(inpEl)inpEl.placeholder=fmtSplit(skiSec); }
+      }
+    } else if(st.type==='air_bike'){
+      const val = inpEl?.value;
+      stSec = val&&val.trim() ? parseMMSS(val) : (25/12)*60; // default 25cal ~2min
+    } else {
+      stSec = parseMMSS(inpEl?.value);
+    }
+    if(timeEl) timeEl.textContent = stSec>0 ? fmtTime(stSec) : '—';
+    totalSec += stSec;
+  });
+  const tot = document.getElementById('deka-total');
+  if(tot) tot.textContent = totalSec>60 ? fmtTime(totalSec) : '—';
+}
+
+/* ══ NAV ══════════════════════════════════════════════════════════════════ */
+function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
+document.addEventListener('click',function(e){if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}});
+
+document.addEventListener('DOMContentLoaded',()=>{
+  renderHyroxStations();
+  renderDekaStations();
+  calcHyrox();
+  calcDeka();
+});
+
+</script>
+</html>

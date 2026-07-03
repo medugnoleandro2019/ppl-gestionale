@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPL · Zone Corsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  /* zone colors */
+  --z1:#6B9FCC;--z2:#4DBD74;--z3:#D4AF45;--z4:#E08C3A;--z5:#E05C5C;--z6:#9A7ACC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+body{margin-top:40px;}
+
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;}
+
+.page{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── SISTEMA ZONE TAB ── */
+.sys-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sys-tab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.sys-tab:last-child{border-right:none;}
+.sys-tab:hover{background:var(--g2);}
+.sys-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.sys-tab-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;color:var(--mu2);}
+.sys-tab.active .sys-tab-title{color:var(--gold);}
+.sys-tab-sub{font-size:9px;color:var(--g6);margin-top:2px;line-height:1.3;}
+
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUTS ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+.inp-row-3{display:flex;gap:8px;margin-bottom:14px;}
+.inp-sm{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  padding:8px 8px;outline:none;width:70px;text-align:center;transition:.15s;}
+.inp-sm:focus{border-color:var(--gold);}
+.inp-colon{font-family:'DM Mono',monospace;font-size:18px;color:var(--mu);padding:0 2px;line-height:40px;}
+
+/* ── FCR METHOD TOGGLE ── */
+.fcr-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fcr-opt{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--mu2);transition:.15s;}
+.fcr-opt:hover{border-color:var(--gold2);color:var(--wh);}
+.fcr-opt.active{border-color:var(--gold);background:var(--goldd);color:var(--gold);}
+.fcr-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+
+/* ── WARN ── */
+.warn-box{background:rgba(184,151,42,.06);border:1px solid rgba(184,151,42,.25);border-radius:4px;
+  padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--mu2);line-height:1.6;}
+.warn-box strong{color:var(--gold2);}
+.note-box{background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--z6);
+  border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:10px;font-size:11px;color:var(--mu2);line-height:1.65;}
+.note-box strong{color:var(--wh);}
+.note-box .src{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+
+/* ── ZONE RESULT TABLE ── */
+.zone-table-wrap{border-radius:4px;overflow:hidden;border:1px solid var(--g3);}
+.zone-table{width:100%;border-collapse:collapse;}
+.zone-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;white-space:nowrap;}
+.zone-table th:not(:first-child){text-align:center;}
+.zone-table td{padding:0;border-bottom:1px solid var(--g2);}
+.zone-table tr:last-child td{border-bottom:none;}
+.zone-row{display:flex;align-items:stretch;}
+.zone-color-bar{width:5px;flex-shrink:0;}
+.zone-cells{display:flex;align-items:center;flex:1;flex-wrap:wrap;}
+.zc{padding:10px 12px;text-align:center;flex:1;min-width:80px;}
+.zc.left{text-align:left;min-width:140px;}
+.zone-name{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--wh);display:block;}
+.zone-sys{font-size:9px;color:var(--mu);display:block;margin-top:1px;}
+.zone-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--wh);}
+.zone-val.big{font-size:15px;}
+.zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);display:block;margin-top:2px;}
+.zone-obiettivo{font-size:10px;color:var(--mu2);line-height:1.4;}
+/* highlight current zone */
+.zone-table tr.current td{background:rgba(255,255,255,.03);}
+.current-badge{display:inline-block;background:var(--gold);color:#000;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;font-weight:bold;
+  padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.result-main{padding:16px 18px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:16px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+
+/* ── FORMULA ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:9px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);}
+.f-hi{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500;}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--z2);font-weight:500;}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;color:var(--mu);}
+.empty-icon{font-size:30px;opacity:.3;margin-bottom:8px;}
+.empty-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.empty-s{font-size:10px;color:var(--g6);}
+
+/* ── GARA PRESET ── */
+.gara-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.gara-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:5px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);cursor:pointer;transition:.15s;}
+.gara-btn:hover{border-color:var(--gold2);color:var(--wh);}
+.gara-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* ── FC CALCULATOR MODULE ── */
+.fc-module{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.fc-mod-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--g3);user-select:none;}
+.fc-mod-head:hover{background:var(--g2);}
+.fc-mod-icon{font-size:18px;flex-shrink:0;}
+.fc-mod-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.fc-mod-badge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;}
+.fc-mod-badge.saved{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:var(--z2);}
+.fc-mod-badge.empty{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.fc-mod-arr{color:var(--mu);font-size:11px;}
+.fc-mod-body{padding:16px;display:none;}
+.fc-mod-body.open{display:block;}
+
+/* formula compare grid */
+.formula-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.formula-card{flex:1;min-width:130px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:10px 12px;transition:.15s;}
+.formula-card.best{border-color:var(--gold);background:rgba(184,151,42,.06);}
+.formula-card.ok{border-color:rgba(46,155,155,.35);}
+.fc-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.fc-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold);line-height:1;}
+.formula-card:not(.best) .fc-val{color:var(--mu2);}
+.fc-formula{font-size:9px;color:var(--mu);margin-top:4px;font-family:'DM Mono',monospace;}
+.fc-err{font-size:9px;margin-top:3px;}
+.fc-err.hi{color:var(--red);}.fc-err.med{color:var(--org);}.fc-err.lo{color:var(--z2);}
+.badge-best{background:var(--gold);color:#000;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;font-weight:bold;}
+.badge-ok{background:rgba(46,155,155,.2);color:var(--teal);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;}
+
+/* test cards */
+.test-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.test-card{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;overflow:hidden;}
+.test-card-head{padding:10px 12px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.test-card-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gold);width:28px;flex-shrink:0;}
+.test-card-title{font-size:12px;font-weight:500;color:var(--wh);}
+.test-card-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+.test-card-body{padding:10px 12px;}
+.test-step{display:flex;gap:8px;margin-bottom:7px;font-size:10px;color:var(--mu2);line-height:1.5;}
+.test-step-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);width:14px;flex-shrink:0;padding-top:1px;}
+.test-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:2px;margin-right:4px;}
+.test-tag.easy{background:rgba(77,189,116,.15);color:var(--z2);}
+.test-tag.med{background:rgba(224,140,58,.15);color:var(--org);}
+.test-tag.hard{background:rgba(224,92,92,.15);color:var(--red);}
+.test-tag.equip{background:rgba(154,122,204,.15);color:var(--z6);}
+.test-result-input-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px;flex-wrap:wrap;}
+.test-result-note{font-size:9px;color:var(--mu);margin-top:4px;font-style:italic;}
+
+/* record atleta */
+.record-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.record-field{flex:1;min-width:120px;display:flex;flex-direction:column;gap:3px;}
+.record-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.record-lbl span{color:var(--gold);margin-left:4px;}
+.record-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:7px 9px;outline:none;width:100%;transition:.15s;}
+.record-inp:focus{border-color:var(--gold);}
+.record-display{background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+.rd-row{display:flex;flex-wrap:wrap;gap:14px;}
+.rd-item{display:flex;flex-direction:column;gap:2px;}
+.rd-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.rd-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.rd-val.sec{color:var(--teal);}
+.rd-val.nd{color:var(--g6);font-size:13px;}
+.rd-sub{font-size:9px;color:var(--mu);}
+.use-record-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;background:rgba(77,189,116,.1);border:1px solid rgba(77,189,116,.3);color:var(--z2);padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.use-record-btn:hover{background:rgba(77,189,116,.2);border-color:var(--z2);}
+.history-list{margin-top:10px;}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--g2);border:1px solid var(--g3);border-radius:3px;margin-bottom:5px;}
+.hi-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;}
+.hi-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.hi-method{font-size:9px;color:var(--mu2);flex:1;}
+.hi-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:13px;}
+.hi-del:hover{color:var(--red);}
+
+  .zc{min-width:60px;padding:8px 8px;}.zc.left{min-width:120px;}
+  .zone-name{font-size:9px;}.zone-val{font-size:12px;}.zone-val.big{font-size:13px;}
+  .result-val{font-size:30px;}
+  .sys-tab-title{font-size:9px;}.sys-tab-sub{font-size:8px;}
+  .topbar{padding:0 12px;}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ── Zone Bici specifiche ── */
+.zone-row{display:flex;align-items:stretch;gap:0;border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.zone-label{width:130px;flex-shrink:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;}
+.zone-num{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mu);}
+.zone-name{font-size:13px;font-weight:500;color:var(--wh);margin:2px 0;}
+.zone-fis{font-size:9px;color:var(--mu);font-style:italic;line-height:1.3;}
+.zone-data{flex:1;display:flex;align-items:center;padding:10px 14px;background:var(--g1);gap:16px;flex-wrap:wrap;}
+.zone-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);min-width:90px;flex-shrink:0;}
+.zone-watts{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+.zone-wkg{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);}
+.zone-bar{height:4px;border-radius:2px;margin-top:6px;transition:width .4s;}
+.calc-block{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px 18px;margin-bottom:14px;}
+.calc-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+.calc-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:110px;}
+.calc-lbl-s{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.calc-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:18px;font-weight:500;padding:8px 10px;outline:none;width:100%;transition:.15s;text-align:right;}
+.calc-inp:focus{border-color:var(--gold);}
+.calc-inp::placeholder{color:var(--g6);}
+.calc-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:4px;}
+.ss-banner{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);border-radius:4px;padding:10px 14px;margin:8px 0 4px;display:flex;align-items:center;gap:12px;}
+.ss-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex-shrink:0;}
+.ss-range{font-family:'DM Mono',monospace;font-size:18px;color:var(--gold2);}
+.ss-note{font-size:10px;color:var(--mu);flex:1;}
+.wkg-table{width:100%;border-collapse:collapse;font-size:11px;}
+.wkg-table th{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--g3);}
+.wkg-table td{padding:8px 10px;border-bottom:1px solid rgba(34,34,34,.4);color:var(--mu2);}
+.wkg-table tr:last-child td{border-bottom:none;}
+.wkg-table .val{font-family:'DM Mono',monospace;color:var(--wh);font-weight:500;}
+.ftp-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 18px;margin-bottom:10px;}
+.ftp-result-val{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:var(--gold);}
+.test-tabs{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.test-tab{flex:1;padding:10px 8px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;}
+.test-tab:last-child{border-right:none;}
+.test-tab:hover{background:var(--g2);}
+.test-tab.active{background:var(--g2);border-bottom:2px solid var(--gold);}
+.test-tab-name{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--mu2);}
+.test-tab.active .test-tab-name{color:var(--gold);}
+.test-tab-desc{font-size:9px;color:var(--g6);margin-top:2px;}
+.test-panel{display:none;}.test-panel.active{display:block;}
+.src-list{display:flex;flex-direction:column;gap:8px;font-size:11px;color:var(--mu);}
+.src-list em{color:var(--mu2);}
+@media(max-width:600px){
+  .zone-row{flex-direction:column;}
+  .zone-label{width:auto;border-bottom:1px solid var(--g3);}
+  .calc-row{flex-direction:column;}
+  .wkg-table{font-size:10px;}
+}
+
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link active" href="zone_bici.html">🚴 Zone Bici</a>
+  <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="topbar">
+  <span class="tb-brand">PPL</span><div class="tb-sep"></div>
+  <span class="tb-title">Zone Bici</span><div class="tb-sp"></div>
+  <span class="tb-src">Coggan · Allen · Hebisz · Seiler</span>
+</div>
+<div class="page">
+
+<div class="warn-box">
+  <strong>⚠ Nota metodologica:</strong>
+  Le zone di potenza seguono il modello a 7 zone di <strong>Andrew Coggan, PhD</strong>
+  (Allen &amp; Coggan, <em>Training and Racing with a Power Meter</em>, VeloPress 2010).
+  La FTP è la massima potenza sostenibile per 60 minuti. Ri-testa ogni 6–8 settimane.
+</div>
+
+<div class="slbl">Calcolo FTP</div>
+
+<div class="test-tabs">
+  <div class="test-tab active" onclick="setTest('t20',this)">
+    <div class="test-tab-name">Test 20 min</div>
+    <div class="test-tab-desc">FTP = media × 0,95</div>
+  </div>
+  <div class="test-tab" onclick="setTest('ramp',this)">
+    <div class="test-tab-name">Ramp Test</div>
+    <div class="test-tab-desc">FTP = picco × 0,75</div>
+  </div>
+  <div class="test-tab" onclick="setTest('t8',this)">
+    <div class="test-tab-name">Test 8 min</div>
+    <div class="test-tab-desc">FTP = media × 0,90</div>
+  </div>
+  <div class="test-tab" onclick="setTest('direct',this)">
+    <div class="test-tab-name">FTP diretta</div>
+    <div class="test-tab-desc">Inserisci FTP nota</div>
+  </div>
+</div>
+
+<div class="calc-block">
+  <div class="test-panel active" id="panel-t20">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Potenza media 20 min (W)</span>
+        <input class="calc-inp" id="inp-t20" type="number" min="0" max="1000" placeholder="es. 250" oninput="calcFTP()">
+      </div>
+      <div class="calc-field" style="flex:0.5;min-width:100px;">
+        <span class="calc-lbl-s">Peso kg (opz.)</span>
+        <input class="calc-inp" id="inp-peso-t20" type="number" min="30" max="150" placeholder="70" oninput="calcFTP()">
+      </div>
+    </div>
+    <div class="calc-hint">Riscaldamento strutturato 30' + 5' massimale + 20' al massimo sostenuto. FTP = media 20' × 0,95.</div>
+  </div>
+  <div class="test-panel" id="panel-ramp">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Potenza picco ramp (W)</span>
+        <input class="calc-inp" id="inp-ramp" type="number" min="0" max="1200" placeholder="es. 320" oninput="calcFTP()">
+      </div>
+      <div class="calc-field" style="flex:0.5;min-width:100px;">
+        <span class="calc-lbl-s">Peso kg (opz.)</span>
+        <input class="calc-inp" id="inp-peso-ramp" type="number" min="30" max="150" placeholder="70" oninput="calcFTP()">
+      </div>
+    </div>
+    <div class="calc-hint">+20W ogni minuto fino all'esaurimento. FTP = potenza massima raggiunta × 0,75.</div>
+  </div>
+  <div class="test-panel" id="panel-t8">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">Potenza media 8 min (W)</span>
+        <input class="calc-inp" id="inp-t8" type="number" min="0" max="1000" placeholder="es. 280" oninput="calcFTP()">
+      </div>
+      <div class="calc-field" style="flex:0.5;min-width:100px;">
+        <span class="calc-lbl-s">Peso kg (opz.)</span>
+        <input class="calc-inp" id="inp-peso-t8" type="number" min="30" max="150" placeholder="70" oninput="calcFTP()">
+      </div>
+    </div>
+    <div class="calc-hint">Meno preciso per atleti esplosivi. Coefficiente 0,90 (Borszcz et al. 2019).</div>
+  </div>
+  <div class="test-panel" id="panel-direct">
+    <div class="calc-row">
+      <div class="calc-field">
+        <span class="calc-lbl-s">FTP nota (W)</span>
+        <input class="calc-inp" id="inp-direct" type="number" min="0" max="700" placeholder="es. 230" oninput="calcFTP()">
+      </div>
+      <div class="calc-field" style="flex:0.5;min-width:100px;">
+        <span class="calc-lbl-s">Peso kg (opz.)</span>
+        <input class="calc-inp" id="inp-peso-direct" type="number" min="30" max="150" placeholder="70" oninput="calcFTP()">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="ftp-result-box" style="display:none;">
+  <div class="ftp-result">
+    <div style="display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;">
+      <div>
+        <div class="calc-lbl-s" style="margin-bottom:4px;">FTP stimata</div>
+        <div class="ftp-result-val" id="ftp-val">—</div>
+      </div>
+      <div id="wkg-result-box" style="display:none;">
+        <div class="calc-lbl-s" style="margin-bottom:4px;">W/kg</div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu2);" id="wkg-val">—</div>
+      </div>
+      <div id="wkg-level-box" style="margin-left:auto;align-self:flex-end;padding-bottom:4px;"></div>
+    </div>
+    <div style="font-size:10px;color:var(--mu);margin-top:6px;" id="ftp-sub"></div>
+  </div>
+  <div class="ss-banner">
+    <span class="ss-label">Sweet Spot</span>
+    <span class="ss-range" id="ss-range">—</span>
+    <span class="ss-note">88–94% FTP · massimo stimolo allenante con recupero sostenibile (Allen &amp; Coggan)</span>
+  </div>
+</div>
+
+<div class="slbl" style="margin-top:20px;">Zone di potenza — 7 zone Coggan</div>
+<div id="zone-list"></div>
+
+<div class="slbl" style="margin-top:20px;">Riferimento W/kg per livello</div>
+<div class="calc-block" style="padding:0;overflow:hidden;">
+  <table class="wkg-table">
+    <thead><tr><th>Livello</th><th>W/kg (20 min)</th><th>Atleta tipo</th></tr></thead>
+    <tbody>
+      <tr><td>Principiante</td><td class="val">&lt; 2.0</td><td>Primo anno strutturato</td></tr>
+      <tr><td>Sportivo amatore</td><td class="val">2.0 – 2.9</td><td>Allenamento regolare, no gare</td></tr>
+      <tr><td>Amatore allenato</td><td class="val">2.9 – 3.7</td><td>Gran Fondo, regionali</td></tr>
+      <tr><td>Agonista evoluto</td><td class="val">3.7 – 4.5</td><td>Cat. 3–4, corse regionali</td></tr>
+      <tr><td>Semiprofessionale</td><td class="val">4.5 – 5.5</td><td>Continental, cat. 2–1</td></tr>
+      <tr><td>Élite / Pro</td><td class="val">&gt; 5.5</td><td>WorldTour, scalatori d'élite</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="slbl" style="margin-top:20px;">Cadenza (RPM)</div>
+<div class="calc-block">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;">
+    <div style="flex:1;min-width:180px;">
+      <div class="calc-lbl-s">Cadenza ottimale</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;color:var(--gold2);margin:4px 0;">80–100 RPM</div>
+      <div style="font-size:10px;color:var(--mu);">Riduce stress muscolare, favorisce efficienza neuromuscolare</div>
+    </div>
+    <div style="flex:1;min-width:180px;">
+      <div class="calc-lbl-s">SFR — Forza specifica</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;color:var(--mu2);margin:4px 0;">50–70 RPM</div>
+      <div style="font-size:10px;color:var(--mu);">Hebisz et al. 2024 (PLOS ONE): maggiori adattamenti aerobici con cadenza bassa in atleti allenati</div>
+    </div>
+    <div style="flex:1;min-width:180px;">
+      <div class="calc-lbl-s">Sprint / neuromuscolare</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;color:var(--mu2);margin:4px 0;">110–130+ RPM</div>
+      <div style="font-size:10px;color:var(--mu);">Potenza picco, velocità di pedalata</div>
+    </div>
+  </div>
+</div>
+
+<div class="slbl" style="margin-top:20px;">Fonti scientifiche</div>
+<div class="calc-block">
+  <div class="src-list">
+    <div>· Allen H, Coggan AR. <em>Training and Racing with a Power Meter.</em> VeloPress, 2010. — Modello 7 zone, definizione FTP, test 20 min.</div>
+    <div>· Borszcz FK et al. Functional threshold power in cyclists: validity of the concept. <em>Sports Medicine</em>, 2019. PMC7862708</div>
+    <div>· Borszcz FK et al. Is the functional threshold power interchangeable with the lactate threshold? <em>Int J Sports Physiol Perf</em>, 2018. PMC6835290</div>
+    <div>· Hebisz R et al. Polarized training with low vs self-selected cadence in trained female cyclists. <em>PLOS ONE</em>, 2024. DOI: 10.1371/journal.pone.0311833</div>
+    <div>· Muñoz I et al. Polarized training effectiveness: systematic review and meta-analysis. <em>Sports Medicine</em>, 2024.</div>
+    <div>· Seiler S. What is best practice for training intensity distribution in endurance athletes? <em>Int J Sports Physiol Perf</em>, 2010.</div>
+  </div>
+</div>
+
+</div>
+</body>
+<script>
+
+const ZONES=[
+  {n:1,name:'Recupero attivo',   fis:'Rigenerazione, metabolismo basale',              pct:[0,55],   color:'#3A8A3A'},
+  {n:2,name:'Endurance',         fis:'Densit\u00e0 mitocondriale, ossidazione lipidi',pct:[56,75],  color:'#4DBD74'},
+  {n:3,name:'Tempo',             fis:'Aerobico sostenuto, inizio reclutamento IIa',    pct:[76,90],  color:'#B8D94D'},
+  {n:4,name:'Soglia (LT2)',      fis:'Lattato threshold, massima zona aerobica',       pct:[91,105], color:'#E08C3A'},
+  {n:5,name:'VO\u2082max',       fis:'Capacit\u00e0 aerobica massima',                pct:[106,120],color:'#E05C5C'},
+  {n:6,name:'Capacit\u00e0 anaer.',fis:'Accumulo lattato, sprint prolungati',         pct:[121,150],color:'#CC3A8A'},
+  {n:7,name:'Neuromuscolare',    fis:'Sprint max, potenza picco \u226410 sec',         pct:[151,200],color:'#9A7ACC'},
+];
+
+let _ftp=0, _peso=0, _currentTest='t20';
+
+function setTest(id,el){
+  _currentTest=id;
+  document.querySelectorAll('.test-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.test-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+  calcFTP();
+}
+
+function calcFTP(){
+  const TESTS={
+    t20:   {inp:'inp-t20',    peso:'inp-peso-t20',   f:0.95},
+    ramp:  {inp:'inp-ramp',   peso:'inp-peso-ramp',  f:0.75},
+    t8:    {inp:'inp-t8',     peso:'inp-peso-t8',    f:0.90},
+    direct:{inp:'inp-direct', peso:'inp-peso-direct',f:1.00},
+  };
+  const t=TESTS[_currentTest];
+  const raw=parseFloat(document.getElementById(t.inp)?.value)||0;
+  _peso=parseFloat(document.getElementById(t.peso)?.value)||0;
+  _ftp=raw>0?Math.round(raw*t.f):0;
+  renderResult(); renderZones();
+}
+
+function renderResult(){
+  const box=document.getElementById('ftp-result-box');
+  if(_ftp<=0){box.style.display='none';return;}
+  box.style.display='block';
+  document.getElementById('ftp-val').textContent=_ftp+' W';
+  const subs={
+    t20:'Potenza media 20min \u00d7 0,95 (Allen & Coggan)',
+    ramp:'Picco ramp \u00d7 0,75',
+    t8:'Potenza media 8min \u00d7 0,90',
+    direct:'FTP inserita manualmente',
+  };
+  document.getElementById('ftp-sub').textContent=subs[_currentTest]||'';
+  const wkg=_peso>0?(_ftp/_peso):0;
+  const wkgBox=document.getElementById('wkg-result-box');
+  const wkgVal=document.getElementById('wkg-val');
+  if(wkg>0){
+    wkgBox.style.display='block';
+    wkgVal.textContent=wkg.toFixed(2)+' W/kg';
+    const lvl=wkg<2?'Principiante':wkg<2.9?'Sportivo amatore':wkg<3.7?'Amatore allenato':wkg<4.5?'Agonista evoluto':wkg<5.5?'Semiprofessionale':'Elite / Pro';
+    document.getElementById('wkg-level-box').innerHTML=
+      '<span style="font-size:11px;color:var(--mu);">Livello: </span>'+
+      '<span style="font-family:\'DM Mono\',monospace;font-size:13px;color:var(--gold);">'+lvl+'</span>';
+  }else{wkgBox.style.display='none';document.getElementById('wkg-level-box').innerHTML='';}
+  const ssL=Math.round(_ftp*0.88),ssH=Math.round(_ftp*0.94);
+  document.getElementById('ss-range').textContent=ssL+' \u2013 '+ssH+' W';
+}
+
+function renderZones(){
+  const list=document.getElementById('zone-list'); if(!list)return;
+  list.innerHTML=ZONES.map(z=>{
+    const lo=_ftp>0?Math.round(_ftp*z.pct[0]/100):null;
+    const hi=_ftp>0?Math.round(_ftp*z.pct[1]/100):null;
+    const wkg_lo=(_ftp>0&&_peso>0)?(lo/_peso).toFixed(2):null;
+    const wkg_hi=(_ftp>0&&_peso>0)?(hi/_peso).toFixed(2):null;
+    const watts=lo!==null?(z.n===1?'< '+hi+' W':z.n===7?'> '+lo+' W':lo+' \u2013 '+hi+' W'):'calcola FTP \u2191';
+    const wkg=wkg_lo?(z.n===1?'< '+wkg_hi:z.n===7?'> '+wkg_lo:wkg_lo+' \u2013 '+wkg_hi+' W/kg'):'';
+    const bw=Math.min(100,z.pct[1])/2;
+    return `<div class="zone-row">
+      <div class="zone-label" style="border-left:4px solid ${z.color};">
+        <div class="zone-num">Z${z.n}</div>
+        <div class="zone-name">${z.name}</div>
+        <div class="zone-fis">${z.fis}</div>
+      </div>
+      <div class="zone-data">
+        <div class="zone-pct">${z.pct[0]}\u2013${z.pct[1]}% FTP</div>
+        <div style="flex:1;">
+          <div class="zone-watts" style="color:${lo?'var(--wh)':'var(--g6)'}">${watts}</div>
+          ${wkg?`<div class="zone-wkg">${wkg}</div>`:''}
+          <div class="zone-bar" style="width:${bw}%;background:${z.color};opacity:.5;"></div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
+document.addEventListener('click',function(e){if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}});
+document.addEventListener('DOMContentLoaded',()=>renderZones());
+
+</script>
+</html>
