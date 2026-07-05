@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPL · Zone Corsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  /* zone colors */
+  --z1:#6B9FCC;--z2:#4DBD74;--z3:#D4AF45;--z4:#E08C3A;--z5:#E05C5C;--z6:#9A7ACC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+body{margin-top:40px;}
+
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;}
+
+.page{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── SISTEMA ZONE TAB ── */
+.sys-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sys-tab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.sys-tab:last-child{border-right:none;}
+.sys-tab:hover{background:var(--g2);}
+.sys-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.sys-tab-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;color:var(--mu2);}
+.sys-tab.active .sys-tab-title{color:var(--gold);}
+.sys-tab-sub{font-size:9px;color:var(--g6);margin-top:2px;line-height:1.3;}
+
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUTS ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+.inp-row-3{display:flex;gap:8px;margin-bottom:14px;}
+.inp-sm{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  padding:8px 8px;outline:none;width:70px;text-align:center;transition:.15s;}
+.inp-sm:focus{border-color:var(--gold);}
+.inp-colon{font-family:'DM Mono',monospace;font-size:18px;color:var(--mu);padding:0 2px;line-height:40px;}
+
+/* ── FCR METHOD TOGGLE ── */
+.fcr-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fcr-opt{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--mu2);transition:.15s;}
+.fcr-opt:hover{border-color:var(--gold2);color:var(--wh);}
+.fcr-opt.active{border-color:var(--gold);background:var(--goldd);color:var(--gold);}
+.fcr-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+
+/* ── WARN ── */
+.warn-box{background:rgba(184,151,42,.06);border:1px solid rgba(184,151,42,.25);border-radius:4px;
+  padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--mu2);line-height:1.6;}
+.warn-box strong{color:var(--gold2);}
+.note-box{background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--z6);
+  border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:10px;font-size:11px;color:var(--mu2);line-height:1.65;}
+.note-box strong{color:var(--wh);}
+.note-box .src{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+
+/* ── ZONE RESULT TABLE ── */
+.zone-table-wrap{border-radius:4px;overflow:hidden;border:1px solid var(--g3);}
+.zone-table{width:100%;border-collapse:collapse;}
+.zone-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;white-space:nowrap;}
+.zone-table th:not(:first-child){text-align:center;}
+.zone-table td{padding:0;border-bottom:1px solid var(--g2);}
+.zone-table tr:last-child td{border-bottom:none;}
+.zone-row{display:flex;align-items:stretch;}
+.zone-color-bar{width:5px;flex-shrink:0;}
+.zone-cells{display:flex;align-items:center;flex:1;flex-wrap:wrap;}
+.zc{padding:10px 12px;text-align:center;flex:1;min-width:80px;}
+.zc.left{text-align:left;min-width:140px;}
+.zone-name{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--wh);display:block;}
+.zone-sys{font-size:9px;color:var(--mu);display:block;margin-top:1px;}
+.zone-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--wh);}
+.zone-val.big{font-size:15px;}
+.zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);display:block;margin-top:2px;}
+.zone-obiettivo{font-size:10px;color:var(--mu2);line-height:1.4;}
+/* highlight current zone */
+.zone-table tr.current td{background:rgba(255,255,255,.03);}
+.current-badge{display:inline-block;background:var(--gold);color:#000;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;font-weight:bold;
+  padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.result-main{padding:16px 18px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:16px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+
+/* ── FORMULA ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:9px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);}
+.f-hi{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500;}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--z2);font-weight:500;}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;color:var(--mu);}
+.empty-icon{font-size:30px;opacity:.3;margin-bottom:8px;}
+.empty-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.empty-s{font-size:10px;color:var(--g6);}
+
+/* ── GARA PRESET ── */
+.gara-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.gara-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:5px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);cursor:pointer;transition:.15s;}
+.gara-btn:hover{border-color:var(--gold2);color:var(--wh);}
+.gara-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* ── FC CALCULATOR MODULE ── */
+.fc-module{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.fc-mod-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--g3);user-select:none;}
+.fc-mod-head:hover{background:var(--g2);}
+.fc-mod-icon{font-size:18px;flex-shrink:0;}
+.fc-mod-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.fc-mod-badge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;}
+.fc-mod-badge.saved{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:var(--z2);}
+.fc-mod-badge.empty{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.fc-mod-arr{color:var(--mu);font-size:11px;}
+.fc-mod-body{padding:16px;display:none;}
+.fc-mod-body.open{display:block;}
+
+/* formula compare grid */
+.formula-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.formula-card{flex:1;min-width:130px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:10px 12px;transition:.15s;}
+.formula-card.best{border-color:var(--gold);background:rgba(184,151,42,.06);}
+.formula-card.ok{border-color:rgba(46,155,155,.35);}
+.fc-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.fc-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold);line-height:1;}
+.formula-card:not(.best) .fc-val{color:var(--mu2);}
+.fc-formula{font-size:9px;color:var(--mu);margin-top:4px;font-family:'DM Mono',monospace;}
+.fc-err{font-size:9px;margin-top:3px;}
+.fc-err.hi{color:var(--red);}.fc-err.med{color:var(--org);}.fc-err.lo{color:var(--z2);}
+.badge-best{background:var(--gold);color:#000;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;font-weight:bold;}
+.badge-ok{background:rgba(46,155,155,.2);color:var(--teal);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;}
+
+/* test cards */
+.test-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.test-card{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;overflow:hidden;}
+.test-card-head{padding:10px 12px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.test-card-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gold);width:28px;flex-shrink:0;}
+.test-card-title{font-size:12px;font-weight:500;color:var(--wh);}
+.test-card-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+.test-card-body{padding:10px 12px;}
+.test-step{display:flex;gap:8px;margin-bottom:7px;font-size:10px;color:var(--mu2);line-height:1.5;}
+.test-step-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);width:14px;flex-shrink:0;padding-top:1px;}
+.test-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:2px;margin-right:4px;}
+.test-tag.easy{background:rgba(77,189,116,.15);color:var(--z2);}
+.test-tag.med{background:rgba(224,140,58,.15);color:var(--org);}
+.test-tag.hard{background:rgba(224,92,92,.15);color:var(--red);}
+.test-tag.equip{background:rgba(154,122,204,.15);color:var(--z6);}
+.test-result-input-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px;flex-wrap:wrap;}
+.test-result-note{font-size:9px;color:var(--mu);margin-top:4px;font-style:italic;}
+
+/* record atleta */
+.record-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.record-field{flex:1;min-width:120px;display:flex;flex-direction:column;gap:3px;}
+.record-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.record-lbl span{color:var(--gold);margin-left:4px;}
+.record-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:7px 9px;outline:none;width:100%;transition:.15s;}
+.record-inp:focus{border-color:var(--gold);}
+.record-display{background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+.rd-row{display:flex;flex-wrap:wrap;gap:14px;}
+.rd-item{display:flex;flex-direction:column;gap:2px;}
+.rd-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.rd-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.rd-val.sec{color:var(--teal);}
+.rd-val.nd{color:var(--g6);font-size:13px;}
+.rd-sub{font-size:9px;color:var(--mu);}
+.use-record-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;background:rgba(77,189,116,.1);border:1px solid rgba(77,189,116,.3);color:var(--z2);padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.use-record-btn:hover{background:rgba(77,189,116,.2);border-color:var(--z2);}
+.history-list{margin-top:10px;}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--g2);border:1px solid var(--g3);border-radius:3px;margin-bottom:5px;}
+.hi-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;}
+.hi-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.hi-method{font-size:9px;color:var(--mu2);flex:1;}
+.hi-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:13px;}
+.hi-del:hover{color:var(--red);}
+
+  .zc{min-width:60px;padding:8px 8px;}.zc.left{min-width:120px;}
+  .zone-name{font-size:9px;}.zone-val{font-size:12px;}.zone-val.big{font-size:13px;}
+  .result-val{font-size:30px;}
+  .sys-tab-title{font-size:9px;}.sys-tab-sub{font-size:8px;}
+  .topbar{padding:0 12px;}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ── Zone Bici specifiche ── */
+.zone-row{display:flex;align-items:stretch;gap:0;border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.zone-label{width:130px;flex-shrink:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;}
+.zone-num{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mu);}
+.zone-name{font-size:13px;font-weight:500;color:var(--wh);margin:2px 0;}
+.zone-fis{font-size:9px;color:var(--mu);font-style:italic;line-height:1.3;}
+.zone-data{flex:1;display:flex;align-items:center;padding:10px 14px;background:var(--g1);gap:16px;flex-wrap:wrap;}
+.zone-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);min-width:90px;flex-shrink:0;}
+.zone-watts{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+.zone-wkg{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);}
+.zone-bar{height:4px;border-radius:2px;margin-top:6px;transition:width .4s;}
+.calc-block{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px 18px;margin-bottom:14px;}
+.calc-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+.calc-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:110px;}
+.calc-lbl-s{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.calc-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:18px;font-weight:500;padding:8px 10px;outline:none;width:100%;transition:.15s;text-align:right;}
+.calc-inp:focus{border-color:var(--gold);}
+.calc-inp::placeholder{color:var(--g6);}
+.calc-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:4px;}
+.ss-banner{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);border-radius:4px;padding:10px 14px;margin:8px 0 4px;display:flex;align-items:center;gap:12px;}
+.ss-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex-shrink:0;}
+.ss-range{font-family:'DM Mono',monospace;font-size:18px;color:var(--gold2);}
+.ss-note{font-size:10px;color:var(--mu);flex:1;}
+.wkg-table{width:100%;border-collapse:collapse;font-size:11px;}
+.wkg-table th{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--g3);}
+.wkg-table td{padding:8px 10px;border-bottom:1px solid rgba(34,34,34,.4);color:var(--mu2);}
+.wkg-table tr:last-child td{border-bottom:none;}
+.wkg-table .val{font-family:'DM Mono',monospace;color:var(--wh);font-weight:500;}
+.ftp-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 18px;margin-bottom:10px;}
+.ftp-result-val{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:var(--gold);}
+.test-tabs{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.test-tab{flex:1;padding:10px 8px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;}
+.test-tab:last-child{border-right:none;}
+.test-tab:hover{background:var(--g2);}
+.test-tab.active{background:var(--g2);border-bottom:2px solid var(--gold);}
+.test-tab-name{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--mu2);}
+.test-tab.active .test-tab-name{color:var(--gold);}
+.test-tab-desc{font-size:9px;color:var(--g6);margin-top:2px;}
+.test-panel{display:none;}.test-panel.active{display:block;}
+.src-list{display:flex;flex-direction:column;gap:8px;font-size:11px;color:var(--mu);}
+.src-list em{color:var(--mu2);}
+@media(max-width:600px){
+  .zone-row{flex-direction:column;}
+  .zone-label{width:auto;border-bottom:1px solid var(--g3);}
+  .calc-row{flex-direction:column;}
+  .wkg-table{font-size:10px;}
+}
+
+
+/* ══ VALUTAZIONE v2 ══════════════════════════════════════════════════════ */
+body{margin-top:40px;}
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:12px;position:sticky;top:40px;z-index:100;flex-shrink:0;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+
+/* val tabs */
+.val-tab-row{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;
+  margin-bottom:16px;position:sticky;top:90px;z-index:99;}
+.val-tab{flex:1;padding:11px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);
+  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--mu);transition:.15s;}
+.val-tab:last-child{border-right:none;}
+.val-tab:hover{background:var(--g2);color:var(--mu2);}
+.val-tab.active{background:var(--g2);color:var(--gold);border-bottom:2px solid var(--gold);}
+.val-section{display:none;}.val-section.active{display:block;}
+
+/* form */
+.val-block{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px 18px;margin-bottom:12px;}
+.val-block-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--g3);}
+.val-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.val-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:140px;}
+.val-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.val-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;width:100%;transition:.15s;}
+.val-inp:focus{border-color:var(--gold);}
+.val-sel{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;width:100%;transition:.15s;cursor:pointer;}
+.val-sel:focus{border-color:var(--gold);}
+
+/* client strip */
+.client-strip{display:flex;align-items:center;gap:10px;background:rgba(184,151,42,.08);
+  border:1px solid rgba(184,151,42,.25);border-radius:4px;padding:8px 12px;margin-bottom:12px;}
+.client-strip-avatar{width:30px;height:30px;border-radius:50%;background:var(--g3);
+  display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);flex-shrink:0;}
+
+/* exercise rows */
+.es-row{background:var(--g2);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:8px;}
+.es-header{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--g3);}
+.es-num{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;flex-shrink:0;}
+.es-name{font-size:12px;color:var(--wh);flex:1;font-weight:500;}
+.es-unit{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);}
+.es-body{padding:10px 12px;display:flex;flex-direction:column;gap:8px;}
+.es-input-wrap{display:flex;flex-direction:column;gap:3px;}
+.es-inp{background:var(--bk);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;padding:8px 10px;
+  outline:none;width:100%;transition:.15s;text-align:right;}
+.es-inp:focus{border-color:var(--gold);}
+.es-bench{font-size:9px;color:var(--g6);font-style:italic;}
+.es-levels{display:flex;gap:4px;flex-wrap:wrap;}
+.lv-btn{flex:1;padding:6px 4px;border:1px solid;border-radius:3px;cursor:pointer;
+  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  background:transparent;border-color:var(--lv-color);color:var(--lv-color);transition:.15s;min-width:60px;}
+.lv-btn:hover,.lv-btn.active{background:var(--lv-color);color:#000;}
+.es-note-inp{background:var(--bk);border:1px solid var(--g4);border-radius:3px;color:var(--mu2);
+  font-family:'DM Sans',sans-serif;font-size:11px;padding:5px 8px;outline:none;width:100%;transition:.15s;}
+.es-note-inp:focus{border-color:var(--g5);}
+
+/* battery cards */
+.batterie-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+.bat-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.bat-card-head{padding:12px 14px;border-bottom:1px solid var(--g3);display:flex;align-items:center;justify-content:space-between;}
+.bat-card-name{font-size:13px;color:var(--wh);font-weight:500;margin-bottom:2px;}
+.bat-card-cat{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.bat-card-body{padding:10px 14px;}
+.bat-es-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(34,34,34,.4);}
+.bat-es-row:last-of-type{border-bottom:none;}
+.bat-es-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:16px;flex-shrink:0;}
+.bat-es-name{flex:1;font-size:11px;color:var(--mu2);}
+.bat-es-unit{font-family:'DM Mono',monospace;font-size:9px;color:var(--g6);}
+.bat-es-tipo{font-family:'DM Mono',monospace;font-size:8px;padding:1px 5px;border-radius:2px;flex-shrink:0;}
+.bat-tipo-max{background:rgba(77,189,116,.1);color:#4DBD74;border:1px solid rgba(77,189,116,.3);}
+.bat-tipo-min{background:rgba(46,155,155,.1);color:#2E9B9B;border:1px solid rgba(46,155,155,.3);}
+.bat-levels-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid var(--g3);}
+.bat-lv-chip{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 6px;border-radius:2px;}
+
+/* storico */
+.storico-block{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.storico-block-head{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--g3);}
+.storico-bat-name{font-size:13px;color:var(--wh);font-weight:500;}
+.storico-count{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);}
+.storico-table{width:100%;border-collapse:collapse;font-size:11px;min-width:400px;}
+.storico-table th{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);
+  text-transform:uppercase;padding:7px 10px;text-align:center;border-bottom:1px solid var(--g3);
+  border-right:1px solid rgba(34,34,34,.4);}
+.storico-table th:first-child{text-align:left;}
+.storico-table th:last-child{border-right:none;}
+.storico-table td{padding:7px 10px;border-bottom:1px solid rgba(34,34,34,.3);
+  border-right:1px solid rgba(34,34,34,.3);text-align:center;}
+.storico-table td:first-child{text-align:left;}
+.storico-table td:last-child{border-right:none;}
+.storico-table tr:last-child td{border-bottom:none;}
+.storico-es-name{font-size:11px;color:var(--mu2);}
+.storico-val-cell{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.storico-val{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--wh);}
+.storico-lv{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;
+  padding:1px 5px;border-radius:2px;}
+.storico-delta{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;text-align:center;}
+
+/* color picker */
+.color-chip{width:22px;height:22px;border-radius:3px;cursor:pointer;border:2px solid transparent;transition:.15s;}
+.color-chip.sel{border-color:var(--wh);transform:scale(1.15);}
+.color-picker{width:36px;height:28px;padding:0;border:1px solid var(--g4);border-radius:3px;cursor:pointer;background:none;}
+
+/* panel (reuse from prenotazioni) */
+.side-panel{position:fixed;top:0;right:-500px;width:500px;height:100vh;background:var(--g1);
+  border-left:1px solid var(--g3);z-index:9000;transition:right .3s ease;
+  display:flex;flex-direction:column;box-shadow:-8px 0 40px rgba(0,0,0,.4);}
+.side-panel.open{right:0;}
+.side-panel-head{padding:14px 18px;border-bottom:1px solid var(--g3);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.side-panel-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;
+  color:var(--gold);text-transform:uppercase;flex:1;}
+.side-panel-close{background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
+.side-panel-close:hover{color:var(--wh);}
+.side-panel-body{flex:1;overflow-y:auto;padding:14px 18px;}
+.side-panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:8999;}
+.side-panel-overlay.open{display:block;}
+.pkg-edit-form{background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:12px;margin-bottom:8px;}
+.pkg-edit-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+.pkg-edit-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:100px;}
+.pkg-edit-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.pkg-edit-inp{background:var(--bk);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 8px;outline:none;width:100%;transition:.15s;}
+.pkg-edit-inp:focus{border-color:var(--gold);}
+select.pkg-edit-inp{cursor:pointer;}
+.pkg-edit-actions{display:flex;gap:6px;}
+.icon-btn{background:none;border:1px solid var(--g4);color:var(--mu);border-radius:3px;
+  padding:3px 7px;font-size:10px;cursor:pointer;transition:.15s;}
+.icon-btn:hover{border-color:var(--gold2);color:var(--gold);}
+.icon-btn.del:hover{border-color:var(--red);color:var(--red);}
+.btn{background:var(--g2);border:1px solid var(--g4);color:var(--mu2);font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:7px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold2);color:var(--wh);}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:#000;}
+.btn.pri:hover{background:var(--gold2);}
+/* combo */
+.combo-wrap{position:relative;}
+.combo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 10px;outline:none;width:100%;transition:.15s;box-sizing:border-box;}
+.combo-inp:focus{border-color:var(--gold);}
+.combo-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--g1);
+  border:1px solid var(--g4);border-radius:3px;max-height:200px;overflow-y:auto;z-index:5000;display:none;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.combo-drop.open{display:block;}
+.combo-opt{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--mu2);transition:.1s;}
+.combo-opt:hover{background:var(--g3);color:var(--wh);}
+.combo-opt mark{background:none;color:var(--gold);font-style:normal;}
+.combo-none{padding:8px 12px;font-size:11px;color:var(--g6);font-style:italic;}
+.status-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 8px;border-radius:2px;}
+.status-badge.ok{background:rgba(77,189,116,.12);border:1px solid rgba(77,189,116,.3);color:#4DBD74;}
+.status-badge.warn{background:rgba(184,151,42,.12);border:1px solid rgba(184,151,42,.3);color:var(--gold);}
+.status-badge.nd{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.status-badge.err{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);color:var(--red);}
+.page{max-width:1200px;margin:0 auto;padding:20px 24px 80px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+.src-list{display:flex;flex-direction:column;gap:8px;font-size:11px;color:var(--mu);}
+.src-list em{color:var(--mu2);}
+:root{--org:#E08C3A;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--teal:#2E9B9B;}
+@media(max-width:680px){
+  .batterie-grid{grid-template-columns:1fr;}
+  .side-panel{width:100%;right:-100%;}
+  .val-row{flex-direction:column;}
+  .es-levels{flex-wrap:wrap;}
+  .lv-btn{min-width:70px;}
+}
+
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html" class="active">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
+  <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="topbar">
+  <span class="tb-brand">PPL</span>
+  <div class="tb-sep"></div>
+  <span class="tb-title">Valutazione</span>
+  <div class="tb-sp"></div>
+  <button class="btn pri" style="font-size:8px;padding:5px 12px;" onclick="openPanel('panel-batteria');_editingBatteriaId=null;renderBatteriaForm(null);">📋 Gestisci Batterie</button>
+  <button class="btn" style="font-size:8px;padding:5px 12px;margin-left:6px;" onclick="loadDefaultBatterie()">↓ Default A/B/C/D</button>
+  <span id="conn-status" class="status-badge nd" style="margin-left:10px;">● Conn...</span>
+</div>
+
+<div class="page">
+  <div class="val-tab-row">
+    <div class="val-tab active" onclick="switchValTab('valutazione',this)">📋 Nuova Valutazione</div>
+    <div class="val-tab" onclick="switchValTab('batterie',this)">🏋 Batterie</div>
+    <div class="val-tab" onclick="switchValTab('storico',this)">📈 Storico</div>
+  </div>
+
+  <!-- ══ TAB 1: NUOVA VALUTAZIONE ══ -->
+  <div class="val-section active" id="valsec-valutazione">
+
+    <div class="val-block">
+      <div class="val-block-title">Cliente</div>
+      <div class="val-row">
+        <div class="val-field" style="flex:2;">
+          <span class="val-lbl">Cerca cliente *</span>
+          <div class="combo-wrap">
+            <input class="combo-inp val-inp" id="val-cliente-input" placeholder="Digita nome o cognome..."
+              autocomplete="off"
+              oninput="comboFilter('val-combo',this.value,_comboClienti,'val-cliente-val',true)"
+              onfocus="comboOpen('val-combo',this.value,_comboClienti,'val-cliente-val',true)"
+              onblur="setTimeout(()=>comboClose('val-combo'),200)">
+            <input type="hidden" id="val-cliente-val">
+            <div class="combo-drop" id="val-combo"></div>
+          </div>
+        </div>
+        <div class="val-field">
+          <span class="val-lbl">Data valutazione</span>
+          <input class="val-inp" id="val-data" type="date">
+        </div>
+        <div class="val-field" style="max-width:130px;">
+          <span class="val-lbl">Peso corporeo kg *</span>
+          <input class="val-inp" id="val-peso" type="number" min="30" max="200"
+            placeholder="es. 80" oninput="autoAllLevels()"
+            style="text-align:right;font-family:'DM Mono',monospace;font-size:16px;">
+        </div>
+        <div class="val-field" style="max-width:120px;">
+          <span class="val-lbl">Coach</span>
+          <input class="val-inp" id="val-coach" value="Leo">
+        </div>
+      </div>
+      <div id="client-strip" class="client-strip" style="display:none;"></div>
+    </div>
+
+    <div class="val-block">
+      <div class="val-block-title">Batteria di test</div>
+      <div class="val-row">
+        <div class="val-field">
+          <span class="val-lbl">Seleziona batteria *</span>
+          <select class="val-sel" id="val-batteria" onchange="onBatteriaSelected()">
+            <option value="">Seleziona batteria...</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="esercizi-grid" style="display:none;"></div>
+
+    <div class="val-block" id="note-block">
+      <div class="val-block-title">Note generali</div>
+      <textarea class="val-inp" id="val-note" rows="3"
+        style="resize:vertical;font-family:'DM Sans',sans-serif;font-size:12px;"
+        placeholder="Condizioni della sessione, note del coach..."></textarea>
+    </div>
+
+    <div style="display:flex;gap:10px;align-items:center;margin-top:4px;">
+      <button class="btn pri" id="btn-save-val" onclick="saveValutazione()" style="padding:10px 24px;">
+        ✓ Salva valutazione
+      </button>
+      <button class="btn" onclick="resetValForm()">↺ Azzera</button>
+      <span id="val-result" style="font-size:11px;"></span>
+    </div>
+  </div>
+
+  <!-- ══ TAB 2: BATTERIE ══ -->
+  <div class="val-section" id="valsec-batterie">
+    <div class="batterie-grid" id="batterie-grid">
+      <div style="color:var(--mu);font-size:11px;padding:20px;">Caricamento...</div>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: STORICO ══ -->
+  <div class="val-section" id="valsec-storico">
+    <div class="val-block" style="margin-bottom:16px;">
+      <div class="val-block-title">Seleziona cliente</div>
+      <div class="val-field">
+        <div class="combo-wrap">
+          <input class="combo-inp val-inp" id="sto-cliente-input" placeholder="Digita nome o cognome..."
+            autocomplete="off"
+            oninput="comboFilter('sto-combo',this.value,_comboClienti,'sto-cliente-val',true)"
+            onfocus="comboOpen('sto-combo',this.value,_comboClienti,'sto-cliente-val',true)"
+            onblur="setTimeout(()=>comboClose('sto-combo'),200)">
+          <input type="hidden" id="sto-cliente-val">
+          <div class="combo-drop" id="sto-combo"></div>
+        </div>
+      </div>
+    </div>
+    <div id="storico-container">
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+        color:var(--g6);text-transform:uppercase;padding:30px;text-align:center;">
+        Seleziona un cliente per visualizzare lo storico</div>
+    </div>
+  </div>
+</div>
+
+<div class="side-panel-overlay" id="panel-overlay" onclick="closeAllPanels()"></div>
+
+<div class="side-panel" id="panel-batteria">
+  <div class="side-panel-head">
+    <span class="side-panel-title">📋 Gestione Batteria</span>
+    <button class="side-panel-close" onclick="closePanel('panel-batteria')">✕</button>
+  </div>
+  <div class="side-panel-body">
+    <div id="batteria-form">
+      <div style="color:var(--mu);font-size:11px;padding:20px;">Caricamento...</div>
+    </div>
+  </div>
+</div>
+</body>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   VALUTAZIONE v2 — Firebase Realtime Database
+   Batterie editabili · Collegamento clienti PPL · Storico con delta
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const PPL_CFG_KEY  = 'ppl_config';
+const VAL_CACHE    = 'ppl_val_cache';
+
+function getPPLConfig(){ try{const v=localStorage.getItem(PPL_CFG_KEY);return v?JSON.parse(v):{};}catch(e){return{};} }
+function cacheSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
+function cacheGet(k){ try{const v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;} }
+
+/* ── Stato globale ── */
+let _db = null, _connected = false;
+let _data = cacheGet(VAL_CACHE) || { batterie:{}, valutazioni:{}, clienti:{} };
+let _currentClientId = null;  // client selected in form
+let _comboClienti = [];
+let _currentBatteriaId = null; // battery selected in form
+let _editingBatteriaId = null; // battery being edited in panel
+let _storicoClienteId = null;  // client selected in storico
+
+/* ═══════════════════════════════════════════════════════════════════════
+   FIREBASE
+   ═══════════════════════════════════════════════════════════════════════ */
+function initFirebase(){
+  const cfg = getPPLConfig();
+  const badge = document.getElementById('conn-status');
+  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL){
+    setStatus(badge,'nd','● Firebase non configurato');
+    renderBatterie(); return;
+  }
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey: cfg.firebase_apiKey,
+        authDomain: cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
+        databaseURL: cfg.firebase_databaseURL,
+        projectId: cfg.firebase_projectId,
+      });
+    }
+    _db = firebase.database();
+    setStatus(badge,'warn','● Connessione...');
+    startListening();
+  }catch(e){
+    console.error('FB init:',e);
+    setStatus(badge,'err','● Errore: '+e.message);
+    renderBatterie();
+  }
+}
+
+function startListening(){
+  if(!_db) return;
+  const badge = document.getElementById('conn-status');
+  _db.ref('ppl').on('value', snap=>{
+    const raw = snap.val()||{};
+    _data = {
+      batterie:    raw.batterie    || {},
+      valutazioni: raw.valutazioni || {},
+      clienti:     raw.clienti     || {},
+    };
+    cacheSet(VAL_CACHE, _data);
+    _connected = true;
+    buildComboClienti();
+    setStatus(badge,'ok','● Firebase connesso');
+    renderBatterie();
+    refreshBatteriaSelect();
+    if(_storicoClienteId) renderStoricoCliente(_storicoClienteId);
+  }, err=>{
+    _connected = false;
+    setStatus(badge,'err','● '+err.code);
+  });
+}
+
+function setStatus(el,cls,txt){ if(el){el.className='status-badge '+cls;el.textContent=txt;} }
+async function fbSet(path,val){ if(!_db)throw new Error('Non connesso');return _db.ref(path).set(val); }
+async function fbPush(path,val){ if(!_db)throw new Error('Non connesso');const r=await _db.ref(path).push(val);return r.key; }
+async function fbUpdate(path,val){ if(!_db)throw new Error('Non connesso');return _db.ref(path).update(val); }
+async function fbRemove(path){ if(!_db)throw new Error('Non connesso');return _db.ref(path).remove(); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   COMBO CLIENTI (reuses pattern from prenotazioni)
+   ═══════════════════════════════════════════════════════════════════════ */
+function buildComboClienti(){
+  _comboClienti = Object.entries(_data.clienti||{})
+    .map(([id,c])=>({value:id, label:(c.nome||'')+' '+(c.cognome||'')}))
+    .sort((a,b)=>a.label.localeCompare(b.label));
+}
+
+function comboFilter(dropId,query,opts,hiddenId,cb){
+  const drop=document.getElementById(dropId); if(!drop)return;
+  const q=(query||'').toLowerCase().trim();
+  const filtered=q?opts.filter(o=>o.label.toLowerCase().includes(q)):opts;
+  renderComboOpts(drop,filtered,q,hiddenId,cb);
+  drop.classList.toggle('open',filtered.length>0);
+}
+function comboOpen(dropId,query,opts,hiddenId,cb){
+  const drop=document.getElementById(dropId); if(!drop)return;
+  const q=(query||'').toLowerCase();
+  const filtered=q?opts.filter(o=>o.label.toLowerCase().includes(q)):opts.slice(0,30);
+  renderComboOpts(drop,filtered,q,hiddenId,cb);
+  drop.classList.toggle('open',filtered.length>0);
+}
+function renderComboOpts(drop,filtered,q,hiddenId,cb){
+  if(!filtered.length){drop.innerHTML='<div class="combo-none">Nessun cliente</div>';drop.classList.add('open');return;}
+  drop.innerHTML=filtered.slice(0,40).map(o=>{
+    const hl=q?o.label.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>'):o.label;
+    return `<div class="combo-opt" data-value="${o.value}" onmousedown="selectCombo('${drop.id}','${hiddenId}','${o.value}','${o.label.replace(/'/g,"\\'")}',${cb?'true':'false'})">${hl}</div>`;
+  }).join('');
+}
+function selectCombo(dropId,hiddenId,value,label,hasCb){
+  const drop=document.getElementById(dropId);
+  const hidden=document.getElementById(hiddenId);
+  if(hidden) hidden.value=value;
+  const inputId=hiddenId.replace('-val','-input');
+  const input=document.getElementById(inputId);
+  if(input) input.value=label;
+  if(drop) drop.classList.remove('open');
+  if(hasCb){
+    if(hiddenId==='val-cliente-val') onClienteSelected(value);
+    if(hiddenId==='sto-cliente-val') onStoricoClienteSelected(value);
+  }
+}
+function comboClose(dropId){ const d=document.getElementById(dropId);if(d)d.classList.remove('open'); }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB NAVIGATION
+   ═══════════════════════════════════════════════════════════════════════ */
+function switchValTab(id,el){
+  document.querySelectorAll('.val-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.val-section').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('valsec-'+id)?.classList.add('active');
+  if(id==='batterie') renderBatterie();
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB 1 — NUOVA VALUTAZIONE
+   ═══════════════════════════════════════════════════════════════════════ */
+function onClienteSelected(cid){
+  _currentClientId = cid;
+  const c = _data.clienti?.[cid];
+  if(!c) return;
+  // Populate client info strip
+  const strip = document.getElementById('client-strip');
+  if(strip){
+    strip.style.display = 'flex';
+    strip.innerHTML = `
+      <div class="client-strip-avatar">${((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase()}</div>
+      <div>
+        <div style="font-size:13px;color:var(--wh);font-weight:500;">${c.nome||''} ${c.cognome||''}</div>
+        <div style="font-size:10px;color:var(--mu);">${c.email||''} ${c.telefono?'· '+c.telefono:''}</div>
+      </div>`;
+  }
+}
+
+function refreshBatteriaSelect(){
+  const sel = document.getElementById('val-batteria'); if(!sel)return;
+  const bats = Object.entries(_data.batterie||{});
+  sel.innerHTML = '<option value="">Seleziona batteria di test...</option>'+
+    bats.map(([id,b])=>`<option value="${id}">${b.nome||id} — ${b.categoria||''}</option>`).join('');
+}
+
+function onBatteriaSelected(){
+  const id=document.getElementById('val-batteria')?.value;
+  _currentBatteriaId=id;
+  const b=_data.batterie?.[id];
+  const esGrid=document.getElementById('esercizi-grid');
+  if(!esGrid) return;
+  if(!b){esGrid.style.display='none';return;}
+  esGrid.style.display='block';
+  const LEVELS=b.livelli||DEFAULT_LEVELS;
+  esGrid.innerHTML=(b.esercizi||[]).map((es,i)=>{
+    const hasSoglie=es.soglie&&es.soglie.length>=4;
+    const isBW=es.riferimento==='bw';
+    const tipoLbl=es.tipo==='min'?'\u2193 min \u00b7 basso = meglio':'\u2191 max \u00b7 alto = meglio';
+    const bwBadge=isBW?`<span style="font-family:'DM Mono',monospace;font-size:8px;padding:1px 6px;border-radius:2px;background:rgba(184,151,42,.15);border:1px solid rgba(184,151,42,.3);color:var(--gold);">\u00d7BW</span>`:'';
+    let soglieTxt='';
+    if(hasSoglie){
+      const s=es.soglie;
+      soglieTxt=isBW
+        ?`<div id="es-bw-hint-${i}" style="font-size:9px;color:var(--mu);margin-top:3px;">\u00d7BW: ${s[0]} / ${s[1]} / ${s[2]} / ${s[3]} <span style="color:var(--g6);">(inserisci il peso sopra)</span></div>`
+        :`<div style="font-size:9px;color:var(--mu);margin-top:3px;">Soglie: ${s[0]} \u00b7 ${s[1]} \u00b7 ${s[2]} \u00b7 ${s[3]} ${es.unita||''}</div>`;
+    } else {
+      soglieTxt=`<div style="font-size:9px;color:var(--g6);margin-top:3px;font-style:italic;">Nessuna soglia \u2014 seleziona il livello manualmente</div>`;
+    }
+    return `<div class="es-row">
+      <div class="es-header">
+        <span class="es-num">Es. ${i+1}</span>
+        <span class="es-name">${es.nome||'\u2014'}</span>
+        <span style="font-size:9px;color:var(--mu);margin-left:auto;">${tipoLbl}</span>
+        ${bwBadge}
+        <span class="es-unit">${es.unita||''}</span>
+      </div>
+      <div class="es-body">
+        <div class="es-input-wrap">
+          <input class="es-inp" id="es-val-${i}" type="number" step="any"
+            placeholder="${isBW?'kg':es.unita||'valore'}" oninput="autoLevel(${i})">
+          ${soglieTxt}
+          <div class="es-bench">${es.bench||''}</div>
+        </div>
+        <div class="es-levels" id="es-levels-${i}">
+          ${LEVELS.map((lv,li)=>`<button class="lv-btn" style="--lv-color:${lv.colore};" onclick="setLevel(${i},${li})" id="lv-${i}-${li}">${lv.label}</button>`).join('')}
+        </div>
+        <input type="hidden" id="es-lv-${i}" value="">
+        <input class="es-note-inp" id="es-note-${i}" type="text" placeholder="Note esercizio...">
+      </div>
+    </div>`;
+  }).join('');
+}
+
+
+function setLevel(esIdx, lvIdx){
+  const LEVELS = _data.batterie?.[_currentBatteriaId]?.livelli || DEFAULT_LEVELS;
+  document.querySelectorAll(`[id^="lv-${esIdx}-"]`).forEach(b=>b.classList.remove('active'));
+  const btn = document.getElementById(`lv-${esIdx}-${lvIdx}`);
+  if(btn) btn.classList.add('active');
+  const hidden = document.getElementById(`es-lv-${esIdx}`);
+  if(hidden) hidden.value = LEVELS[lvIdx]?.label || '';
+}
+
+function autoLevel(esIdx){
+  const b=_data.batterie?.[_currentBatteriaId]; if(!b) return;
+  const es=b.esercizi?.[esIdx]; if(!es) return;
+  const soglie=es.soglie;
+  if(!soglie||soglie.length<4) return;
+  const valStr=document.getElementById('es-val-'+esIdx)?.value;
+  const val=parseFloat(valStr); if(isNaN(val)) return;
+  const LEVELS=b.livelli||DEFAULT_LEVELS;
+  const peso=parseFloat(document.getElementById('val-peso')?.value)||0;
+  let thr;
+  if(es.riferimento==='bw'){
+    if(peso<=0){
+      const h=document.getElementById('es-bw-hint-'+esIdx);
+      if(h)h.style.color='var(--org)'; return;
+    }
+    thr=soglie.map(s=>s*peso);
+  } else { thr=[...soglie]; }
+  let lvIdx;
+  if(es.tipo==='min'){
+    if(val<=thr[0])      lvIdx=4;
+    else if(val<=thr[1]) lvIdx=3;
+    else if(val<=thr[2]) lvIdx=2;
+    else if(val<=thr[3]) lvIdx=1;
+    else                 lvIdx=0;
+  } else {
+    if(val>=thr[3])      lvIdx=4;
+    else if(val>=thr[2]) lvIdx=3;
+    else if(val>=thr[1]) lvIdx=2;
+    else if(val>=thr[0]) lvIdx=1;
+    else                 lvIdx=0;
+  }
+  setLevel(esIdx,Math.min(lvIdx,LEVELS.length-1));
+}
+function autoAllLevels(){
+  const b=_data.batterie?.[_currentBatteriaId]; if(!b) return;
+  (b.esercizi||[]).forEach((_,i)=>autoLevel(i));
+}
+
+
+async function saveValutazione(){
+  const cid = document.getElementById('val-cliente-val')?.value;
+  const bid = document.getElementById('val-batteria')?.value;
+  const data = document.getElementById('val-data')?.value;
+  const coach = document.getElementById('val-coach')?.value||'Leo';
+  const peso  = parseFloat(document.getElementById('val-peso')?.value)||0;
+  const note = document.getElementById('val-note')?.value||'';
+  const res = document.getElementById('val-result');
+  if(!cid){ showMsg(res,'⚠ Seleziona un cliente.','var(--org)'); return; }
+  if(!bid){ showMsg(res,'⚠ Seleziona una batteria.','var(--org)'); return; }
+  const b = _data.batterie?.[bid];
+  if(!b){ showMsg(res,'⚠ Batteria non trovata.','var(--org)'); return; }
+  // Collect exercise results
+  const risultati = {};
+  let missingLevel = false;
+  (b.esercizi||[]).forEach((es,i)=>{
+    const val = document.getElementById(`es-val-${i}`)?.value||'';
+    const lv  = document.getElementById(`es-lv-${i}`)?.value||'';
+    const nte = document.getElementById(`es-note-${i}`)?.value||'';
+    if(!lv) missingLevel = true;
+    risultati[i] = { nome: es.nome||'', unita: es.unita||'', valore: val, livello: lv, note: nte };
+  });
+  if(missingLevel){
+    showMsg(res,'⚠ Assegna un livello a tutti gli esercizi.','var(--org)'); return;
+  }
+  const oggi = data || new Date().toLocaleDateString('it-IT');
+  const ts   = new Date(data||undefined).getTime()||Date.now();
+  const btn = document.getElementById('btn-save-val');
+  if(btn){btn.textContent='⏳ Salvataggio...';btn.disabled=true;}
+  try{
+    await fbPush('ppl/valutazioni',{
+      peso,
+      clienteId:bid,batteriaId:bid,
+      clienteId:cid, batteriaId:bid,
+      data:oggi, dataTS:ts, coach, note, risultati,
+      batteriaNome: b.nome||'',
+    });
+    showMsg(res,'✓ Valutazione salvata con successo.','var(--grn)');
+    resetValForm();
+  }catch(e){ showMsg(res,'✕ '+e.message,'var(--red)'); }
+  finally{ if(btn){btn.textContent='✓ Salva valutazione';btn.disabled=false;} }
+}
+
+function resetValForm(){
+  document.getElementById('val-cliente-input').value='';
+  document.getElementById('val-cliente-val').value='';
+  document.getElementById('val-batteria').value='';
+  document.getElementById('val-note').value='';
+  const strip=document.getElementById('client-strip'); if(strip)strip.style.display='none';
+  const grid=document.getElementById('esercizi-grid'); if(grid){grid.style.display='none';grid.innerHTML='';}
+  _currentClientId=null; _currentBatteriaId=null;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB 2 — BATTERIE
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderBatterie(){
+  const container = document.getElementById('batterie-grid'); if(!container)return;
+  const bats = Object.entries(_data.batterie||{});
+  if(!bats.length){
+    container.innerHTML=`<div style="text-align:center;padding:30px;color:var(--mu);">
+      <div style="font-size:24px;margin-bottom:12px;">📋</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;">
+        Nessuna batteria creata</div>
+      <button class="btn pri" onclick="openPanel('panel-batteria')">+ Crea prima batteria</button>
+      <div style="margin-top:8px;">
+        <button class="btn" onclick="loadDefaultBatterie()" style="font-size:8px;">
+          ↓ Importa batterie PPL default (A/B/C/D)</button></div>
+    </div>`;
+    return;
+  }
+  container.innerHTML = bats.map(([id,b])=>{
+    const LEVELS = b.livelli||DEFAULT_LEVELS;
+    return `<div class="bat-card">
+      <div class="bat-card-head" style="border-left:4px solid ${b.colore||'var(--gold)'};">
+        <div>
+          <div class="bat-card-name">${b.nome||'—'}</div>
+          <div class="bat-card-cat">${b.categoria||''}</div>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <button class="icon-btn" onclick="editBatteria('${id}')">✏</button>
+          <button class="icon-btn del" onclick="deleteBatteria('${id}')">✕</button>
+        </div>
+      </div>
+      <div class="bat-card-body">
+        ${(b.esercizi||[]).map((es,i)=>`
+          <div class="bat-es-row">
+            <span class="bat-es-num">${i+1}</span>
+            <span class="bat-es-name">${es.nome||'—'}</span>
+            <span class="bat-es-unit">${es.unita||''}</span>
+            <span class="bat-es-tipo bat-tipo-${es.tipo||'max'}">${es.tipo==='min'?'↓ min':'↑ max'}</span>
+          </div>`).join('')}
+        <div class="bat-levels-row">
+          ${LEVELS.map(lv=>`<span class="bat-lv-chip" style="background:${lv.colore}20;border:1px solid ${lv.colore}60;color:${lv.colore};">${lv.label}</span>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function deleteBatteria(id){
+  const b=_data.batterie?.[id];
+  if(!confirm(`Eliminare la batteria "${b?.nome||id}"? Le valutazioni associate rimarranno.`)) return;
+  try{ await fbRemove('ppl/batterie/'+id); }catch(e){ alert('Errore: '+e.message); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BATTERY PANEL — CRUD
+   ═══════════════════════════════════════════════════════════════════════ */
+const DEFAULT_LEVELS=[
+  {label:'BASE',       colore:'#E05C5C'},
+  {label:'SVILUPPO',   colore:'#CC8822'},
+  {label:'INTERMEDIO', colore:'#BBBB22'},
+  {label:'AVANZATO',   colore:'#5ACC44'},
+  {label:'ELITE',      colore:'#2E9B9B'},
+];
+
+function openPanelNuovaBatteria(){
+  _editingBatteriaId = null;
+  renderBatteriaForm(null);
+  openPanel('panel-batteria');
+}
+
+function editBatteria(id){
+  _editingBatteriaId = id;
+  renderBatteriaForm(_data.batterie?.[id]);
+  openPanel('panel-batteria');
+}
+
+function renderBatteriaForm(b){
+  const form=document.getElementById('batteria-form'); if(!form) return;
+  const COLORS=['#B8972A','#4DBD74','#2E9B9B','#9A7ACC','#E08C3A','#E05C5C','#4488CC','#CC3A8A'];
+  const selColor=b?.colore||COLORS[0];
+  const esercizi=b?.esercizi||Array(5).fill(null).map(()=>({nome:'',unita:'',tipo:'max',bench:'',riferimento:'assoluto',soglie:[]}));
+  const levels=b?.livelli||DEFAULT_LEVELS;
+  form.innerHTML=`
+    <div class="pkg-edit-form">
+      <div class="pkg-edit-row">
+        <div class="pkg-edit-field" style="flex:2;">
+          <span class="pkg-edit-lbl">Nome batteria *</span>
+          <input class="pkg-edit-inp" id="bf-nome" value="${b?.nome||''}" placeholder="Batteria A \u2014 Forza">
+        </div>
+        <div class="pkg-edit-field">
+          <span class="pkg-edit-lbl">Categoria</span>
+          <input class="pkg-edit-inp" id="bf-cat" value="${b?.categoria||''}" placeholder="Forza">
+        </div>
+      </div>
+      <div class="pkg-edit-row">
+        <div class="pkg-edit-field">
+          <span class="pkg-edit-lbl">Colore</span>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;">
+            ${COLORS.map(c=>`<div class="color-chip ${c===selColor?'sel':''}" style="background:${c};" onclick="selectBatColor(this,'${c}')"></div>`).join('')}
+            <input type="hidden" id="bf-colore" value="${selColor}">
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pkg-edit-lbl" style="margin-bottom:8px;">Esercizi (max 5)</div>
+    <div id="bf-esercizi">
+      ${esercizi.slice(0,5).map((es,i)=>`
+        <div class="pkg-edit-form" style="margin-bottom:8px;">
+          <div class="pkg-edit-lbl" style="margin-bottom:6px;color:var(--gold);">Esercizio ${i+1}</div>
+          <div class="pkg-edit-row">
+            <div class="pkg-edit-field" style="flex:2;">
+              <span class="pkg-edit-lbl">Nome</span>
+              <input class="pkg-edit-inp" id="bf-es-nome-${i}" value="${es.nome||''}" placeholder="Back Squat 5RM">
+            </div>
+            <div class="pkg-edit-field">
+              <span class="pkg-edit-lbl">Unit\u00e0</span>
+              <input class="pkg-edit-inp" id="bf-es-unit-${i}" value="${es.unita||''}" placeholder="kg">
+            </div>
+            <div class="pkg-edit-field">
+              <span class="pkg-edit-lbl">Tipo</span>
+              <select class="pkg-edit-inp" id="bf-es-tipo-${i}">
+                <option value="max" ${es.tipo!=='min'?'selected':''}>&#8593; max</option>
+                <option value="min" ${es.tipo==='min'?'selected':''}>&#8595; min</option>
+              </select>
+            </div>
+          </div>
+          <div class="pkg-edit-row">
+            <div class="pkg-edit-field">
+              <span class="pkg-edit-lbl">Riferimento soglie</span>
+              <select class="pkg-edit-inp" id="bf-es-rif-${i}">
+                <option value="assoluto" ${es.riferimento!=='bw'?'selected':''}>Assoluto</option>
+                <option value="bw" ${es.riferimento==='bw'?'selected':''}>Relativo al peso (\u00d7BW)</option>
+              </select>
+            </div>
+          </div>
+          <div style="background:var(--bk);border:1px solid var(--g4);border-radius:3px;padding:10px;margin-top:4px;">
+            <div class="pkg-edit-lbl" style="margin-bottom:6px;">Soglie automatiche (vuoto = selezione manuale)</div>
+            <div class="pkg-edit-row">
+              <div class="pkg-edit-field">
+                <span class="pkg-edit-lbl">Base \u2192 Svil.</span>
+                <input class="pkg-edit-inp" id="bf-es-s1-${i}" type="number" step="any" value="${es.soglie?.[0]??''}" placeholder="es. 0.75">
+              </div>
+              <div class="pkg-edit-field">
+                <span class="pkg-edit-lbl">Svil. \u2192 Inter.</span>
+                <input class="pkg-edit-inp" id="bf-es-s2-${i}" type="number" step="any" value="${es.soglie?.[1]??''}" placeholder="es. 1.0">
+              </div>
+              <div class="pkg-edit-field">
+                <span class="pkg-edit-lbl">Inter. \u2192 Avan.</span>
+                <input class="pkg-edit-inp" id="bf-es-s3-${i}" type="number" step="any" value="${es.soglie?.[2]??''}" placeholder="es. 1.25">
+              </div>
+              <div class="pkg-edit-field">
+                <span class="pkg-edit-lbl">Avan. \u2192 Elite</span>
+                <input class="pkg-edit-inp" id="bf-es-s4-${i}" type="number" step="any" value="${es.soglie?.[3]??''}" placeholder="es. 1.5">
+              </div>
+            </div>
+            <div style="font-size:9px;color:var(--g6);margin-top:4px;font-style:italic;">
+              \u2191max: val &ge; s4 = ELITE &lt; s1 = BASE. \u2193min: val &le; s1 = ELITE &gt; s4 = BASE.<br>
+              \u00d7BW: inserisci moltiplicatori (es. 1.5 = 150% del peso corporeo).
+            </div>
+          </div>
+          <div class="pkg-edit-row" style="margin-top:8px;">
+            <div class="pkg-edit-field">
+              <span class="pkg-edit-lbl">Benchmark testuale</span>
+              <input class="pkg-edit-inp" id="bf-es-bench-${i}" value="${es.bench||''}" placeholder="< 0.75\u00d7BW \u2192 Base">
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="pkg-edit-lbl" style="margin-top:12px;margin-bottom:8px;">Livelli di valutazione</div>
+    <div id="bf-livelli">
+      ${levels.map((lv,i)=>`
+        <div class="pkg-edit-row" style="align-items:center;margin-bottom:6px;">
+          <div class="pkg-edit-field" style="flex:0.3;min-width:36px;">
+            <span class="pkg-edit-lbl">${i+1}</span>
+            <input type="color" class="color-picker" id="bf-lv-col-${i}" value="${lv.colore||'#888888'}">
+          </div>
+          <div class="pkg-edit-field">
+            <span class="pkg-edit-lbl">Label</span>
+            <input class="pkg-edit-inp" id="bf-lv-lbl-${i}" value="${lv.label||''}">
+          </div>
+        </div>`).join('')}
+    </div>
+    <div class="pkg-edit-actions" style="margin-top:14px;">
+      <button class="btn pri" style="flex:1;" onclick="saveBatteria()">\u2713 Salva batteria</button>
+      <button class="btn" onclick="closePanel('panel-batteria')">Annulla</button>
+    </div>
+    <div id="bf-msg" style="margin-top:8px;font-size:11px;min-height:14px;"></div>`;
+}
+
+
+function selectBatColor(el, colore){
+  document.querySelectorAll('.color-chip').forEach(c=>c.classList.remove('sel'));
+  el.classList.add('sel');
+  const inp=document.getElementById('bf-colore'); if(inp)inp.value=colore;
+}
+
+async function saveBatteria(){
+  const nome   = document.getElementById('bf-nome')?.value.trim();
+  const cat    = document.getElementById('bf-cat')?.value.trim();
+  const colore = document.getElementById('bf-colore')?.value||'#B8972A';
+  const msg    = document.getElementById('bf-msg');
+  if(!nome){ if(msg){msg.textContent='⚠ Nome obbligatorio.';msg.style.color='var(--org)';}return; }
+  const esercizi = [];
+  for(let i=0;i<5;i++){
+    const n = document.getElementById('bf-es-nome-'+i)?.value.trim();
+    if(!n) continue;
+    const s1 = document.getElementById('bf-es-s1-'+i)?.value.trim();
+    const s2 = document.getElementById('bf-es-s2-'+i)?.value.trim();
+    const s3 = document.getElementById('bf-es-s3-'+i)?.value.trim();
+    const s4 = document.getElementById('bf-es-s4-'+i)?.value.trim();
+    const hasSoglie = s1!==''&&s2!==''&&s3!==''&&s4!=='';
+    esercizi.push({
+      nome:        n,
+      unita:       document.getElementById('bf-es-unit-'+i)?.value.trim()||'',
+      tipo:        document.getElementById('bf-es-tipo-'+i)?.value||'max',
+      riferimento: document.getElementById('bf-es-rif-'+i)?.value||'assoluto',
+      bench:       document.getElementById('bf-es-bench-'+i)?.value.trim()||'',
+      soglie:      hasSoglie ? [parseFloat(s1),parseFloat(s2),parseFloat(s3),parseFloat(s4)] : [],
+    });
+  }
+  if(!esercizi.length){ if(msg){msg.textContent='⚠ Inserisci almeno un esercizio.';msg.style.color='var(--org)';}return; }
+  const livelli = DEFAULT_LEVELS.map((_,i)=>({
+    label:  document.getElementById('bf-lv-lbl-'+i)?.value.trim() || DEFAULT_LEVELS[i].label,
+    colore: document.getElementById('bf-lv-col-'+i)?.value || DEFAULT_LEVELS[i].colore,
+  }));
+  const data = { nome, categoria:cat, colore, esercizi, livelli };
+  if(msg){msg.textContent='⏳ Salvataggio...';msg.style.color='var(--mu)';}
+  try{
+    if(_editingBatteriaId){ await fbUpdate('ppl/batterie/'+_editingBatteriaId, data); }
+    else { await fbPush('ppl/batterie', data); }
+    if(msg){msg.textContent='✓ Batteria salvata';msg.style.color='var(--grn)';}
+    setTimeout(()=>closePanel('panel-batteria'), 900);
+  }catch(e){ if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';} }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   DEFAULT BATTERIES — importa A/B/C/D in Firebase
+   ═══════════════════════════════════════════════════════════════════════ */
+async function loadDefaultBatterie(){
+  if(!_db){alert('Firebase non connesso.');return;}
+  if(!confirm('Importare le 4 batterie PPL default (A/B/C/D) con soglie automatiche?'))return;
+  const DEF=[
+    {nome:'Batteria A — Performance & Forza', categoria:'Forza', colore:'#B8972A',
+     esercizi:[
+      {nome:'Back Squat 5RM',      unita:'kg',            tipo:'max',riferimento:'bw',      soglie:[0.75,1.0,1.25,1.5], bench:'< 0.75×BW → Base · > 1.5×BW → Elite'},
+      {nome:'Push-up Max Reps',    unita:'rip',           tipo:'max',riferimento:'assoluto',soglie:[10,20,30,40],        bench:'< 10 → Base · > 40 → Elite'},
+      {nome:'Farmer Carry 40m',    unita:'sec',           tipo:'min',riferimento:'assoluto',soglie:[12,18,25,32],        bench:'< 12s → Elite · > 35s → Base'},
+      {nome:'Plank Isometrico',    unita:'sec',           tipo:'max',riferimento:'assoluto',soglie:[45,90,120,180],      bench:'< 45s → Base · > 180s → Elite'},
+      {nome:'Broad Jump',          unita:'cm',            tipo:'max',riferimento:'assoluto',soglie:[150,175,195,215],    bench:'< 150cm → Base · > 215cm → Elite'},
+    ]},
+    {nome:'Batteria B — Salute & Ricomposizione', categoria:'Salute', colore:'#4DBD74',
+     esercizi:[
+      {nome:'Squat Bodyweight',    unita:'qualità 1–5',   tipo:'max',riferimento:'assoluto',soglie:[2,3,4,5],           bench:'1–2 compensi → Base · 5 → Elite'},
+      {nome:'Push-up Max Reps',    unita:'rip',           tipo:'max',riferimento:'assoluto',soglie:[5,15,25,35],        bench:'< 5 → Base · > 35 → Elite'},
+      {nome:'Plank Isometrico',    unita:'sec',           tipo:'max',riferimento:'assoluto',soglie:[20,60,100,140],     bench:'< 20s → Base · > 140s → Elite'},
+      {nome:'Sit & Reach',         unita:'cm',            tipo:'max',riferimento:'assoluto',soglie:[-10,0,10,20],       bench:'< −10cm → Base · > +20cm → Elite'},
+      {nome:'Step Test 3 min',     unita:'bpm',           tipo:'min',riferimento:'assoluto',soglie:[90,100,110,120],    bench:'< 90bpm → Elite · > 120bpm → Base'},
+    ]},
+    {nome:'Batteria C — Mobilità & Postura', categoria:'Mobilità', colore:'#9A7ACC',
+     esercizi:[
+      {nome:'Overhead Squat',      unita:'qualità 1–5',   tipo:'max',riferimento:'assoluto',soglie:[2,3,4,5],           bench:'1–2 → Base · 5 → Elite'},
+      {nome:'Wall Angel',          unita:'qualità 1–5',   tipo:'max',riferimento:'assoluto',soglie:[2,3,4,5],           bench:'3+ contatti persi → Base · perfetto → Elite'},
+      {nome:'Hip Hinge (bastone)', unita:'qualità 1–5',   tipo:'max',riferimento:'assoluto',soglie:[2,3,4,5],           bench:'1–2 → Base · 5 → Elite'},
+      {nome:'Thomas Test',         unita:'gradi',         tipo:'min',riferimento:'assoluto',soglie:[0,5,10,15],         bench:'> 15° → Base · 0° simm. → Elite'},
+      {nome:'Single Leg Stance',   unita:'sec',           tipo:'max',riferimento:'assoluto',soglie:[10,25,40,55],       bench:'< 10s → Base · > 55s → Elite'},
+    ]},
+    {nome:'Batteria D — Sport & Condizionamento', categoria:'Condizionamento', colore:'#2E9B9B',
+     esercizi:[
+      {nome:'AMRAP 5min',          unita:'rounds+reps',   tipo:'max',riferimento:'assoluto',soglie:[3,4,5,6],           bench:'< 3 rounds → Base · > 6 → Elite'},
+      {nome:'Farmer Carry 40m',    unita:'sec',           tipo:'min',riferimento:'assoluto',soglie:[12,18,25,32],       bench:'< 12s → Elite · > 35s → Base'},
+      {nome:'Broad Jump',          unita:'cm',            tipo:'max',riferimento:'assoluto',soglie:[150,175,195,215],   bench:'< 150cm → Base · > 215cm → Elite'},
+      {nome:'Dead Hang',           unita:'sec',           tipo:'max',riferimento:'assoluto',soglie:[20,40,60,80],       bench:'< 20s → Base · > 80s → Elite'},
+      {nome:'ΔFC recupero @1min',  unita:'bpm',           tipo:'max',riferimento:'assoluto',soglie:[12,20,30,40],       bench:'< 12bpm → Base · > 40bpm → Elite'},
+    ]},
+  ];
+  for(const bat of DEF){ await fbPush('ppl/batterie',{...bat, livelli:DEFAULT_LEVELS}); }
+  alert('4 batterie importate con successo.');
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════
+   TAB 3 — STORICO
+   ═══════════════════════════════════════════════════════════════════════ */
+function onStoricoClienteSelected(cid){
+  _storicoClienteId = cid;
+  renderStoricoCliente(cid);
+}
+
+function renderStoricoCliente(cid){
+  const container = document.getElementById('storico-container'); if(!container)return;
+  const c = _data.clienti?.[cid];
+  const clientName = c ? (c.nome+' '+c.cognome) : cid;
+
+  // Get all valuations for this client, sorted by date
+  const vals = Object.entries(_data.valutazioni||{})
+    .filter(([,v])=>v.clienteId===cid)
+    .map(([id,v])=>({id,...v}))
+    .sort((a,b)=>(a.dataTS||0)-(b.dataTS||0));
+
+  if(!vals.length){
+    container.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+      color:var(--g6);text-transform:uppercase;padding:30px;text-align:center;">
+      Nessuna valutazione per ${clientName}</div>`;
+    return;
+  }
+
+  // Group by battery
+  const byBat = {};
+  vals.forEach(v=>{
+    const key = v.batteriaId||'unknown';
+    if(!byBat[key]) byBat[key]=[];
+    byBat[key].push(v);
+  });
+
+  let html = `<div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
+    color:var(--gold);text-transform:uppercase;margin-bottom:16px;">
+    Storico valutazioni — ${clientName} (${vals.length} sessioni)</div>`;
+
+  Object.entries(byBat).forEach(([batId, batVals])=>{
+    const b = _data.batterie?.[batId];
+    const batNome = b?.nome || batVals[0]?.batteriaNome || batId;
+    const LEVELS = b?.livelli || DEFAULT_LEVELS;
+
+    html += `<div class="storico-block">
+      <div class="storico-block-head" style="border-left:4px solid ${b?.colore||'var(--gold)'};">
+        <span class="storico-bat-name">${batNome}</span>
+        <span class="storico-count">${batVals.length} ${batVals.length===1?'sessione':'sessioni'}</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="storico-table">
+          <thead>
+            <tr>
+              <th>Esercizio</th>
+              ${batVals.map(v=>`<th>${v.data||'—'}</th>`).join('')}
+              ${batVals.length>1?'<th>Δ Totale</th>':''}
+            </tr>
+          </thead>
+          <tbody>`;
+
+    // Get exercises from first valuation that has results
+    const refVal = batVals.find(v=>v.risultati);
+    const esercizi = refVal ? Object.entries(refVal.risultati).map(([,r])=>r) : [];
+
+    esercizi.forEach((esRef,esIdx)=>{
+      const esTipo = b?.esercizi?.[esIdx]?.tipo||'max';
+      html += `<tr>
+        <td class="storico-es-name">${esRef.nome||b?.esercizi?.[esIdx]?.nome||('Es. '+(esIdx+1))}<br>
+          <span style="font-size:9px;color:var(--mu);">${esRef.unita||b?.esercizi?.[esIdx]?.unita||''}</span></td>`;
+
+      const values = batVals.map(v=>v.risultati?.[esIdx]);
+      values.forEach(res=>{
+        if(!res){ html+='<td>—</td>'; return; }
+        const lv = LEVELS.find(l=>l.label===res.livello);
+        const lvColor = lv?.colore||'var(--g4)';
+        html += `<td>
+          <div class="storico-val-cell">
+            <div class="storico-val">${res.valore||'—'}</div>
+            <div class="storico-lv" style="background:${lvColor}22;border:1px solid ${lvColor}55;color:${lvColor};">
+              ${res.livello||'—'}</div>
+          </div>
+        </td>`;
+      });
+
+      // Delta column
+      if(batVals.length>1){
+        const firstRes = values.find(v=>v?.valore);
+        const lastRes  = [...values].reverse().find(v=>v?.valore);
+        const firstVal = parseFloat(firstRes?.valore);
+        const lastVal  = parseFloat(lastRes?.valore);
+        if(!isNaN(firstVal) && !isNaN(lastVal) && firstVal!==lastVal){
+          const delta = lastVal - firstVal;
+          const better = esTipo==='min' ? delta<0 : delta>0;
+          const arrow  = better ? '↑' : (delta===0?'→':'↓');
+          const color  = better ? 'var(--grn)' : (delta===0?'var(--mu)':'var(--red)');
+          html += `<td><div class="storico-delta" style="color:${color};">${arrow} ${delta>0?'+':''}${delta.toFixed(1)}</div></td>`;
+        } else {
+          html += '<td><div class="storico-delta" style="color:var(--mu);">—</div></td>';
+        }
+      }
+      html += '</tr>';
+    });
+
+    html += `</tbody></table></div>
+      <div style="display:flex;gap:8px;padding:6px 0;flex-wrap:wrap;">
+        ${batVals.map(v=>`
+          <button class="icon-btn del" style="font-size:8px;padding:2px 8px;"
+            onclick="deleteValutazione('${v.id}')">✕ ${v.data}</button>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+async function deleteValutazione(id){
+  if(!confirm('Eliminare questa valutazione?')) return;
+  try{
+    await fbRemove('ppl/valutazioni/'+id);
+    if(_storicoClienteId) renderStoricoCliente(_storicoClienteId);
+  }catch(e){ alert('Errore: '+e.message); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   PANEL / UI HELPERS
+   ═══════════════════════════════════════════════════════════════════════ */
+function openPanel(id){
+  document.getElementById(id)?.classList.add('open');
+  document.getElementById('panel-overlay')?.classList.add('open');
+  if(id==='panel-batteria'&&!_editingBatteriaId) renderBatteriaForm(null);
+}
+function closePanel(id){
+  document.getElementById(id)?.classList.remove('open');
+  const anyOpen=[...document.querySelectorAll('.side-panel.open')].length;
+  if(!anyOpen) document.getElementById('panel-overlay')?.classList.remove('open');
+  _editingBatteriaId=null;
+}
+function closeAllPanels(){
+  document.querySelectorAll('.side-panel').forEach(p=>p.classList.remove('open'));
+  document.getElementById('panel-overlay')?.classList.remove('open');
+  _editingBatteriaId=null;
+}
+function showMsg(el,txt,color){
+  if(!el) return;
+  el.textContent=txt; el.style.color=color||'var(--mu)';
+  setTimeout(()=>{el.textContent='';},4000);
+}
+
+/* ── Nav ── */
+function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
+document.addEventListener('click',e=>{
+  if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeAllPanels();
+});
+
+document.addEventListener('DOMContentLoaded', initFirebase);
+
+</script>
+</html>
