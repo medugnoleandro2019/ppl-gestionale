@@ -453,9 +453,7 @@ function renderProgResult(){
     <div style="font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;padding-top:10px;">Fonte: ${db.src}</div>`;
 }
 
-if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
-}
+
 document.addEventListener('DOMContentLoaded', ()=>{
   if(typeof _progHistory !== 'undefined'){
     _progHistory = storageGet(PK) || [];
