@@ -236,17 +236,17 @@ nav.ppl-topnav.nav-open a.tn-link{
         <div class="res-field">
           <span class="res-lbl">Nome studio</span>
           <input class="res-inp" id="cfg-studio" type="text"
-            placeholder="Phoenix Performance Lab" oninput="markUnsaved()">
+            placeholder="Phoenix Performance Lab" oninput="autoSaveIdentity()">
         </div>
         <div class="res-field">
           <span class="res-lbl">Nome coach</span>
           <input class="res-inp" id="cfg-coach" type="text"
-            placeholder="Leo" oninput="markUnsaved()">
+            placeholder="Leo" oninput="autoSaveIdentity()">
         </div>
         <div class="res-field">
           <span class="res-lbl">Città</span>
           <input class="res-inp" id="cfg-city" type="text"
-            placeholder="Torino" oninput="markUnsaved()">
+            placeholder="Torino" oninput="autoSaveIdentity()">
         </div>
         <div class="res-actions">
           <button class="btn pri" onclick="saveIdentity()">✓ Salva identità</button>
@@ -275,23 +275,23 @@ nav.ppl-topnav.nav-open a.tn-link{
         <div class="res-field">
           <span class="res-lbl">API Key</span>
           <input class="res-inp" id="cfg-firebase-key" type="text"
-            placeholder="AIzaSy..." oninput="markUnsaved()">
+            placeholder="AIzaSy..." oninput="autoSaveFirebase()">
         </div>
         <div class="res-field">
           <span class="res-lbl">Database URL</span>
           <input class="res-inp" id="cfg-firebase-db" type="url"
             placeholder="https://tuo-progetto-default-rtdb.firebaseio.com"
-            oninput="markUnsaved()">
+            oninput="autoSaveFirebase()">
         </div>
         <div class="res-field">
           <span class="res-lbl">Project ID</span>
           <input class="res-inp" id="cfg-firebase-pid" type="text"
-            placeholder="tuo-progetto-xxxxx" oninput="markUnsaved()">
+            placeholder="tuo-progetto-xxxxx" oninput="autoSaveFirebase()">
         </div>
         <div class="res-field">
           <span class="res-lbl">Auth Domain <span style="color:var(--g6);font-size:9px;">(opzionale)</span></span>
           <input class="res-inp" id="cfg-firebase-auth" type="text"
-            placeholder="tuo-progetto.firebaseapp.com" oninput="markUnsaved()">
+            placeholder="tuo-progetto.firebaseapp.com" oninput="autoSaveFirebase()">
         </div>
         <div class="res-actions" style="margin-top:12px;">
           <button class="btn pri" onclick="saveFirebase()">✓ Salva configurazione</button>
@@ -353,6 +353,52 @@ nav.ppl-topnav.nav-open a.tn-link{
 </div>
 </body>
 <script>
+/* ══ AUTO-SAVE — evita perdita dati su refresh/F5 ═══════════════════════
+   Ogni digitazione salva automaticamente su localStorage con un breve
+   debounce (300ms). Nessun bottone necessario per non perdere i dati.
+   ═════════════════════════════════════════════════════════════════════ */
+let _autoSaveFbTimer = null;
+function autoSaveFirebase(){
+  clearTimeout(_autoSaveFbTimer);
+  _autoSaveFbTimer = setTimeout(()=>{
+    const key  = (document.getElementById('cfg-firebase-key')?.value||'').trim();
+    const db   = (document.getElementById('cfg-firebase-db')?.value||'').trim();
+    const pid  = (document.getElementById('cfg-firebase-pid')?.value||'').trim();
+    const auth = (document.getElementById('cfg-firebase-auth')?.value||'').trim();
+    const cfg = cfgGet();
+    cfg.firebase_apiKey      = key;
+    cfg.firebase_databaseURL = db;
+    cfg.firebase_projectId   = pid;
+    cfg.firebase_authDomain  = auth || (pid ? pid+'.firebaseapp.com' : '');
+    cfgSet(cfg);
+    _unsaved = false;
+    updateStatus(cfg, kpiGet()||{...DCFG_KPI});
+    // Silent visual confirmation
+    const msg = document.getElementById('firebase-save-msg');
+    if(msg && key && db){
+      msg.textContent = '✓ Salvato automaticamente';
+      msg.style.color = 'var(--grn)';
+    }
+  }, 300);
+}
+
+let _autoSaveIdTimer = null;
+function autoSaveIdentity(){
+  markUnsaved();
+  clearTimeout(_autoSaveIdTimer);
+  _autoSaveIdTimer = setTimeout(()=>{
+    const cfg = cfgGet();
+    cfg.studio_name = document.getElementById('cfg-studio')?.value.trim()||'';
+    cfg.coach_name  = document.getElementById('cfg-coach')?.value.trim()||'';
+    cfg.city        = document.getElementById('cfg-city')?.value.trim()||'';
+    cfgSet(cfg);
+    _unsaved = false;
+    const brand = document.getElementById('tb-studio-name');
+    if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
+    updateStatus(cfg, kpiGet()||{...DCFG_KPI});
+  }, 300);
+}
+
 
 /* ══ CONFIG KEY ═══════════════════════════════════════════════════════════
    Chiave condivisa tra tutte le pagine del gestionale.
@@ -501,11 +547,6 @@ function saveIdentity(){
   showMsg('msg-identity', '✓ Salvato');
   updateStatus(cfg, kpiGet() || {...DCFG_KPI});
 }
-
-// ── SAVE SHEETS ──────────────────────────────────────────────────────────────
-
-
-async 
 
 // ── SAVE KPI TARGETS ────────────────────────────────────────────────────────
 function saveKPI(){
