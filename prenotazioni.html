@@ -1333,16 +1333,19 @@ select.pkg-edit-inp{cursor:pointer;}
   <div class="modal" style="max-width:620px;">
     <div class="modal-head">
       <span class="modal-title" id="detail-title">Cliente</span>
-      <div style="display:flex;gap:4px;align-items:center;">
+      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
         <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openNewAbb()">+ Abbonamento</button>
         <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openEditClient()">✏ Modifica</button>
+        <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openClientAuthPanel()">🔑 Accesso Portale</button>
         <button class="btn danger" style="font-size:8px;padding:4px 10px;" onclick="deleteClient()">🗑</button>
-        <button class="modal-close" onclick="closeModal('modal-client-detail')">✕</button>
+        <button class="modal-close" onclick="closeModal(\'modal-client-detail\')">✕</button>
       </div>
     </div>
     <div class="modal-body">
       <div id="edit-client-form" style="display:none;background:var(--g2);border:1px solid var(--g4);
         border-radius:4px;padding:12px;margin-bottom:12px;"></div>
+      <div id="client-auth-panel" style="display:none;background:var(--g2);border:1px solid var(--g4);
+        border-radius:4px;padding:14px;margin-bottom:12px;"></div>
       <div class="client-detail-grid" id="detail-stats" style="margin-bottom:14px;"></div>
       <div class="slbl-mini">Abbonamenti</div>
       <div id="detail-abbs" style="margin-bottom:14px;"></div>
@@ -1398,10 +1401,9 @@ select.pkg-edit-inp{cursor:pointer;}
 </body>
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script><!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -2822,5 +2824,152 @@ function parseDataScadenza(str){
   if(str.includes('-')) return new Date(str+'T00:00:00');
   return null;
 }
+
+/* ══ ACCESSO PORTALE CLIENTE ═══════════════════════════════════════════════
+   Crea un account Firebase Auth per il cliente usando un'istanza SECONDARIA
+   dell'app Firebase (stessa configurazione, sessione isolata). Questo evita
+   di disconnettere il coach durante la creazione dell'account del cliente
+   — tecnica standard e interamente client-side, nessun server richiesto.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+function openClientAuthPanel(){
+  const c = _data.clienti?.[_currentClientId];
+  if(!c) return;
+  const panel = document.getElementById('client-auth-panel');
+  if(!panel) return;
+  panel.style.display = 'block';
+
+  if(c.authUid){
+    panel.innerHTML = `
+      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+        color:var(--grn);text-transform:uppercase;margin-bottom:8px;">✓ Accesso portale attivo</div>
+      <div style="font-size:11px;color:var(--mu2);margin-bottom:10px;">
+        Email di accesso: <strong style="color:var(--wh);">${c.authEmail||c.email||'—'}</strong>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" style="font-size:9px;" onclick="resetClientPassword('${c.authEmail||c.email}')">
+          ✉ Invia reset password</button>
+        <button class="btn danger" style="font-size:9px;" onclick="revokeClientAuth()">
+          🗑 Revoca accesso</button>
+      </div>
+      <div id="auth-panel-msg" style="margin-top:8px;font-size:11px;min-height:14px;"></div>`;
+    return;
+  }
+
+  const suggestedEmail = c.email || '';
+  panel.innerHTML = `
+    <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
+      color:var(--gold);text-transform:uppercase;margin-bottom:8px;">🔑 Crea accesso al portale clienti</div>
+    <div style="font-size:10px;color:var(--mu);margin-bottom:12px;">
+      Il cliente riceverà email e password per accedere al portale prenotazioni da
+      <strong style="color:var(--mu2);">portale_cliente.html</strong>
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="pkg-edit-lbl" style="margin-bottom:4px;">Email di accesso</div>
+      <input class="pkg-edit-inp" id="auth-email" type="email" value="${suggestedEmail}"
+        placeholder="mario.rossi@email.com">
+    </div>
+    <div style="margin-bottom:10px;">
+      <div class="pkg-edit-lbl" style="margin-bottom:4px;">Password provvisoria</div>
+      <div style="display:flex;gap:6px;">
+        <input class="pkg-edit-inp" id="auth-pw" type="text" value="${genTempPassword()}" style="flex:1;">
+        <button class="btn" style="font-size:9px;padding:6px 10px;" onclick="document.getElementById('auth-pw').value=genTempPassword()">↻</button>
+      </div>
+      <div style="font-size:9px;color:var(--g6);margin-top:4px;font-style:italic;">
+        Comunica queste credenziali al cliente. Potrà cambiarla dal suo profilo.
+      </div>
+    </div>
+    <button class="btn pri" style="width:100%;" onclick="createClientAuth()">✓ Crea accesso</button>
+    <div id="auth-panel-msg" style="margin-top:8px;font-size:11px;min-height:14px;"></div>`;
+}
+
+function genTempPassword(){
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let pw = '';
+  for(let i=0;i<8;i++) pw += chars[Math.floor(Math.random()*chars.length)];
+  return pw;
+}
+
+async function createClientAuth(){
+  const email = document.getElementById('auth-email')?.value.trim();
+  const pw    = document.getElementById('auth-pw')?.value;
+  const msg   = document.getElementById('auth-panel-msg');
+
+  if(!email || !pw){
+    if(msg){ msg.textContent='⚠ Email e password obbligatorie.'; msg.style.color='var(--org)'; }
+    return;
+  }
+  if(pw.length < 6){
+    if(msg){ msg.textContent='⚠ La password deve avere almeno 6 caratteri.'; msg.style.color='var(--org)'; }
+    return;
+  }
+
+  if(msg){ msg.textContent='⏳ Creazione account...'; msg.style.color='var(--mu)'; }
+
+  try{
+    // Istanza Firebase SECONDARIA — evita di disconnettere il coach
+    const cfg = getPPLConfig();
+    const secondaryApp = firebase.apps.find(a=>a.name==='secondary')
+      || firebase.initializeApp({
+          apiKey: cfg.firebase_apiKey,
+          authDomain: cfg.firebase_authDomain || (cfg.firebase_projectId+'.firebaseapp.com'),
+          databaseURL: cfg.firebase_databaseURL,
+          projectId: cfg.firebase_projectId,
+        }, 'secondary');
+
+    const secondaryAuth = firebase.auth(secondaryApp);
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, pw);
+    const newUid = cred.user.uid;
+
+    // Disconnetti subito la sessione secondaria (non serve più)
+    await secondaryAuth.signOut();
+
+    // Collega l'authUid al cliente nel database principale
+    await fbUpdate('ppl/clienti/'+_currentClientId, {
+      authUid: newUid,
+      authEmail: email,
+    });
+
+    if(msg){ msg.textContent='✓ Accesso creato con successo'; msg.style.color='var(--grn)'; }
+    setTimeout(()=>openClientAuthPanel(), 1200);
+
+  }catch(e){
+    const errMsgs = {
+      'auth/email-already-in-use': "Questa email è già registrata. Usa un'altra email o contatta il cliente.",
+      'auth/invalid-email': 'Email non valida.',
+      'auth/weak-password': 'Password troppo debole (minimo 6 caratteri).',
+    };
+    if(msg){ msg.textContent='✕ '+(errMsgs[e.code]||e.message); msg.style.color='var(--red)'; }
+  }
+}
+
+async function resetClientPassword(email){
+  if(!email){ alert('Nessuna email associata.'); return; }
+  const msg = document.getElementById('auth-panel-msg');
+  try{
+    const cfg = getPPLConfig();
+    const secondaryApp = firebase.apps.find(a=>a.name==='secondary')
+      || firebase.initializeApp({
+          apiKey: cfg.firebase_apiKey,
+          authDomain: cfg.firebase_authDomain || (cfg.firebase_projectId+'.firebaseapp.com'),
+          databaseURL: cfg.firebase_databaseURL,
+          projectId: cfg.firebase_projectId,
+        }, 'secondary');
+    const secondaryAuth = firebase.auth(secondaryApp);
+    await secondaryAuth.sendPasswordResetEmail(email);
+    if(msg){ msg.textContent='✓ Email di reset inviata a '+email; msg.style.color='var(--grn)'; }
+  }catch(e){
+    if(msg){ msg.textContent='✕ '+e.message; msg.style.color='var(--red)'; }
+  }
+}
+
+async function revokeClientAuth(){
+  if(!confirm("Revocare l'accesso al portale per questo cliente? Il cliente non potrà più accedere finché non gli crei un nuovo accesso.\n\nNota: questo rimuove solo il collegamento — per eliminare completamente l'account servirà farlo dalla Console Firebase (Authentication).")) return;
+  try{
+    await fbUpdate('ppl/clienti/'+_currentClientId, { authUid: null, authEmail: null });
+    openClientAuthPanel();
+  }catch(e){ alert('Errore: '+e.message); }
+}
+
 </script>
 </html>
