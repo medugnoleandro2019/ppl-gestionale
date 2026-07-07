@@ -1489,6 +1489,7 @@ function startListening(){
     renderClienti();
     renderSessioniForm();
     renderStorico();
+    renderScadenze();
     renderCalendar();
     renderPkgList();
     renderTipiList();
@@ -2100,7 +2101,8 @@ function switchBkTab(id,el){
   document.querySelectorAll('.bk-section').forEach(s=>s.classList.remove('active'));
   el.classList.add('active');
   document.getElementById('bksec-'+id)?.classList.add('active');
-  if(id==='calendario')renderCalendar();
+  if(id==='calendario') renderCalendar();
+  if(id==='scadenze')   renderScadenze();
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
