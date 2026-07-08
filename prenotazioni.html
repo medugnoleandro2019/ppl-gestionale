@@ -1029,36 +1029,7 @@ select.pkg-edit-inp{cursor:pointer;}
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
 </nav>
-<!-- ══ COACH LOGIN GATE — richiesto solo quando le Security Rules sono attive ══ -->
-<div id="coach-login-overlay" class="app-hidden" style="position:fixed;inset:0;z-index:99999;
-  background:var(--bk);display:flex;align-items:center;justify-content:center;padding:24px;">
-  <div style="width:100%;max-width:360px;background:var(--g1);border:1px solid var(--g3);
-    border-radius:10px;padding:28px 24px;">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;
-      letter-spacing:8px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:4px;">PPL</div>
-    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);
-      text-transform:uppercase;text-align:center;margin-bottom:28px;">Accesso Coach</div>
-    <div style="margin-bottom:14px;">
-      <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);
-        text-transform:uppercase;display:block;margin-bottom:6px;">Email</span>
-      <input id="coach-login-email" type="email" placeholder="tuo@email.com"
-        style="width:100%;background:var(--g2);border:1px solid var(--g4);border-radius:6px;
-        color:var(--wh);font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box;">
-    </div>
-    <div style="margin-bottom:18px;">
-      <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);
-        text-transform:uppercase;display:block;margin-bottom:6px;">Password</span>
-      <input id="coach-login-pw" type="password" placeholder="••••••••"
-        style="width:100%;background:var(--g2);border:1px solid var(--g4);border-radius:6px;
-        color:var(--wh);font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box;">
-    </div>
-    <button id="coach-login-btn" onclick="doCoachLogin()"
-      style="width:100%;background:var(--gold);border:none;border-radius:6px;color:#000;
-      font-size:14px;font-weight:600;padding:13px;cursor:pointer;">Accedi</button>
-    <div id="coach-login-error" style="font-size:12px;color:var(--red);margin-top:10px;
-      text-align:center;min-height:16px;"></div>
-  </div>
-</div>
+
 
 <div class="standalone-wrap">
   <div class="topbar-simple">
@@ -2157,7 +2128,7 @@ document.addEventListener('click',function(e){
 
 /* ══ INIT ═════════════════════════════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded',()=>initCoachGate(initFirebase));
+document.addEventListener('DOMContentLoaded',initFirebase);
 
 
 
@@ -3156,110 +3127,7 @@ async function removeCertMedico(){
 }
 
 
-/* ══════════════════════════════════════════════════════════════════════════
-   COACH LOGIN GATE ═══════════════════════════════════════════════════════
-   Wrapper di autenticazione per il gestionale coach. Finché le Security
-   Rules restano aperte (Fase 1), questo overlay è disattivato e il
-   gestionale funziona esattamente come prima — zero rischio.
-   Quando le Security Rules verranno bloccate (Fase 2), impostare
-   COACH_AUTH_REQUIRED = true per attivare il login obbligatorio.
-   ═══════════════════════════════════════════════════════════════════════ */
-const COACH_AUTH_REQUIRED = false; // ← passa a true SOLO dopo aver bloccato le Security Rules
 
-let _coachAuth = null;
-let _coachAuthenticated = false;
-
-function initCoachGate(originalInit){
-  if(!COACH_AUTH_REQUIRED){
-    // Fase 1: nessun gate, comportamento identico a prima
-    originalInit();
-    return;
-  }
-
-  const cfg = getPPLConfig();
-  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL){
-    originalInit(); // lascia che initFirebase gestisca il messaggio "non configurato"
-    return;
-  }
-
-  try{
-    if(!firebase.apps.length){
-      firebase.initializeApp({
-        apiKey: cfg.firebase_apiKey,
-        authDomain: cfg.firebase_authDomain || (cfg.firebase_projectId+'.firebaseapp.com'),
-        databaseURL: cfg.firebase_databaseURL,
-        projectId: cfg.firebase_projectId,
-      });
-    }
-    _coachAuth = firebase.auth();
-  }catch(e){
-    console.error('Coach auth init error:', e);
-    originalInit();
-    return;
-  }
-
-  _coachAuth.onAuthStateChanged(user=>{
-    if(user){
-      _coachAuthenticated = true;
-      document.getElementById('coach-login-overlay')?.classList.add('app-hidden');
-      originalInit();
-    } else {
-      _coachAuthenticated = false;
-      document.getElementById('coach-login-overlay')?.classList.remove('app-hidden');
-    }
-  });
-}
-
-async function doCoachLogin(){
-  const email = document.getElementById('coach-login-email')?.value.trim();
-  const pw    = document.getElementById('coach-login-pw')?.value;
-  const errEl = document.getElementById('coach-login-error');
-  const btn   = document.getElementById('coach-login-btn');
-  errEl.textContent = '';
-
-  if(!email || !pw){ errEl.textContent = 'Inserisci email e password.'; return; }
-
-  // Attende fino a 3 secondi che _coachAuth sia pronto, per evitare race condition
-  // se l'utente clicca Accedi prima che l'inizializzazione Firebase sia completata
-  if(!_coachAuth){
-    errEl.textContent = 'Inizializzazione in corso, un secondo...';
-    let waited = 0;
-    while(!_coachAuth && waited < 3000){
-      await new Promise(r=>setTimeout(r,100));
-      waited += 100;
-    }
-    if(!_coachAuth){
-      errEl.textContent = 'Errore: Firebase non si è inizializzato. Ricarica la pagina e riprova.';
-      return;
-    }
-    errEl.textContent = '';
-  }
-
-  btn.disabled = true; btn.textContent = 'Accesso...';
-  try{
-    await _coachAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    const cred = await _coachAuth.signInWithEmailAndPassword(email, pw);
-    console.log('[Coach Login] Autenticazione riuscita, UID:', cred.user.uid);
-    setTimeout(()=>{
-      if(!_coachAuthenticated){
-        console.warn('[Coach Login] onAuthStateChanged non scattato dopo 2s - sblocco manuale.');
-        _coachAuthenticated = true;
-        document.getElementById('coach-login-overlay')?.classList.add('app-hidden');
-        initFirebase();
-      }
-    }, 2000);
-  }catch(e){
-    const msgs = {
-      'auth/wrong-password': 'Password errata.',
-      'auth/user-not-found': 'Nessun account coach trovato con questa email.',
-      'auth/invalid-credential': 'Email o password errati.',
-      'auth/too-many-requests': 'Troppi tentativi. Riprova più tardi.',
-    };
-    errEl.textContent = msgs[e.code] || 'Errore: ' + e.message;
-  } finally {
-    btn.disabled = false; btn.textContent = 'Accedi';
-  }
-}
 
 </script>
 </html>
