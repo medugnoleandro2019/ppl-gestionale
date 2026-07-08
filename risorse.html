@@ -487,8 +487,8 @@ async function testFirebase(){
   res.textContent='⏳ Test connessione...'; res.style.color='var(--mu)';
   try{
     // Test: ping il database REST endpoint
-    const pingUrl = db.replace(/\/$/, '') + '/ppl/.json?shallow=true&auth=';
-    const r = await fetch(pingUrl + '&limitToFirst=1');
+    const pingUrl = db.replace(/\/$/, '') + '/ppl/.json?shallow=true';
+    const r = await fetch(pingUrl);
     if(r.ok || r.status===200 || r.status===204 || r.status===null){
       res.textContent = '✓ Database raggiungibile';
       res.style.color = 'var(--grn)';
