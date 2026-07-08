@@ -4,654 +4,85 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0A0A0A">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="manifest.json">
-<title>PPL · Prenotazioni</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<title>PPL · Risorse</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 
-
-
-/* ══ TOKENS ══ */
-:root{
-  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
-  --gold:#B8972A;--gold2:#D4AF45;--goldd:#6B5518;
-  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;
-  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
-  --sidebar:220px;
-}
 *{margin:0;padding:0;box-sizing:border-box;}
 html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
-
-/* ══ LAYOUT ══ */
-.shell{display:flex;height:calc(100vh - 40px);overflow:hidden;}
-
-/* ══ SIDEBAR ══ */
-.sidebar{
-  width:var(--sidebar);flex-shrink:0;
-  background:var(--g1);border-right:1px solid var(--g3);
-  display:flex;flex-direction:column;
-  z-index:200;
-  transition:width .22s ease;
-  overflow:hidden;min-width:0;
-}
-.sidebar.collapsed{width:48px;}
-.sb-logo{
-  padding:12px 10px;border-bottom:1px solid var(--g3);
-  display:flex;align-items:center;gap:8px;height:52px;flex-shrink:0;
-}
-.sb-logo-text{overflow:hidden;white-space:nowrap;flex:1;transition:opacity .15s .05s;}
-.sidebar.collapsed .sb-logo-text{opacity:0;width:0;flex:0;transition:opacity .05s;}
-.sb-brand{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:300;
-  letter-spacing:4px;color:var(--gold);text-transform:uppercase;line-height:1;}
-.sb-sub{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
-  color:var(--mu);text-transform:uppercase;margin-top:3px;}
-.sb-toggle{
-  background:none;border:1px solid var(--g4);color:var(--mu2);
-  width:28px;height:28px;min-width:28px;border-radius:3px;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;transition:.15s;flex-shrink:0;
-}
-.sb-toggle:hover{border-color:var(--gold);color:var(--gold);}
-.sb-nav{flex:1;padding:8px 0;overflow-y:auto;overflow-x:hidden;}
-.sb-section{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:3px;
-  color:var(--g6);text-transform:uppercase;padding:12px 14px 5px;
-  white-space:nowrap;overflow:hidden;transition:opacity .1s;}
-.sidebar.collapsed .sb-section{opacity:0;}
-.sb-item{
-  display:flex;align-items:center;gap:10px;
-  padding:9px 14px;cursor:pointer;
-  font-size:12px;color:var(--mu2);
-  border-left:2px solid transparent;
-  transition:.15s;user-select:none;white-space:nowrap;overflow:hidden;
-}
-.sb-item:hover{color:var(--wh);background:var(--g2);}
-.sb-item.active{color:var(--gold);border-left-color:var(--gold);background:rgba(184,151,42,.06);}
-.sb-icon{font-size:16px;width:20px;min-width:20px;text-align:center;flex-shrink:0;}
-.sb-label{flex:1;overflow:hidden;white-space:nowrap;transition:opacity .1s;}
-.sidebar.collapsed .sb-label{opacity:0;width:0;overflow:hidden;}
-.sidebar.collapsed .sb-badge{display:none;}
-.sb-badge{font-family:'DM Mono',monospace;font-size:8px;background:var(--g4);
-  color:var(--mu);padding:1px 5px;border-radius:2px;flex-shrink:0;}
-.sb-badge.new{background:var(--goldd);color:var(--gold2);}
-.sb-footer{padding:12px 10px;border-top:1px solid var(--g3);overflow:hidden;flex-shrink:0;}
-.sb-foot-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);
-  white-space:nowrap;transition:opacity .1s;}
-.sidebar.collapsed .sb-foot-t{opacity:0;}
-/* mobile overlay */
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;}
-.sb-overlay.visible{display:block;}
-
-/* ══ CONTENT AREA ══ */
-.content{flex:1;overflow:hidden;display:flex;flex-direction:column;}
-.topbar{
-  background:var(--g1);border-bottom:1px solid var(--g3);
-  padding:0 22px;height:48px;display:flex;align-items:center;gap:12px;
-  flex-shrink:0;
-}
-.topbar-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;
-  color:var(--gold);text-transform:uppercase;}
-.topbar-sep{width:1px;height:20px;background:var(--g4);}
-.tb-sp{flex:1;}
-.tbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
-  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;white-space:nowrap;}
-.tbtn:hover{border-color:var(--gold);color:var(--gold);}
-.tbtn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
-.tbtn.pri:hover{background:var(--gold2);}
-.sdot{width:7px;height:7px;border-radius:50%;background:var(--g5);transition:.3s;flex-shrink:0;}
-.sdot.uns{background:var(--org);}.sdot.sav{background:var(--grn);}
-
-.panel-area{flex:1;overflow-y:auto;overflow-x:hidden;}
-.tab-panel{display:none;height:100%;}
-.tab-panel.active{display:block;}
-
-/* ══ SHARED COMPONENTS ══ */
-.main{max-width:1380px;margin:0 auto;padding:18px 22px 60px;}
-.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
-  text-transform:uppercase;margin:18px 0 10px;display:flex;align-items:center;gap:10px;}
-.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
-.slbl:first-child{margin-top:0;}
-.btn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;
-  padding:5px 12px;border-radius:3px;cursor:pointer;transition:.15s;}
-.btn:hover{border-color:var(--gold);color:var(--gold);}
-.btn.pri{background:var(--gold);color:#000;border-color:var(--gold);font-weight:bold;}
-.btn.pri:hover{background:var(--gold2);}
-
-/* ══ DASHBOARD KPI ══ */
-.krow{display:flex;gap:10px;flex-wrap:wrap;}
-.kc{flex:1;min-width:150px;background:var(--g1);border:1px solid var(--g3);
-  border-radius:4px;padding:12px 14px;border-top:2px solid var(--g4);}
-.kc.grn{border-top-color:var(--grn);}.kc.org{border-top-color:var(--org);}
-.kc.red{border-top-color:var(--red);}.kc.neu{border-top-color:var(--g4);}
-.klbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
-  color:var(--mu);text-transform:uppercase;margin-bottom:7px;display:flex;align-items:center;gap:5px;}
-.dot{width:6px;height:6px;border-radius:50%;}
-.dot.grn{background:var(--grn);}.dot.org{background:var(--org);}
-.dot.red{background:var(--red);}.dot.neu{background:var(--g5);}
-.kval{font-family:'DM Mono',monospace;font-size:24px;line-height:1;color:var(--wh);font-weight:500;}
-.kval.dim{color:var(--mu);}
-.ksub{font-size:10px;color:var(--mu);margin-top:5px;display:flex;justify-content:space-between;}
-.kdelta{font-family:'DM Mono',monospace;font-size:10px;}
-.kdelta.pos{color:var(--grn);}.kdelta.neg{color:var(--red);}
-.crow{display:flex;gap:10px;margin-bottom:2px;flex-wrap:wrap;}
-.cb{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 16px;min-width:0;}
-.cb.f2{flex:2 1 300px;}.cb.f1{flex:1 1 200px;}
-.cbtitle{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:var(--gold);text-transform:uppercase;margin-bottom:12px;}
-.cbwrap{position:relative;height:150px;}
-.panels{display:flex;gap:10px;flex-wrap:wrap;}
-.panel{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;flex:1;min-width:280px;}
-.ph{display:flex;justify-content:space-between;align-items:center;
-  padding:10px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--g3);}
-.ph-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
-.ph-arr{color:var(--mu);font-size:11px;}
-.pb{padding:14px;}.pb.closed{display:none;}
-.fg{display:flex;flex-wrap:wrap;gap:8px;}
-.fi{display:flex;flex-direction:column;gap:3px;min-width:95px;flex:1;}
-.fi.w2{min-width:200px;flex:2;}
-.filab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
-.finp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;
-  padding:6px 8px;outline:none;width:100%;transition:border-color .15s;}
-.finp:focus{border-color:var(--gold);}
-.finp::placeholder{color:var(--g5);}
-.finp.ta{resize:vertical;min-height:50px;font-family:'DM Sans',sans-serif;font-size:11px;}
-.fdiv{width:100%;height:1px;background:var(--g3);flex-basis:100%;margin:4px 0;}
-.fsubl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:var(--vio);text-transform:uppercase;flex-basis:100%;padding-top:4px;}
-.irow{display:flex;gap:10px;flex-wrap:wrap;}
-.ins{flex:1;min-width:210px;background:var(--g1);border:1px solid var(--g3);
-  border-radius:4px;padding:11px 13px;border-left:3px solid;}
-.ins.grn{border-left-color:var(--grn);}.ins.org{border-left-color:var(--org);}
-.ins.red{border-left-color:var(--red);}.ins.inf{border-left-color:var(--vio);}
-.ins-t{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
-.ins.grn .ins-t{color:var(--grn);}.ins.org .ins-t{color:var(--org);}
-.ins.red .ins-t{color:var(--red);}.ins.inf .ins-t{color:var(--vio);}
-.ins-m{font-size:11px;color:var(--mu2);line-height:1.55;}
-.htw{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow-x:auto;}
-.ht{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
-.ht th{background:var(--g2);padding:8px 11px;font-family:'DM Mono',monospace;
-  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
-  text-align:right;border-bottom:1px solid var(--g3);}
-.ht th:first-child{text-align:left;}
-.ht td{padding:8px 11px;border-bottom:1px solid var(--g2);text-align:right;
-  font-family:'DM Mono',monospace;color:var(--mu2);}
-.ht td:first-child{text-align:left;color:var(--wh);font-weight:bold;}
-.ht tr:last-child td{border-bottom:none;}
-.ht tr.act td{background:rgba(184,151,42,.05);}
-.cg{color:var(--grn)!important;}.cr{color:var(--red)!important;}
-.co{color:var(--gold)!important;}.co2{color:var(--org)!important;}
-
-/* ══ RESPONSIVE MOBILE ══ */
-@media(max-width:700px){
-  :root{ --sidebar:200px; }
-  .main{ padding:12px 12px 60px; }
-  .kc{ min-width:calc(50% - 5px); }
-  .kval{ font-size:20px; }
-  .cb.f2,.cb.f1{ flex:1 1 100%; }
-  .cbwrap{ height:130px; }
-  .panel{ min-width:100%; }
-  .ins{ min-width:100%; }
-  .topbar{ padding:0 10px; gap:6px; }
-  .topbar-sep{ display:none; }
-  .tbtn{ font-size:8px; padding:5px 7px; letter-spacing:0; }
-  .topbar-title{ font-size:9px; letter-spacing:1px; }
-  .mnav{ gap:4px; }
-  .mnavlabel{ min-width:70px; font-size:11px; }
-  .mnavbtn{ width:26px; height:26px; }
-  .sdot{ display:none; }
-  .hide-xs{ display:none; }
-  .prog-input-row{ flex-direction:column; }
-  .prog-inp-group{ min-width:100%; }
-  .bat-opt{ min-width:60px; }
-  .vfi{ min-width:calc(50% - 4px); }
-  .cli-card{ min-width:calc(50% - 5px); }
-}
-/* month nav */
-.mnav{display:flex;align-items:center;gap:8px;}
-.mnavbtn{background:var(--g3);border:1px solid var(--g4);color:var(--mu2);
-  width:30px;height:30px;border-radius:3px;cursor:pointer;font-size:14px;
-  display:flex;align-items:center;justify-content:center;transition:.15s;}
-.mnavbtn:hover{border-color:var(--gold);color:var(--gold);}
-.mnavlabel{font-family:'DM Mono',monospace;font-size:12px;font-weight:bold;
-  color:var(--wh);letter-spacing:1px;min-width:100px;text-align:center;}
-/* settings modal */
-.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:400;
-  align-items:center;justify-content:center;}
-.ov.open{display:flex;}
-.mod{background:var(--g1);border:1px solid var(--g3);border-radius:6px;
-  width:580px;max-width:95vw;max-height:90vh;overflow-y:auto;}
-.mh{padding:15px 20px;border-bottom:1px solid var(--g3);
-  display:flex;justify-content:space-between;align-items:center;}
-.mh-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
-.mx{background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;}
-.mx:hover{color:var(--wh);}
-.mb{padding:18px 20px;}.ms{margin-bottom:16px;}
-.ms-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:var(--vio);text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:1px solid var(--g3);}
-.mgrid{display:flex;flex-wrap:wrap;gap:10px;}
-.mf{flex:1;min-width:130px;display:flex;flex-direction:column;gap:3px;}
-.mflab{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
-.mfinp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Mono',monospace;font-size:12px;padding:6px 9px;outline:none;width:100%;}
-.mfinp:focus{border-color:var(--gold);}
-.mfhint{font-size:10px;color:var(--mu);margin-top:2px;font-style:italic;}
-.mfoot{padding:12px 20px;border-top:1px solid var(--g3);display:flex;justify-content:flex-end;gap:8px;}
-
-/* ══ VALUTAZIONE ══ */
-.val-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
-.val-toolbar{display:flex;gap:8px;align-items:center;margin-bottom:20px;flex-wrap:wrap;}
-.client-select-bar{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
-  padding:14px 16px;margin-bottom:16px;}
-.client-select-bar select{background:var(--g2);border:1px solid var(--g4);color:var(--wh);
-  font-family:'DM Mono',monospace;font-size:11px;padding:5px 8px;border-radius:3px;outline:none;width:200px;}
-.client-select-bar select:focus{border-color:var(--gold);}
-/* Form fields */
-.vform-section{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
-  margin-bottom:10px;overflow:hidden;}
-.vform-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;
-  justify-content:space-between;align-items:center;cursor:pointer;}
-.vform-head-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;}
-.vform-body{padding:14px;}
-.vfg{display:flex;flex-wrap:wrap;gap:8px;}
-.vfi{display:flex;flex-direction:column;gap:3px;min-width:110px;flex:1;}
-.vfi.w3{min-width:240px;flex:3;}
-.vfl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
-.vfinp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:11px;
-  padding:6px 8px;outline:none;width:100%;transition:.15s;}
-.vfinp:focus{border-color:var(--gold);}
-.vfinp.ta{resize:vertical;min-height:55px;}
-/* battery */
-.bat-row{display:flex;gap:8px;flex-wrap:wrap;}
-.bat-opt{flex:1;min-width:80px;background:var(--g2);border:1px solid var(--g4);
-  border-radius:4px;padding:10px 8px;text-align:center;cursor:pointer;transition:.15s;}
-.bat-opt:hover{border-color:var(--gold2);}
-.bat-opt.active{border-color:var(--gold);background:rgba(184,151,42,.08);}
-.bat-letter{font-family:'DM Mono',monospace;font-size:20px;font-weight:bold;color:var(--gold);line-height:1;}
-.bat-name{font-size:9px;color:var(--mu2);margin-top:3px;line-height:1.3;}
-/* tags */
-.tag{display:inline-flex;align-items:center;gap:4px;font-family:'DM Mono',monospace;font-size:8px;
-  letter-spacing:1px;text-transform:uppercase;padding:3px 8px;border-radius:2px;cursor:pointer;
-  border:1px solid var(--g4);color:var(--mu2);transition:.15s;margin:3px 3px 3px 0;}
-.tag:hover{border-color:var(--gold2);color:var(--wh);}
-.tag.active{background:rgba(184,151,42,.15);border-color:var(--gold);color:var(--gold);}
-.tag.red{border-color:rgba(224,92,92,.4);color:#E05C5C;}
-.tag.red.active{background:rgba(224,92,92,.15);border-color:var(--red);}
-/* test table */
-.test-table{width:100%;border-collapse:collapse;font-size:11px;}
-.test-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
-  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
-  border-bottom:1px solid var(--g3);text-align:left;}
-.test-table th:last-child{text-align:right;}
-.test-table td{padding:8px 10px;border-bottom:1px solid var(--g2);vertical-align:middle;}
-.test-table tr:last-child td{border-bottom:none;}
-.test-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:20px;display:inline-block;}
-.test-name{font-weight:500;font-size:11px;}
-.test-unit{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:1px;}
-.test-result-inp{background:transparent;border:none;border-bottom:1px solid var(--g4);
-  outline:none;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);
-  text-align:right;width:90px;padding:0 0 2px;}
-.lev-row{display:flex;gap:3px;justify-content:flex-end;}
-.lev{width:14px;height:14px;border-radius:2px;cursor:pointer;background:var(--g4);transition:.15s;}
-.lev.active{opacity:1;}.lev:not(.active){opacity:.3;}
-.lev.l1{background:#E05C5C;}.lev.l2{background:#CC8822;}.lev.l3{background:#BBBB22;}
-.lev.l4{background:#5ACC44;}.lev.l5{background:#2E9B9B;}
-.lev-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);margin-top:3px;text-align:right;}
-/* smart objectives */
-.smart-row{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;
-  border-bottom:1px solid var(--g3);}
-.smart-row:last-child{border-bottom:none;}
-.smart-num{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold);
-  width:24px;flex-shrink:0;padding-top:4px;}
-.smart-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);
-  text-transform:uppercase;width:120px;flex-shrink:0;padding-top:6px;}
-/* client list */
-.cli-grid{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
-.cli-card{flex:1;min-width:180px;background:var(--g1);border:1px solid var(--g3);
-  border-radius:4px;padding:12px 14px;cursor:pointer;transition:.15s;border-top:2px solid var(--g4);}
-.cli-card:hover{border-color:var(--gold);}
-.cli-card.active{border-top-color:var(--gold);background:rgba(184,151,42,.04);}
-.cli-name{font-weight:500;font-size:13px;margin-bottom:3px;}
-.cli-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;}
-.cli-add{display:flex;align-items:center;justify-content:center;gap:8px;
-  min-width:140px;border-style:dashed;color:var(--mu);font-size:12px;}
-.cli-add:hover{color:var(--gold);border-color:var(--gold);}
-
-/* ══ DOCUMENTI (SOP) ══ */
-.doc-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
-.sop-frame{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
-.sop-toc{display:flex;flex-direction:column;}
-.sop-chapter{border-bottom:1px solid var(--g3);}
-.sop-chapter:last-child{border-bottom:none;}
-.sop-ch-head{display:flex;align-items:center;gap:12px;padding:11px 16px;
-  cursor:pointer;transition:.15s;}
-.sop-ch-head:hover{background:var(--g2);}
-.sop-ch-num{font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);width:28px;flex-shrink:0;}
-.sop-ch-title{font-size:12px;color:var(--wh);font-weight:500;flex:1;}
-.sop-ch-arr{font-size:10px;color:var(--mu);}
-.sop-ch-body{display:none;padding:14px 20px 16px 56px;background:var(--g2);
-  font-size:11px;color:var(--mu2);line-height:1.7;border-top:1px solid var(--g3);}
-.sop-ch-body.open{display:block;}
-.sop-ch-body h4{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);
-  text-transform:uppercase;margin:12px 0 6px;}
-.sop-ch-body p{margin-bottom:8px;}
-.sop-ch-body ul{padding-left:16px;margin-bottom:8px;}
-.sop-ch-body li{margin-bottom:4px;}
-.sop-ch-body strong{color:var(--wh);}
-.sop-ch-body .tag-inline{display:inline-block;background:var(--g3);border:1px solid var(--g4);
-  font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;padding:1px 6px;border-radius:2px;color:var(--mu2);}
-.wapp-block{background:var(--g1);border:1px solid var(--g4);border-left:3px solid var(--teal);
-  border-radius:3px;padding:10px 12px;margin:8px 0;font-size:11px;font-family:'DM Sans',sans-serif;
-  line-height:1.6;color:var(--mu2);}
-.wapp-block strong{color:var(--wh);}
-
-/* ══ PROGRESSIONI AI ══ */
-.prog-wrap{padding:20px 22px 60px;max-width:900px;margin:0 auto;}
-.prog-skill-grid{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
-.prog-skill{flex:1;min-width:100px;background:var(--g1);border:1px solid var(--g3);
-  border-radius:4px;padding:10px 12px;text-align:center;cursor:pointer;transition:.15s;}
-.prog-skill:hover{border-color:var(--gold2);}
-.prog-skill.active{border-color:var(--gold);background:rgba(184,151,42,.07);}
-.prog-skill-icon{font-size:20px;margin-bottom:4px;}
-.prog-skill-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
-  text-transform:uppercase;color:var(--mu2);}
-.prog-skill.active .prog-skill-name{color:var(--gold);}
-.prog-input-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
-.prog-inp-group{flex:1;min-width:140px;display:flex;flex-direction:column;gap:4px;}
-.prog-inp-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
-  color:var(--mu);text-transform:uppercase;}
-.prog-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Mono',monospace;font-size:13px;
-  padding:7px 10px;outline:none;width:100%;transition:.15s;}
-.prog-inp:focus{border-color:var(--gold);}
-.prog-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
-  padding:18px 20px;min-height:120px;position:relative;}
-.prog-result-placeholder{color:var(--mu);font-size:11px;text-align:center;
-  padding:30px 0;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;}
-.prog-loading{display:flex;align-items:center;gap:10px;color:var(--mu);font-size:11px;}
-.prog-loading .spin{
-  width:16px;height:16px;border:2px solid var(--g4);border-top-color:var(--gold);
-  border-radius:50%;animation:spin .7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.prog-answer{font-size:12px;line-height:1.7;color:var(--mu2);}
-.prog-answer h3{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
-  color:var(--gold);text-transform:uppercase;margin:14px 0 6px;}
-.prog-answer h3:first-child{margin-top:0;}
-.prog-answer p{margin-bottom:8px;}
-.prog-answer ul{padding-left:16px;margin-bottom:10px;}
-.prog-answer li{margin-bottom:5px;color:var(--wh);}
-.prog-answer strong{color:var(--wh);}
-.prog-answer em{color:var(--gold2);font-style:normal;}
-.prog-history{margin-top:16px;}
-.prog-hist-item{background:var(--g2);border:1px solid var(--g3);border-radius:3px;
-  padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
-.prog-hist-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);
-  letter-spacing:1px;white-space:nowrap;}
-.prog-hist-q{font-size:11px;color:var(--mu2);}
-.prog-hist-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:14px;flex-shrink:0;}
-.prog-hist-del:hover{color:var(--red);}
-
-/* ══ MISC ══ */
-.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:60px 20px;color:var(--mu);}
-.empty-state-icon{font-size:36px;margin-bottom:12px;opacity:.4;}
-.empty-state-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
-  text-transform:uppercase;margin-bottom:6px;}
-.empty-state-s{font-size:11px;color:var(--g6);}
-.foot-note{text-align:center;font-family:'DM Mono',monospace;font-size:9px;
-  color:var(--g4);letter-spacing:2px;padding-top:14px;margin-top:8px;border-top:1px solid var(--g2);}
-
-/* ════ CALCOLATORE INTENSITÀ ════ */
+body{margin-top:40px;}
 :root{
   --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
   --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
-  --teal:#2E9B9B;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--org:#E08C3A;--blu:#4A8FCC;
   --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  --org:#E08C3A;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--teal:#2E9B9B;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
-
-/* ── TOPBAR ── */
-
-/* ── LAYOUT ── */
-/* ── SECTION LABELS ── */
-/* ── VIA TABS ── */
-.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);
-  border-radius:4px;overflow:hidden;margin-bottom:16px;}
-.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;
-  border-right:1px solid var(--g3);transition:.15s;user-select:none;}
-.via-tab:last-child{border-right:none;}
-.via-tab:hover{background:var(--g2);}
-.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
-.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;
-  color:var(--gold);line-height:1;margin-bottom:3px;}
-.via-tab:not(.active) .via-num{color:var(--mu);}
-.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
-  text-transform:uppercase;color:var(--mu2);line-height:1.3;}
-.via-tab.active .via-lbl{color:var(--wh);}
-
-/* ── PANELS ── */
-.via-panel{display:none;}
-.via-panel.active{display:block;}
-
-/* ── INPUT GROUP ── */
-.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
-.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
-.inp-group.wide{min-width:200px;flex:2;}
-.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;
-  color:var(--mu);text-transform:uppercase;}
-.inp-lbl span{color:var(--gold);margin-left:4px;}
-.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
-  padding:8px 10px;outline:none;width:100%;transition:.15s;}
-.inp:focus{border-color:var(--gold);background:var(--g1);}
-.inp::placeholder{color:var(--g5);font-size:13px;}
-.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
-
-/* ── PROFILO ATLETICO ── */
-.profilo-row{display:flex;gap:8px;margin-bottom:16px;}
-.profilo-opt{flex:1;background:var(--g1);border:1px solid var(--g3);border-radius:4px;
-  padding:10px 12px;cursor:pointer;transition:.15s;text-align:center;}
-.profilo-opt:hover{border-color:var(--gold2);}
-.profilo-opt.active{border-color:var(--gold);background:var(--goldd);}
-.profilo-opt.neu-active{border-color:var(--teal);background:rgba(46,155,155,.1);}
-.profilo-opt.met-active{border-color:var(--vio);background:rgba(154,122,204,.1);}
-.profilo-icon{font-size:18px;margin-bottom:4px;}
-.profilo-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
-  text-transform:uppercase;color:var(--mu2);margin-bottom:2px;}
-.profilo-opt.active .profilo-name,.profilo-opt.neu-active .profilo-name{color:var(--wh);}
-.profilo-desc{font-size:9px;color:var(--mu);line-height:1.4;}
-
-/* ── RESULT CARD ── */
-.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;
-  overflow:hidden;margin-bottom:12px;}
-.result-main{padding:18px 20px;border-bottom:1px solid var(--g3);}
-.result-val{font-family:'DM Mono',monospace;font-size:42px;font-weight:500;
-  color:var(--gold);line-height:1;margin-bottom:4px;}
-.result-val span{font-size:18px;color:var(--mu);margin-left:4px;}
-.result-sub{font-size:11px;color:var(--mu2);}
-.result-grid{display:flex;flex-wrap:wrap;}
-.result-cell{flex:1;min-width:120px;padding:12px 16px;border-right:1px solid var(--g3);}
-.result-cell:last-child{border-right:none;}
-.rc-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;
-  color:var(--mu);text-transform:uppercase;margin-bottom:5px;}
-.rc-val{font-family:'DM Mono',monospace;font-size:17px;color:var(--wh);font-weight:500;}
-.rc-val.gold{color:var(--gold);}
-.rc-val.teal{color:var(--teal);}
-.rc-val.vio{color:var(--vio);}
-
-/* ── ZONA INTENSITÀ ── */
-.zona-bar{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-bottom:16px;}
-.zona-seg{flex:1;transition:.3s;}
-.zona-seg.active{flex:3;}
-.zona-badge{display:inline-flex;align-items:center;gap:6px;
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
-  padding:4px 10px;border-radius:2px;border:1px solid;}
-.zona-badge.fmax{color:#E05C5C;border-color:rgba(224,92,92,.4);background:rgba(224,92,92,.08);}
-.zona-badge.frel{color:#CC7733;border-color:rgba(204,119,51,.4);background:rgba(204,119,51,.08);}
-.zona-badge.iper{color:#B8972A;border-color:rgba(184,151,42,.4);background:rgba(184,151,42,.08);}
-.zona-badge.pot{color:#4A8FCC;border-color:rgba(74,143,204,.4);background:rgba(74,143,204,.08);}
-.zona-badge.res{color:#4DBD74;border-color:rgba(77,189,116,.4);background:rgba(77,189,116,.08);}
-.zona-badge.aa{color:#9A7ACC;border-color:rgba(154,122,204,.4);background:rgba(154,122,204,.08);}
-.zona-badge.sovra{color:#FF6666;border-color:rgba(255,102,102,.5);background:rgba(255,102,102,.1);}
-.zona-badge.nd{color:var(--g6);border-color:var(--g4);background:transparent;}
-
-/* ── TABELLA COMPLETA ── */
-.full-table-wrap{overflow-x:auto;border-radius:4px;border:1px solid var(--g3);}
-.full-table{width:100%;border-collapse:collapse;font-size:11px;white-space:nowrap;}
-.full-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
-  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
-  border-bottom:1px solid var(--g3);text-align:center;}
-.full-table th:first-child{text-align:left;}
-.full-table td{padding:7px 12px;border-bottom:1px solid var(--g2);
-  font-family:'DM Mono',monospace;text-align:center;color:var(--mu2);}
-.full-table td:first-child{text-align:left;color:var(--wh);}
-.full-table tr:last-child td{border-bottom:none;}
-.full-table tr.highlight td{background:rgba(184,151,42,.07);}
-.full-table tr.highlight td:first-child{color:var(--gold2);}
-.zona-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
-
-/* ── NOTE SCIENTIFICHE ── */
-/* ── FORMULA VIS ── */
-.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-  background:var(--g2);border-radius:4px;padding:10px 14px;margin-bottom:12px;}
-.f-part{font-family:'DM Mono',monospace;font-size:12px;color:var(--mu2);}
-.f-part.hi{color:var(--gold2);font-weight:500;}
-.f-part.op{color:var(--g6);}
-.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--teal);font-weight:500;}
-
-/* ── RANGE REPS TABLE (Via B) ── */
-.range-table{width:100%;border-collapse:collapse;margin-top:12px;}
-.range-table th{background:var(--g2);padding:7px 10px;font-family:'DM Mono',monospace;
-  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
-  text-align:center;border-bottom:1px solid var(--g3);}
-.range-table td{padding:7px 10px;border-bottom:1px solid var(--g2);
-  font-family:'DM Mono',monospace;font-size:11px;text-align:center;color:var(--mu2);}
-.range-table tr:last-child td{border-bottom:none;}
-.range-table tr.hl td{background:rgba(184,151,42,.06);}
-.range-table td.kg{color:var(--gold2);font-weight:500;font-size:13px;}
-.range-table td.reps{color:var(--wh);}
-
-/* ── EMPTY STATE ── */
-/* ── BTN ── */
-.btn:hover{border-color:var(--gold);color:var(--gold);}
-/* ── MOBILE ── */
-@media(max-width:600px){
-  .via-tab{padding:10px 6px;}
-  .via-num{font-size:14px;}
-  .via-lbl{font-size:7px;}
-  .result-val{font-size:32px;}
-  .result-cell{min-width:100px;}
-  .profilo-row{flex-direction:column;}
-  .inp-row{gap:8px;}
-  .inp-group{min-width:calc(50% - 4px);}
-}
-
-.standalone-wrap{display:flex;flex-direction:column;min-height:calc(100vh - 40px);margin-top:40px;}
-.topbar-simple{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 24px;height:50px;
-  display:flex;align-items:center;gap:10px;position:sticky;top:40px;z-index:100;flex-shrink:0;}
-.tb-title-s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;}
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
 .tb-sp{flex:1;}
-.content-scroll{flex:1;overflow-y:visible;}
-.bk-wrap{max-width:1200px;margin:0 auto;padding:20px 24px 80px;}
-.status-badge{display:inline-flex;align-items:center;gap:6px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:2px;}
-.status-badge.ok{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:#4DBD74;}
-.status-badge.warn{background:rgba(224,140,58,.15);border:1px solid rgba(224,140,58,.3);color:var(--org);}
-.status-badge.err{background:rgba(224,92,92,.15);border:1px solid rgba(224,92,92,.3);color:var(--red);}
-.status-badge.nd{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
-.config-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px;margin-bottom:12px;}
-.config-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px;}
-.config-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
-.config-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:200px;}
-.config-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
-.config-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:11px;padding:7px 10px;outline:none;width:100%;transition:.15s;}
-.config-inp:focus{border-color:var(--gold);}
-.config-inp::placeholder{color:var(--g6);}
-.client-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
-.client-card{flex:1;min-width:260px;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;transition:.15s;cursor:pointer;}
-.client-card:hover{border-color:rgba(184,151,42,.5);}
-.client-card-head{padding:10px 14px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:10px;}
-.client-avatar{width:32px;height:32px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);flex-shrink:0;}
-.client-name{font-size:12px;font-weight:500;color:var(--wh);}
-.client-pkg{font-size:9px;color:var(--mu);margin-top:2px;}
-.client-card-body{padding:10px 14px;}
-.credits-bar-wrap{margin-bottom:8px;}
-.credits-bar-label{display:flex;justify-content:space-between;margin-bottom:4px;}
-.credits-bar-name{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
-.credits-bar-val{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
-.credits-bar-track{height:6px;background:var(--g3);border-radius:3px;overflow:hidden;}
-.credits-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
-.bk-tab-row{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;position:sticky;top:90px;z-index:99;}
-.bk-tab{flex:1;padding:10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--mu);transition:.15s;user-select:none;}
-.bk-tab:last-child{border-right:none;}
-.bk-tab:hover{color:var(--wh);background:var(--g2);}
-.bk-tab.active{color:var(--gold);background:rgba(184,151,42,.08);border-bottom:2px solid var(--gold);}
-.bk-section{display:none;}
-.bk-section.active{display:block;}
-.setup-step{display:flex;gap:14px;padding:14px 0;border-bottom:1px solid var(--g3);}
-.setup-step:last-child{border-bottom:none;}
-.step-num{width:28px;height:28px;border-radius:50%;background:rgba(184,151,42,.1);border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:10px;color:var(--gold);flex-shrink:0;margin-top:2px;}
-.step-content{flex:1;}
-.step-title{font-size:12px;font-weight:500;color:var(--wh);margin-bottom:4px;}
-.step-desc{font-size:11px;color:var(--mu2);line-height:1.6;}
-.step-code{background:var(--g2);border:1px solid var(--g4);border-radius:3px;padding:8px 12px;font-family:'DM Mono',monospace;font-size:10px;color:#2E9B9B;margin-top:8px;word-break:break-all;}
-:root{--teal:#2E9B9B;--org:#E08C3A;}
-
-/* Collapsed mobile/overflow nav */
-nav.ppl-topnav.nav-open .tn-links{
-  display:flex !important;
-  flex-direction:column !important;
-  position:fixed !important;
-  top:40px !important; left:0 !important; right:0 !important;
-  background:#111 !important;
-  border-bottom:1px solid rgba(184,151,42,.3) !important;
-  padding:4px 0 !important;
-  overflow:visible !important;
-  z-index:99998 !important;
-  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
-}
-nav.ppl-topnav.nav-open a.tn-link{
-  height:36px !important;
-  padding:0 20px !important;
-  width:100% !important;
-  font-size:9px !important;
-  letter-spacing:2px !important;
-}
-@media(max-width:900px){
-  nav.ppl-topnav .tn-links{ display:none !important; }
-  nav.ppl-topnav .tn-toggle{ display:flex !important; }
-  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
-}
+.page{max-width:1100px;margin:0 auto;padding:24px 24px 80px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+.btn{background:none;border:1px solid var(--g4);color:var(--mu2);border-radius:3px;
+  padding:7px 14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
+  text-transform:uppercase;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold2);color:var(--wh);}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:#000;}
+.btn.pri:hover{background:var(--gold2);}
 
 
-/* Collapsed mobile/overflow nav */
-nav.ppl-topnav.nav-open .tn-links{
-  display:flex !important;
-  flex-direction:column !important;
-  position:fixed !important;
-  top:40px !important; left:0 !important; right:0 !important;
-  background:#111 !important;
-  border-bottom:1px solid rgba(184,151,42,.3) !important;
-  padding:4px 0 !important;
-  overflow:visible !important;
-  z-index:99998 !important;
-  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
-}
-nav.ppl-topnav.nav-open a.tn-link{
-  height:36px !important;
-  padding:0 20px !important;
-  width:100% !important;
-  font-size:9px !important;
-  letter-spacing:2px !important;
-}
-@media(max-width:900px){
-  nav.ppl-topnav .tn-links{ display:none !important; }
-  nav.ppl-topnav .tn-toggle{ display:flex !important; }
-  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
-}
+/* ══ RISORSE PAGE ══ */
+.res-grid{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:6px;}
+.res-card{flex:1;min-width:280px;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.res-card-head{padding:12px 16px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:10px;}
+.res-card-icon{font-size:16px;flex-shrink:0;}
+.res-card-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.res-card-badge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:3px 8px;border-radius:2px;text-transform:uppercase;}
+.badge-ok{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:#4DBD74;}
+.badge-warn{background:rgba(224,140,58,.15);border:1px solid rgba(224,140,58,.3);color:var(--org);}
+.badge-nd{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.badge-soon{background:rgba(154,122,204,.1);border:1px solid rgba(154,122,204,.3);color:var(--vio);}
+.res-card-body{padding:14px 16px;}
+.res-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px;}
+.res-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.res-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;outline:none;
+  width:100%;transition:.15s;}
+.res-inp:focus{border-color:var(--gold);}
+.res-inp::placeholder{color:var(--g6);}
+.res-inp:disabled{opacity:.4;cursor:not-allowed;}
+.res-hint{font-size:10px;color:var(--g6);font-style:italic;}
+.res-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
+.res-save-msg{font-family:'DM Mono',monospace;font-size:9px;color:var(--grn);margin-top:8px;min-height:16px;}
+.res-divider{height:1px;background:var(--g3);margin:12px 0;}
+.res-test-result{font-size:11px;min-height:18px;margin-top:8px;}
+/* Status overview strip */
+.status-strip{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px;}
+.status-item{display:flex;align-items:center;gap:8px;background:var(--g1);border:1px solid var(--g3);
+  border-radius:4px;padding:8px 12px;flex:1;min-width:140px;}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.status-dot.ok{background:#4DBD74;}
+.status-dot.warn{background:var(--org);}
+.status-dot.nd{background:var(--g5);}
+.status-item-label{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);}
+.status-item-val{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);margin-top:1px;}
+/* KPI targets mini-grid */
+.kpi-targets-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.kpi-target-field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px;}
+.kpi-target-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1.5px;
+  color:var(--mu);text-transform:uppercase;}
+.kpi-target-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;font-weight:500;
+  padding:7px 10px;outline:none;width:100%;text-align:right;transition:.15s;}
+.kpi-target-inp:focus{border-color:var(--gold);}
+:root{--org:#E08C3A;--vio:#9A7ACC;--grn:#4DBD74;--red:#E05C5C;--teal:#2E9B9B;}
+@media(max-width:680px){.res-card{min-width:100%;}.status-item{min-width:100%;}}
 
 /* ══ PPL TOPNAV ══ */
 nav.ppl-topnav{
@@ -745,268 +176,6 @@ nav.ppl-topnav.nav-open a.tn-link{
   nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
 }
 
-
-.standalone-wrap{overflow:hidden;}
-
-/* ══ MODALI ══ */
-.modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);
-  z-index:999999;align-items:center;justify-content:center;padding:20px;
-}
-.modal-overlay.open{display:flex;}
-.modal{
-  background:var(--g1);border:1px solid var(--g3);border-radius:6px;
-  width:100%;max-width:520px;max-height:90vh;overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,.6);
-}
-.modal-head{
-  padding:16px 20px;border-bottom:1px solid var(--g3);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.modal-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;
-  color:var(--gold);text-transform:uppercase;}
-.modal-close{background:none;border:none;color:var(--mu);font-size:18px;
-  cursor:pointer;padding:0 4px;line-height:1;}
-.modal-close:hover{color:var(--wh);}
-.modal-body{padding:20px;}
-.modal-section{margin-bottom:16px;}
-.modal-section-title{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:var(--mu);text-transform:uppercase;margin-bottom:10px;
-  padding-bottom:6px;border-bottom:1px solid var(--g3);}
-.modal-row{display:flex;gap:10px;margin-bottom:10px;}
-.modal-field{display:flex;flex-direction:column;gap:4px;flex:1;}
-.modal-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;
-  color:var(--mu);text-transform:uppercase;}
-.modal-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
-  padding:8px 10px;outline:none;width:100%;transition:.15s;}
-.modal-inp:focus{border-color:var(--gold);}
-.modal-inp::placeholder{color:var(--g6);}
-select.modal-inp{cursor:pointer;}
-.modal-foot{padding:14px 20px;border-top:1px solid var(--g3);
-  display:flex;gap:8px;justify-content:flex-end;}
-.modal-result{padding:8px 20px;font-size:11px;min-height:24px;}
-/* Client detail */
-.client-detail-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
-.client-stat{flex:1;min-width:100px;background:var(--g2);border:1px solid var(--g3);
-  border-radius:4px;padding:10px 12px;}
-.client-stat-val{font-family:'DM Mono',monospace;font-size:18px;color:var(--gold);font-weight:500;}
-.client-stat-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;
-  color:var(--mu);text-transform:uppercase;margin-top:2px;}
-.client-sess-row{display:flex;align-items:center;gap:10px;padding:7px 0;
-  border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;}
-.client-sess-row:last-child{border-bottom:none;}
-.client-sess-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:75px;flex-shrink:0;}
-.client-sess-type{flex:1;color:var(--mu2);}
-.client-sess-cr{font-family:'DM Mono',monospace;font-size:11px;color:var(--red);}
-@media(max-width:540px){.modal-row{flex-direction:column;}}
-
-
-/* ── buttons ── */
-.btn{background:var(--g2);border:1px solid var(--g4);color:var(--mu2);
-  font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
-  text-transform:uppercase;padding:7px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
-.btn:hover{border-color:var(--gold2);color:var(--wh);}
-.btn.pri{background:var(--gold);border-color:var(--gold);color:#000;}
-.btn.pri:hover{background:var(--gold2);}
-
-
-
-/* ══ PANEL LATERALE ══ */
-.side-panel{position:fixed;top:0;right:-480px;width:480px;height:100vh;
-  background:var(--g1);border-left:1px solid var(--g3);z-index:9000;
-  transition:right .3s ease;display:flex;flex-direction:column;
-  box-shadow:-8px 0 40px rgba(0,0,0,.4);}
-.side-panel.open{right:0;}
-.side-panel-head{padding:14px 18px;border-bottom:1px solid var(--g3);
-  display:flex;align-items:center;gap:10px;flex-shrink:0;}
-.side-panel-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;
-  color:var(--gold);text-transform:uppercase;flex:1;}
-.side-panel-close{background:none;border:none;color:var(--mu);font-size:18px;cursor:pointer;padding:0 4px;line-height:1;}
-.side-panel-close:hover{color:var(--wh);}
-.side-panel-body{flex:1;overflow-y:auto;padding:14px 18px;}
-.side-panel-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:8999;}
-.side-panel-overlay.open{display:block;}
-/* items */
-.pkg-item-row{display:flex;align-items:center;gap:8px;padding:10px 12px;
-  background:var(--g2);border:1px solid var(--g3);border-radius:4px;margin-bottom:6px;transition:.15s;}
-.pkg-item-row:hover{border-color:var(--g5);}
-.pkg-color-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.pkg-item-info{flex:1;}.pkg-item-name{font-size:12px;color:var(--wh);}
-.pkg-item-meta{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);}
-.pkg-item-actions{display:flex;gap:4px;}
-.icon-btn{background:none;border:1px solid var(--g4);color:var(--mu);
-  border-radius:3px;padding:3px 7px;font-size:10px;cursor:pointer;transition:.15s;}
-.icon-btn:hover{border-color:var(--gold2);color:var(--gold);}
-.icon-btn.del:hover{border-color:var(--red);color:var(--red);}
-/* edit form */
-.pkg-edit-form{background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:12px;margin-bottom:8px;}
-.pkg-edit-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
-.pkg-edit-field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:100px;}
-.pkg-edit-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
-.pkg-edit-inp{background:var(--bk);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 8px;
-  outline:none;width:100%;transition:.15s;}
-.pkg-edit-inp:focus{border-color:var(--gold);}
-select.pkg-edit-inp{cursor:pointer;}
-.pkg-edit-actions{display:flex;gap:6px;}
-/* calendar */
-.cal-controls{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
-.cal-week-label{font-family:'DM Mono',monospace;font-size:11px;color:var(--wh);letter-spacing:1px;flex:1;}
-.cal-grid{display:grid;grid-template-columns:54px repeat(7,1fr);
-  border:1px solid var(--g3);border-radius:4px;overflow:hidden;background:var(--bk);min-width:600px;}
-.cal-header-cell{background:var(--g1);border-bottom:1px solid var(--g3);
-  border-right:1px solid var(--g3);padding:8px 4px;text-align:center;}
-.cal-header-cell:last-child{border-right:none;}
-.cal-day-name{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
-.cal-day-num{font-family:'DM Mono',monospace;font-size:14px;color:var(--wh);margin-top:2px;}
-.cal-day-num.today{color:var(--gold);}
-.cal-time-col{background:var(--g1);border-right:1px solid var(--g3);}
-.cal-time-cell{height:40px;border-bottom:1px solid rgba(34,34,34,.5);
-  display:flex;align-items:flex-start;padding:2px 4px;}
-.cal-time-label{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);}
-.cal-day-col{border-right:1px solid var(--g3);position:relative;}
-.cal-day-col:last-child{border-right:none;}
-.cal-slot{height:40px;border-bottom:1px solid rgba(34,34,34,.3);position:relative;cursor:pointer;transition:.1s;}
-.cal-slot:hover{background:rgba(184,151,42,.04);}
-.cal-lesson{position:absolute;left:2px;right:2px;border-radius:3px;padding:3px 5px;
-  overflow:hidden;cursor:pointer;transition:.15s;z-index:1;border-left:3px solid;}
-.cal-lesson:hover{filter:brightness(1.15);}
-.cal-lesson-name{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.5px;
-  text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.cal-lesson-time{font-size:9px;opacity:.8;}
-.cal-lesson-count{font-family:'DM Mono',monospace;font-size:9px;margin-top:1px;opacity:.9;}
-.cal-add-btn{position:absolute;bottom:2px;right:2px;
-  background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);
-  color:var(--gold);font-size:10px;border-radius:2px;padding:1px 5px;cursor:pointer;display:none;}
-.cal-slot:hover .cal-add-btn{display:block;}
-/* multi-subscription bars */
-.client-sub-row{background:var(--g2);border-radius:3px;padding:7px 10px;margin-bottom:4px;}
-.client-sub-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-.client-sub-name{font-size:10px;color:var(--mu2);}
-.client-sub-credits{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
-.credits-bar-track{height:5px;background:var(--g3);border-radius:3px;overflow:hidden;}
-.credits-bar-fill{height:100%;border-radius:3px;transition:width .4s;}
-.client-sub-meta{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);margin-top:3px;}
-/* attendance */
-.attendance-client-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
-  border-bottom:1px solid rgba(34,34,34,.6);transition:.15s;cursor:pointer;}
-.attendance-client-row:hover{background:var(--g2);}
-.att-check{width:20px;height:20px;border:1px solid var(--g5);border-radius:3px;
-  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.15s;font-size:12px;}
-.att-check.checked{background:var(--gold);border-color:var(--gold);color:#000;}
-.att-name{flex:1;font-size:12px;color:var(--wh);}
-.att-sub-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;
-  padding:2px 6px;border-radius:2px;text-transform:uppercase;border:1px solid var(--g4);color:var(--mu);}
-.att-sub-badge.active{border-color:rgba(77,189,116,.4);color:var(--grn);}
-.att-credits{font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);}
-/* modal result inline */
-.modal-result{font-size:11px;min-height:18px;padding:0 20px 8px;color:var(--org);}
-@media(max-width:700px){
-  .side-panel{width:100%;right:-100%;}
-  .cal-grid{min-width:400px;font-size:10px;}
-}
-
-.slbl-mini{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--gold);
-  text-transform:uppercase;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--g3);}
-.btn.danger{border-color:rgba(224,92,92,.4);color:var(--red);}
-.btn.danger:hover{background:rgba(224,92,92,.1);border-color:var(--red);}
-.client-sess-row{display:flex;align-items:center;gap:12px;padding:6px 0;
-  border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;}
-.client-sess-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:75px;flex-shrink:0;}
-.client-sess-type{flex:1;color:var(--mu2);}
-.client-sess-cr{font-family:'DM Mono',monospace;color:var(--red);}
-
-
-/* ── Combo searchable select ── */
-.combo-wrap{position:relative;}
-.combo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
-  padding:7px 10px;outline:none;width:100%;transition:.15s;box-sizing:border-box;}
-.combo-inp:focus{border-color:var(--gold);}
-.combo-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;
-  background:var(--g1);border:1px solid var(--g4);border-radius:3px;
-  max-height:200px;overflow-y:auto;z-index:5000;display:none;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);}
-.combo-drop.open{display:block;}
-.combo-opt{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--mu2);transition:.1s;}
-.combo-opt:hover,.combo-opt.active{background:var(--g3);color:var(--wh);}
-.combo-opt mark{background:none;color:var(--gold);font-style:normal;}
-.combo-none{padding:8px 12px;font-size:11px;color:var(--g6);font-style:italic;}
-/* ── Attendance rework ── */
-.att-section-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-  color:var(--mu);text-transform:uppercase;padding:7px 12px;
-  background:var(--g2);border-bottom:1px solid var(--g3);}
-.att-present-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
-  border-bottom:1px solid rgba(34,34,34,.5);background:rgba(77,189,116,.04);}
-.att-present-name{flex:1;font-size:12px;color:var(--wh);}
-.att-present-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--grn);letter-spacing:1px;}
-.att-remove-btn{background:none;border:none;color:var(--g5);font-size:14px;
-  cursor:pointer;padding:0 4px;line-height:1;transition:.15s;}
-.att-remove-btn:hover{color:var(--red);}
-.att-avail-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
-  border-bottom:1px solid rgba(34,34,34,.3);cursor:pointer;transition:.1s;}
-.att-avail-row:hover{background:var(--g2);}
-.att-avail-name{flex:1;font-size:12px;color:var(--mu2);}
-.att-avail-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);letter-spacing:1px;}
-.att-avail-cr{font-family:'DM Mono',monospace;font-size:10px;color:var(--g6);}
-.att-add-btn{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);
-  color:var(--gold);font-size:10px;border-radius:2px;padding:2px 8px;cursor:pointer;transition:.15s;}
-.att-add-btn:hover{background:rgba(184,151,42,.25);}
-
-/* ── Combo searchable select ── */
-.combo-wrap{position:relative;}
-.combo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-  color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
-  padding:7px 10px;outline:none;width:100%;transition:.15s;box-sizing:border-box;}
-.combo-inp:focus{border-color:var(--gold);}
-.combo-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;
-  background:var(--g1);border:1px solid var(--g4);border-radius:3px;
-  max-height:200px;overflow-y:auto;z-index:5000;display:none;
-  box-shadow:0 8px 24px rgba(0,0,0,.4);}
-.combo-drop.open{display:block;}
-.combo-opt{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--mu2);transition:.1s;}
-.combo-opt:hover{background:var(--g3);color:var(--wh);}
-.combo-none{padding:8px 12px;font-size:11px;color:var(--g6);font-style:italic;}
-/* ── Attendance ── */
-.att-present-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
-  border-bottom:1px solid rgba(34,34,34,.5);background:rgba(77,189,116,.04);}
-.att-present-name{flex:1;font-size:12px;color:var(--wh);}
-.att-present-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--grn);letter-spacing:1px;}
-.att-remove-btn{background:none;border:none;color:var(--g5);font-size:14px;
-  cursor:pointer;padding:0 4px;line-height:1;transition:.15s;}
-.att-remove-btn:hover{color:var(--red);}
-.att-avail-row{display:flex;align-items:center;gap:10px;padding:8px 12px;
-  border-bottom:1px solid rgba(34,34,34,.3);cursor:pointer;transition:.1s;}
-.att-avail-row:hover{background:var(--g2);}
-.att-avail-name{flex:1;font-size:12px;color:var(--mu2);}
-.att-avail-pkg{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);}
-.att-avail-cr{font-family:'DM Mono',monospace;font-size:10px;color:var(--g6);}
-.att-add-btn{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);
-  color:var(--gold);font-size:10px;border-radius:2px;padding:2px 8px;cursor:pointer;}
-.att-add-btn:hover{background:rgba(184,151,42,.25);}
-
-
-/* Scadenze */
-.scad-section-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2.5px;text-transform:uppercase;padding:7px 0;margin:14px 0 6px;display:flex;align-items:center;gap:10px;color:var(--mu);}
-.scad-section-lbl::after{content:'';flex:1;height:1px;background:var(--g3);}
-.scad-section-lbl.red{color:var(--red);}.scad-section-lbl.org{color:var(--org);}
-.scad-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--g4);border-radius:4px;margin-bottom:6px;cursor:pointer;transition:.15s;}
-.scad-row:hover{border-color:var(--g5);}.scad-row.alert-red{border-left-color:var(--red);}.scad-row.alert-org{border-left-color:var(--org);}
-.scad-avatar{width:32px;height:32px;border-radius:50%;background:var(--g3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);flex-shrink:0;}
-.scad-info{flex:1;min-width:0;}.scad-name{font-size:12px;color:var(--wh);margin-bottom:2px;}.scad-pkg{font-size:10px;color:var(--mu);}
-.scad-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;flex-shrink:0;}
-.scad-badge.red{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);color:var(--red);}
-.scad-badge.org{background:rgba(224,140,58,.12);border:1px solid rgba(224,140,58,.3);color:var(--org);}
-.scad-credits{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;text-align:right;flex-shrink:0;}
-.scad-action{background:none;border:1px solid var(--g4);color:var(--mu);font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;padding:4px 10px;border-radius:3px;cursor:pointer;transition:.15s;flex-shrink:0;}
-.scad-action:hover{border-color:var(--gold2);color:var(--gold);}
-.scad-empty{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--g6);text-transform:uppercase;padding:24px;text-align:center;}
-.scad-filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
-.scad-filter-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
-.scad-days-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:4px 8px;width:60px;outline:none;text-align:center;}
-.scad-days-inp:focus{border-color:var(--gold);}
-
 </style>
 </head>
 <body>
@@ -1018,2116 +187,421 @@ select.pkg-edit-inp{cursor:pointer;}
   <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
   <a class="tn-link" href="intensita.html">⚡ Intensità</a>
   <a class="tn-link" href="sop.html">📁 SOP</a>
-  <a class="tn-link active" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
   <a class="tn-link" href="comunicazioni.html">📢 Comunicazioni</a>
   <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
   <a class="tn-link" href="listino.html">💰 Listino</a>
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
   <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
   <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
-  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
+  <a class="tn-link active" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
 </nav>
-
-
-<div class="standalone-wrap">
-  <div class="topbar-simple">
-    <span class="tb-title-s">Prenotazioni & Crediti</span>
-    <div class="tb-sp"></div>
-    <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openPanel('panel-tipi')">🏋 Tipi Lezione</button>
-    <button class="btn" style="font-size:8px;padding:4px 10px;margin-left:4px;" onclick="openPanel('panel-pacchetti')">📦 Pacchetti</button>
-    <span id="conn-status" class="status-badge nd" style="margin-left:8px;">● Connessione...</span>
+<div class="topbar">
+  <span class="tb-brand" id="tb-studio-name">PPL</span>
+  <div class="tb-sep"></div>
+  <span class="tb-title">Risorse & Configurazione</span>
+  <div class="tb-sp"></div>
+</div>
+<div class="page">
+<div class="status-strip" id="status-strip">
+    <div class="status-item">
+      <div class="status-dot nd" id="dot-identity"></div>
+      <div><div class="status-item-label">Identità studio</div>
+           <div class="status-item-val" id="val-identity">Non configurata</div></div>
+    </div>
+    
+    </div>
+    <div class="status-item">
+      <div class="status-dot nd" id="dot-kpi"></div>
+      <div><div class="status-item-label">Target KPI</div>
+           <div class="status-item-val" id="val-kpi">Default di sistema</div></div>
+    </div>
+    <div class="status-item">
+      <div class="status-dot nd" id="dot-firebase"></div>
+      <div><div class="status-item-label">Firebase</div>
+           <div class="status-item-val" id="val-firebase">Non configurato</div></div>
+    </div>
   </div>
-  <div class="content-scroll">
-    <div class="bk-wrap">
-      <div class="bk-tab-row">
-        <div class="bk-tab active" onclick="switchBkTab('clienti',this)">👥 Clienti</div>
-        <div class="bk-tab" onclick="switchBkTab('scadenze',this)" id="tab-scadenze">⚠ Scadenze</div>
-        <div class="bk-tab" onclick="switchBkTab('calendario',this)">📅 Calendario</div>
-        <div class="bk-tab" onclick="switchBkTab('sessioni',this)">✏ Registra</div>
-        <div class="bk-tab" onclick="switchBkTab('storico',this)">📋 Storico</div>
-        <div class="bk-tab" onclick="switchBkTab('setup',this)">⚙ Setup</div>
+
+  <div class="slbl">Identità studio</div>
+  <div class="res-grid">
+    <div class="res-card">
+      <div class="res-card-head">
+        <span class="res-card-icon">🏛</span>
+        <span class="res-card-title">Studio & Coach</span>
+        <span class="res-card-badge badge-nd" id="badge-identity">Non configurato</span>
       </div>
-
-      <!-- CLIENTI -->
-      <div class="bk-section active" id="bksec-clienti">
-        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-          <button class="btn pri" onclick="openNewClient()">+ Nuovo cliente</button>
-          <button class="btn" onclick="openNewAbb()">+ Abbonamento</button>
-          <input type="text" id="search-client" placeholder="Cerca cliente..."
-            style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-            color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
-            padding:6px 12px;outline:none;flex:1;min-width:180px;"
-            oninput="filterClients(this.value)">
+      <div class="res-card-body">
+        <div class="res-field">
+          <span class="res-lbl">Nome studio</span>
+          <input class="res-inp" id="cfg-studio" type="text"
+            placeholder="Phoenix Performance Lab" oninput="autoSaveIdentity()">
         </div>
-        <div class="warn-box" id="no-conn-warn" style="display:none;">
-          Configura Firebase dalla tab <strong>⚙ Setup</strong>.
+        <div class="res-field">
+          <span class="res-lbl">Nome coach</span>
+          <input class="res-inp" id="cfg-coach" type="text"
+            placeholder="Leo" oninput="autoSaveIdentity()">
         </div>
-        <div id="clienti-content" style="display:none;">
-          <div class="client-grid" id="client-grid"></div>
+        <div class="res-field">
+          <span class="res-lbl">Città</span>
+          <input class="res-inp" id="cfg-city" type="text"
+            placeholder="Torino" oninput="autoSaveIdentity()">
         </div>
+        <div class="res-actions">
+          <button class="btn pri" onclick="saveIdentity()">✓ Salva identità</button>
+        </div>
+        <div class="res-save-msg" id="msg-identity"></div>
       </div>
+    </div>
+  </div>
 
+  <div class="slbl">Connessioni</div>
+  <div class="res-grid">
+    
+    </div>
 
-      <!-- SCADENZE -->
-      <div class="bk-section" id="bksec-scadenze">
-        <div class="scad-filter-row">
-          <span class="scad-filter-lbl">Preavviso</span>
-          <input class="scad-days-inp" id="scad-days" type="number" min="7" max="180" value="30" oninput="renderScadenze()">
-          <span class="scad-filter-lbl">giorni</span>
-          <span style="flex:1;"></span>
-          <span id="scad-count" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);"></span>
-        </div>
-        <div id="scad-list"></div>
+    <div class="res-card">
+      <div class="res-card-head">
+        <span class="res-card-icon">🔥</span>
+        <span class="res-card-title">Firebase Realtime Database</span>
+        <span class="res-card-badge badge-nd" id="badge-firebase">Non configurato</span>
       </div>
-
-      <!-- CALENDARIO -->
-      <div class="bk-section" id="bksec-calendario">
-        <div class="cal-controls">
-          <button class="btn" onclick="calPrevWeek()">← Prec.</button>
-          <span class="cal-week-label" id="cal-week-label"></span>
-          <button class="btn" onclick="calNextWeek()">Succ. →</button>
-          <button class="btn" onclick="calToday()">Oggi</button>
-          <button class="btn pri" onclick="openPanel('panel-palinsesto')">⊕ Nuova lezione</button>
+      <div class="res-card-body">
+        <div class="res-hint" style="margin-bottom:12px;">
+          Aggiornamento real-time multi-dispositivo. I dati si sincronizzano
+          in meno di 100ms su tutti i client connessi.
         </div>
-        <div style="overflow-x:auto;">
-          <div class="cal-grid" id="cal-grid"></div>
+        <div class="res-field">
+          <span class="res-lbl">API Key</span>
+          <input class="res-inp" id="cfg-firebase-key" type="text"
+            placeholder="AIzaSy..." oninput="autoSaveFirebase()">
         </div>
+        <div class="res-field">
+          <span class="res-lbl">Database URL</span>
+          <input class="res-inp" id="cfg-firebase-db" type="url"
+            placeholder="https://tuo-progetto-default-rtdb.firebaseio.com"
+            oninput="autoSaveFirebase()">
+        </div>
+        <div class="res-field">
+          <span class="res-lbl">Project ID</span>
+          <input class="res-inp" id="cfg-firebase-pid" type="text"
+            placeholder="tuo-progetto-xxxxx" oninput="autoSaveFirebase()">
+        </div>
+        <div class="res-field">
+          <span class="res-lbl">Auth Domain <span style="color:var(--g6);font-size:9px;">(opzionale)</span></span>
+          <input class="res-inp" id="cfg-firebase-auth" type="text"
+            placeholder="tuo-progetto.firebaseapp.com" oninput="autoSaveFirebase()">
+        </div>
+        <div class="res-actions" style="margin-top:12px;">
+          <button class="btn pri" onclick="saveFirebase()">✓ Salva configurazione</button>
+          <button class="btn" onclick="testFirebase()">▶ Testa connessione</button>
+        </div>
+        <div class="res-test-result" id="test-firebase-result"></div>
+        <div id="firebase-save-msg" class="res-save-msg"></div>
       </div>
+    </div>
+  </div>
 
-      <!-- REGISTRA -->
-      <div class="bk-section" id="bksec-sessioni">
-        <div class="warn-box" id="no-conn-warn2" style="display:none;">
-          Configura Firebase dalla tab <strong>⚙ Setup</strong>.
-        </div>
-        <div id="sessioni-content" style="display:none;">
-          <div class="config-card">
-            <div class="config-title">✏ Registra sessione manuale</div>
-            <div class="config-row">
-              <div class="config-field"><span class="config-lbl">Cliente</span>
-                <div class="combo-wrap">
-                  <input class="combo-inp config-inp" id="sess-client-input"
-                    placeholder="Cerca cliente..." autocomplete="off"
-                    oninput="comboFilter('sess-combo',this.value,_comboClients,'sess-client-val',function(v){loadAbbonamenti(v);})"
-                    onfocus="comboOpen('sess-combo',this.value,_comboClients,'sess-client-val',function(v){loadAbbonamenti(v);})"
-                    onblur="setTimeout(()=>comboClose('sess-combo'),200)">
-                  <input type="hidden" id="sess-client-val">
-                  <div class="combo-drop" id="sess-combo"></div>
-                </div></div>
-              <div class="config-field"><span class="config-lbl">Abbonamento</span>
-                <select class="config-inp" id="sess-abbonamento"></select></div>
-            </div>
-            <div class="config-row">
-              <div class="config-field"><span class="config-lbl">Data</span>
-                <input class="config-inp" id="sess-data" type="date" onchange="loadSessOrari()"></div>
-              <div class="config-field"><span class="config-lbl">Tipo lezione</span>
-                <select class="config-inp" id="sess-tipo" onchange="loadSessOrari()"></select></div>
-              <div class="config-field"><span class="config-lbl">Ora (da calendario)</span>
-                <select class="config-inp" id="sess-ora">
-                  <option value="">— seleziona tipo e data —</option>
-                </select></div>
-            </div>
-            <div class="config-row">
-              <div class="config-field" style="flex:2;"><span class="config-lbl">Note</span>
-                <input class="config-inp" id="sess-note" type="text"></div>
-              <div class="config-field"><span class="config-lbl">Crediti</span>
-                <input class="config-inp" id="sess-crediti" type="number" value="1" min="0"></div>
-            </div>
-            <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-              <button class="btn pri" onclick="registraSessione()">✓ Registra</button>
-              <span id="sess-result" style="font-size:11px;"></span>
-            </div>
+  <div class="slbl">Target KPI dashboard</div>
+  <div class="res-grid">
+    <div class="res-card" style="min-width:100%;">
+      <div class="res-card-head">
+        <span class="res-card-icon">📈</span>
+        <span class="res-card-title">Obiettivi mensili</span>
+        <span class="res-card-badge badge-nd" id="badge-kpi">Default sistema</span>
+      </div>
+      <div class="res-card-body">
+        <div class="kpi-targets-grid" style="margin-bottom:14px;">
+          <div class="kpi-target-field">
+            <span class="kpi-target-lbl">Break-even (€)</span>
+            <input class="kpi-target-inp" id="kpi-be" type="number" min="0" oninput="markUnsaved()">
+          </div>
+          <div class="kpi-target-field">
+            <span class="kpi-target-lbl">Target revenue (€)</span>
+            <input class="kpi-target-inp" id="kpi-rev" type="number" min="0" oninput="markUnsaved()">
+          </div>
+          <div class="kpi-target-field">
+            <span class="kpi-target-lbl">Clienti attivi target</span>
+            <input class="kpi-target-inp" id="kpi-cli" type="number" min="0" oninput="markUnsaved()">
+          </div>
+          <div class="kpi-target-field">
+            <span class="kpi-target-lbl">Ticket medio (€)</span>
+            <input class="kpi-target-inp" id="kpi-tick" type="number" min="0" oninput="markUnsaved()">
+          </div>
+          <div class="kpi-target-field">
+            <span class="kpi-target-lbl">Saturazione target (%)</span>
+            <input class="kpi-target-inp" id="kpi-sat" type="number" min="0" max="100" oninput="markUnsaved()">
+          </div>
+          <div class="kpi-target-field">
+            <span class="kpi-target-lbl">Churn max (%)</span>
+            <input class="kpi-target-inp" id="kpi-churn" type="number" min="0" max="100" oninput="markUnsaved()">
           </div>
         </div>
-      </div>
-
-      <!-- STORICO -->
-      <div class="bk-section" id="bksec-storico">
-        <div class="warn-box" id="no-conn-warn3" style="display:none;">Configura Firebase dalla tab <strong>⚙ Setup</strong>.</div>
-        <div id="storico-content" style="display:none;">
-          <div style="margin-bottom:12px;">
-            <input type="text" id="storico-search" placeholder="Cerca per cliente, tipo, data..."
-              style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-              color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
-              padding:7px 12px;outline:none;width:100%;box-sizing:border-box;"
-              oninput="filterStorico(this.value)">
-          </div>
-          <div id="storico-list"></div>
+        <div class="res-hint" style="margin-bottom:10px;">
+          Questi valori vengono letti dalla Dashboard KPI — modificarli qui equivale a
+          modificarli nel pannello impostazioni della dashboard.
         </div>
-      </div>
-
-      <!-- SETUP -->
-      <div class="bk-section" id="bksec-setup">
-        <div class="warn-box" style="margin-bottom:14px;">
-          <strong>Firebase Realtime Database.</strong>
-          Configura le credenziali in <a href="risorse.html" style="color:var(--gold)">⚙ Risorse</a>.
+        <div class="res-actions">
+          <button class="btn pri" onclick="saveKPI()">✓ Salva target</button>
+          <button class="btn" onclick="resetKPI()">↺ Ripristina default</button>
         </div>
-        <div class="config-card">
-          <div class="config-title">🔥 Stato connessione</div>
-          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
-            <span id="conn-result" style="font-size:11px;color:var(--mu);">Inizializzazione...</span>
-            <button class="btn" onclick="retryFirebase()">↻ Riprova</button>
-            <a href="risorse.html" class="btn">⚙ Configura Firebase</a>
-          </div>
-          <div id="fb-project-info" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--g6);"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<!-- SIDE PANEL OVERLAY -->
-<div class="side-panel-overlay" id="panel-overlay" onclick="closeAllPanels()"></div>
-
-<!-- PANEL: PACCHETTI -->
-<div class="side-panel" id="panel-pacchetti">
-  <div class="side-panel-head">
-    <span class="side-panel-title">📦 Gestione Pacchetti</span>
-    <button class="side-panel-close" onclick="closePanel('panel-pacchetti')">✕</button>
-  </div>
-  <div class="side-panel-body">
-    <p style="font-size:10px;color:var(--mu);margin-bottom:12px;">
-      I pacchetti definiscono crediti, prezzo e tipo di accesso. Il menu
-      "Nuovo Abbonamento" li legge in automatico da qui.
-    </p>
-    <div id="pkg-list-panel"></div>
-    <button class="btn pri" style="width:100%;margin-top:10px;" onclick="addPkgForm()">+ Nuovo pacchetto</button>
-    <div id="pkg-add-form"></div>
-  </div>
-</div>
-
-<!-- PANEL: TIPI LEZIONE -->
-<div class="side-panel" id="panel-tipi">
-  <div class="side-panel-head">
-    <span class="side-panel-title">🏋 Tipi di Lezione</span>
-    <button class="side-panel-close" onclick="closePanel('panel-tipi')">✕</button>
-  </div>
-  <div class="side-panel-body">
-    <p style="font-size:10px;color:var(--mu);margin-bottom:12px;">
-      Definisci le tipologie di lezione usate nel calendario.
-      Il campo "Tipo" deve coincidere con quello del pacchetto compatibile.
-    </p>
-    <div id="tipi-list-panel"></div>
-    <button class="btn pri" style="width:100%;margin-top:10px;" onclick="addTipoForm()">+ Nuovo tipo</button>
-    <div id="tipo-add-form"></div>
-  </div>
-</div>
-
-<!-- PANEL: NUOVA LEZIONE -->
-<div class="side-panel" id="panel-palinsesto">
-  <div class="side-panel-head">
-    <span class="side-panel-title">📅 Nuova Lezione</span>
-    <button class="side-panel-close" onclick="closePanel('panel-palinsesto')">✕</button>
-  </div>
-  <div class="side-panel-body">
-    <div class="pkg-edit-form">
-      <div class="pkg-edit-row">
-        <div class="pkg-edit-field" style="flex:2;">
-          <span class="pkg-edit-lbl">Tipo lezione</span>
-          <select class="pkg-edit-inp" id="new-lesson-tipo"></select>
-        </div>
-        <div class="pkg-edit-field">
-          <span class="pkg-edit-lbl">Coach</span>
-          <input class="pkg-edit-inp" id="new-lesson-coach" value="Leo">
-        </div>
-      </div>
-      <div class="pkg-edit-row">
-        <div class="pkg-edit-field">
-          <span class="pkg-edit-lbl">Data</span>
-          <input class="pkg-edit-inp" id="new-lesson-data" type="date">
-        </div>
-        <div class="pkg-edit-field">
-          <span class="pkg-edit-lbl">Ora inizio</span>
-          <input class="pkg-edit-inp" id="new-lesson-ora" type="time" value="10:00">
-        </div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:11px;color:var(--mu2);cursor:pointer;">
-        <input type="checkbox" id="new-lesson-ricorrente">
-        Ricorrente (genera 8 settimane)
-      </label>
-      <div class="pkg-edit-actions">
-        <button class="btn pri" style="flex:1;" onclick="createLesson()">✓ Crea</button>
-        <button class="btn" onclick="closePanel('panel-palinsesto')">Annulla</button>
-      </div>
-      <div id="new-lesson-msg" style="margin-top:8px;font-size:11px;min-height:16px;"></div>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: NUOVO CLIENTE -->
-<div class="modal-overlay" id="modal-new-client" onclick="closeOnOverlay(event,'modal-new-client')">
-  <div class="modal">
-    <div class="modal-head"><span class="modal-title">✚ Nuovo cliente</span>
-      <button class="modal-close" onclick="closeModal('modal-new-client')">✕</button></div>
-    <div class="modal-body">
-      <div class="modal-row">
-        <div class="modal-field"><span class="modal-lbl">Nome *</span>
-          <input class="modal-inp" id="nc-nome" type="text" placeholder="Mario"></div>
-        <div class="modal-field"><span class="modal-lbl">Cognome *</span>
-          <input class="modal-inp" id="nc-cognome" type="text" placeholder="Rossi"></div>
-      </div>
-      <div class="modal-row">
-        <div class="modal-field"><span class="modal-lbl">Telefono</span>
-          <input class="modal-inp" id="nc-telefono" type="tel"></div>
-        <div class="modal-field"><span class="modal-lbl">Email</span>
-          <input class="modal-inp" id="nc-email" type="email"></div>
-      </div>
-      <div class="modal-field" style="margin-top:8px;"><span class="modal-lbl">Note</span>
-        <input class="modal-inp" id="nc-note" type="text" placeholder="Obiettivi, patologie..."></div>
-    </div>
-    <div class="modal-result" id="nc-result"></div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-new-client')">Annulla</button>
-      <button class="btn pri" onclick="submitNewClient()">✓ Aggiungi cliente</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: NUOVO ABBONAMENTO -->
-<div class="modal-overlay" id="modal-new-abb" onclick="closeOnOverlay(event,'modal-new-abb')">
-  <div class="modal">
-    <div class="modal-head"><span class="modal-title">📦 Nuovo abbonamento</span>
-      <button class="modal-close" onclick="closeModal('modal-new-abb')">✕</button></div>
-    <div class="modal-body">
-      <div class="modal-field" style="margin-bottom:12px;"><span class="modal-lbl">Cliente *</span>
-        <div class="combo-wrap">
-          <input class="combo-inp modal-inp" id="na-cliente-input"
-            placeholder="Cerca cliente..." autocomplete="off"
-            oninput="comboFilter('na-combo',this.value,_comboClients,'na-cliente-val',null)"
-            onfocus="comboOpen('na-combo',this.value,_comboClients,'na-cliente-val',null)"
-            onblur="setTimeout(()=>comboClose('na-combo'),200)">
-          <input type="hidden" id="na-cliente-val">
-          <div class="combo-drop" id="na-combo"></div>
-        </div></div>
-      <div class="modal-field" style="margin-bottom:10px;"><span class="modal-lbl">Pacchetto *</span>
-        <select class="modal-inp" id="na-pacchetto" onchange="onPacchettoChange(this)"></select></div>
-      <div id="na-pkg-preview" style="background:var(--g2);border:1px solid var(--g3);
-        border-radius:3px;padding:10px 12px;margin-bottom:12px;display:none;">
-        <div style="display:flex;gap:20px;flex-wrap:wrap;">
-          <div><span style="font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;display:block;">Crediti</span>
-            <span id="na-preview-crediti" style="font-family:'DM Mono',monospace;font-size:22px;color:var(--gold);">8</span></div>
-          <div><span style="font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;display:block;">Tipo accesso</span>
-            <span id="na-preview-tipo" style="font-size:12px;color:var(--mu2);">—</span></div>
-          <div><span style="font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;display:block;">Prezzo</span>
-            <span id="na-preview-prezzo" style="font-family:'DM Mono',monospace;font-size:20px;color:var(--gold2);">€0</span></div>
-        </div>
-      </div>
-      <div class="modal-row">
-        <div class="modal-field"><span class="modal-lbl">Data inizio</span>
-          <input class="modal-inp" id="na-inizio" type="date"></div>
-        <div class="modal-field"><span class="modal-lbl">Scadenza</span>
-          <input class="modal-inp" id="na-scadenza" type="date"></div>
-      </div>
-      <div class="modal-field" style="margin-top:8px;"><span class="modal-lbl">Note</span>
-        <input class="modal-inp" id="na-note" type="text" placeholder="Opzionale"></div>
-    </div>
-    <div class="modal-result" id="na-result"></div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-new-abb')">Annulla</button>
-      <button class="btn pri" onclick="submitNewAbb()">✓ Crea abbonamento</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: DETTAGLIO CLIENTE -->
-<div class="modal-overlay" id="modal-client-detail" onclick="closeOnOverlay(event,'modal-client-detail')">
-  <div class="modal" style="max-width:620px;">
-    <div class="modal-head">
-      <span class="modal-title" id="detail-title">Cliente</span>
-      <div style="display:flex;gap:4px;align-items:center;flex-wrap:wrap;">
-        <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openNewAbb()">+ Abbonamento</button>
-        <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openEditClient()">✏ Modifica</button>
-        <button class="btn" style="font-size:8px;padding:4px 10px;" onclick="openClientAuthPanel()">🔑 Accesso Portale</button>
-        <button class="btn danger" style="font-size:8px;padding:4px 10px;" onclick="deleteClient()">🗑</button>
-        <button class="modal-close" onclick="closeModal(\'modal-client-detail\')">✕</button>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div id="edit-client-form" style="display:none;background:var(--g2);border:1px solid var(--g4);
-        border-radius:4px;padding:12px;margin-bottom:12px;"></div>
-      <div id="client-auth-panel" style="display:none;background:var(--g2);border:1px solid var(--g4);
-        border-radius:4px;padding:14px;margin-bottom:12px;"></div>
-      <div id="cert-medico-panel" style="background:var(--g2);border:1px solid var(--g4);
-        border-radius:4px;padding:14px;margin-bottom:12px;"></div>
-      <div class="client-detail-grid" id="detail-stats" style="margin-bottom:14px;"></div>
-      <div class="slbl-mini">Abbonamenti</div>
-      <div id="detail-abbs" style="margin-bottom:14px;"></div>
-      <div class="slbl-mini">Ultime sessioni</div>
-      <div id="detail-sess"></div>
-    </div>
-    <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-client-detail')">Chiudi</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: PRESENZE -->
-<div class="modal-overlay" id="modal-attendance" onclick="closeOnOverlay(event,'modal-attendance')">
-  <div class="modal" style="max-width:580px;">
-    <div class="modal-head">
-      <span class="modal-title" id="att-modal-title">Presenze</span>
-      <button class="modal-close" onclick="closeModal('modal-attendance')">✕</button>
-    </div>
-    <div class="modal-body" style="padding-bottom:0;">
-      <div id="att-lesson-info" style="background:var(--g2);border-radius:4px;
-        padding:10px 12px;margin-bottom:12px;font-size:11px;color:var(--mu2);"></div>
-      <!-- Presenti -->
-      <div class="slbl-mini" style="margin-bottom:0;">Presenti (<span id="att-count">0</span>)</div>
-      <div id="att-present-list"
-        style="background:var(--g1);border:1px solid var(--g3);border-top:none;border-radius:0;
-        overflow:hidden;margin-bottom:0;min-height:36px;">
-        <div id="att-present-inner" style="max-height:160px;overflow-y:auto;"></div>
-      </div>
-      <!-- Aggiungi -->
-      <div class="slbl-mini" style="margin-top:10px;margin-bottom:0;">Aggiungi cliente</div>
-      <div style="background:var(--g1);border:1px solid var(--g3);border-top:none;border-radius:0 0 4px 4px;">
-        <div style="padding:8px 12px;border-bottom:1px solid var(--g3);">
-          <input id="att-search" type="text" placeholder="Cerca cliente disponibile..."
-            style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;
-            color:var(--wh);font-family:'DM Sans',sans-serif;font-size:12px;
-            padding:6px 10px;outline:none;width:100%;box-sizing:border-box;"
-            oninput="filterAttAvail(this.value)">
-        </div>
-        <div id="att-avail-list" style="max-height:200px;overflow-y:auto;"></div>
-      </div>
-    </div>
-    <div class="modal-foot" style="justify-content:space-between;margin-top:14px;">
-      <button class="btn danger" onclick="deleteLesson()">🗑 Elimina</button>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <span id="att-result" style="font-size:11px;"></span>
-        <button class="btn" onclick="closeModal('modal-attendance')">Annulla</button>
-        <button class="btn pri" onclick="saveAttendance()">✓ Salva presenze</button>
+        <div class="res-save-msg" id="msg-kpi"></div>
       </div>
     </div>
   </div>
 </div>
 </body>
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
 <script>
-
-/* ══════════════════════════════════════════════════════════════════════════
-   PPL PRENOTAZIONI v3 — Firebase + Calendario + Multi-Abbonamento
-   Architettura pronta per Livello B (prenotazione self-service clienti)
-   ══════════════════════════════════════════════════════════════════════════ */
-
-const PPL_CFG_KEY  = 'ppl_config';
-const BK_CACHE_KEY = 'ppl_bk_cache';
-function cfgGet(k){ try{const v=localStorage.getItem(k||PPL_CFG_KEY);return v?JSON.parse(v):null;}catch(e){return null;} }
-function cfgSet(k,v){ try{localStorage.setItem(k,JSON.stringify(v));}catch(e){} }
-function getPPLConfig(){ return cfgGet(PPL_CFG_KEY)||{}; }
-
-/* ── Stato globale ── */
-let _db=null, _dbRef=null, _connected=false;
-let _data = cfgGet(BK_CACHE_KEY) || {
-  clienti:{}, abbonamenti:{}, sessioni:{},
-  pacchetti:{}, tipiLezione:{}, lezioni:{}, palinsesto:{}
-};
-let _calWeekStart = getMonday(new Date());
-let _currentLessonId = null;
-let _attendance = {};  // clienteId → abbonamentoId (present at current lesson)
-
-/* ══ FIREBASE ══════════════════════════════════════════════════════════════ */
-function initFirebase(){
-  const cfg=getPPLConfig();
-  const connResult=document.getElementById('conn-result');
-  const badge=document.getElementById('conn-status');
-  if(!cfg.firebase_apiKey||!cfg.firebase_databaseURL){
-    setStatus(badge,'nd','● Firebase non configurato');
-    if(connResult)connResult.textContent='Credenziali mancanti — configura in ⚙ Risorse.';
-    renderClienti(); return;
-  }
-  const projInfo=document.getElementById('fb-project-info');
-  if(projInfo)projInfo.textContent='Progetto: '+(cfg.firebase_projectId||'—')+'  |  DB: '+cfg.firebase_databaseURL;
-  try{
-    if(!firebase.apps.length){
-      firebase.initializeApp({
-        apiKey:cfg.firebase_apiKey,
-        authDomain:cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
-        databaseURL:cfg.firebase_databaseURL,
-        projectId:cfg.firebase_projectId,
-      });
+/* ══ AUTO-SAVE — evita perdita dati su refresh/F5 ═══════════════════════
+   Ogni digitazione salva automaticamente su localStorage con un breve
+   debounce (300ms). Nessun bottone necessario per non perdere i dati.
+   ═════════════════════════════════════════════════════════════════════ */
+let _autoSaveFbTimer = null;
+function autoSaveFirebase(){
+  clearTimeout(_autoSaveFbTimer);
+  _autoSaveFbTimer = setTimeout(()=>{
+    const key  = (document.getElementById('cfg-firebase-key')?.value||'').trim();
+    const db   = (document.getElementById('cfg-firebase-db')?.value||'').trim();
+    const pid  = (document.getElementById('cfg-firebase-pid')?.value||'').trim();
+    const auth = (document.getElementById('cfg-firebase-auth')?.value||'').trim();
+    const cfg = cfgGet();
+    cfg.firebase_apiKey      = key;
+    cfg.firebase_databaseURL = db;
+    cfg.firebase_projectId   = pid;
+    cfg.firebase_authDomain  = auth || (pid ? pid+'.firebaseapp.com' : '');
+    cfgSet(cfg);
+    _unsaved = false;
+    updateStatus(cfg, kpiGet()||{...DCFG_KPI});
+    // Silent visual confirmation
+    const msg = document.getElementById('firebase-save-msg');
+    if(msg && key && db){
+      msg.textContent = '✓ Salvato automaticamente';
+      msg.style.color = 'var(--grn)';
     }
-    _db=firebase.database();
-    setStatus(badge,'warn','● Connessione...');
-    if(connResult)connResult.textContent='⏳ Connessione...';
-    startListening();
-  }catch(e){
-    console.error('FB init:',e);
-    setStatus(badge,'err','● Errore Firebase');
-    if(connResult)connResult.textContent='✕ '+e.message;
-    renderClienti();
-  }
+  }, 300);
 }
 
-function retryFirebase(){
-  if(firebase.apps.length){firebase.apps[0].delete().then(()=>{_db=null;initFirebase();}).catch(()=>{_db=null;initFirebase();});}
-  else{initFirebase();}
-}
-
-function startListening(){
-  if(!_db)return;
-  const badge=document.getElementById('conn-status');
-  const connResult=document.getElementById('conn-result');
-  _dbRef=_db.ref('ppl');
-  _dbRef.on('value',snap=>{
-    const raw=snap.val()||{};
-    _data={
-      clienti:    raw.clienti||{},
-      abbonamenti:raw.abbonamenti||{},
-      sessioni:   raw.sessioni||{},
-      pacchetti:  raw.pacchetti||{},
-      tipiLezione:raw.tipiLezione||{},
-      lezioni:    raw.lezioni||{},
-      palinsesto: raw.palinsesto||{},
-    };
-    cfgSet(BK_CACHE_KEY,_data);
-    _connected=true;
-    buildComboClients();
-    setStatus(badge,'ok','● Firebase connesso');
-    checkExpiredAbbonamenti();
-    if(connResult)connResult.textContent='✓ Connesso — aggiornamento real-time attivo.';
-    renderClienti();
-    renderSessioniForm();
-    renderStorico();
-    renderScadenze();
-    renderCalendar();
-    renderPkgList();
-    renderTipiList();
-    refreshNewLessonTipi();
-  },err=>{
-    console.error('FB listener:',err);
-    _connected=false;
-    setStatus(badge,'err','● '+err.code);
-    renderClienti();
-  });
-}
-
-function syncData(){ if(_db&&_dbRef){ _dbRef.off(); startListening(); } }
-function setStatus(el,cls,txt){ if(el){el.className='status-badge '+cls;el.textContent=txt;} }
-
-/* ── FB write helpers ── */
-async function fbSet(path,val){ if(!_db)throw new Error('Non connesso');return _db.ref(path).set(val); }
-async function fbUpdate(path,val){ if(!_db)throw new Error('Non connesso');return _db.ref(path).update(val); }
-async function fbPush(path,val){ if(!_db)throw new Error('Non connesso');const r=await _db.ref(path).push(val);return r.key; }
-async function fbRemove(path){ if(!_db)throw new Error('Non connesso');return _db.ref(path).remove(); }
-
-/* ══ UTIL ══════════════════════════════════════════════════════════════════ */
-function getMonday(d){
-  const dt=new Date(d); const day=dt.getDay(); const diff=dt.getDate()-day+(day===0?-6:1);
-  dt.setDate(diff); dt.setHours(0,0,0,0); return dt;
-}
-function fmtDate(d){
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
-}
-function fmtDateIT(d){
-  return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
-}
-const IT_DAYS=['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
-
-/* ══ CLIENTI ════════════════════════════════════════════════════════════════ */
-function renderClienti(){
-  buildComboClients();
-  const grid=document.getElementById('client-grid');
-  const warn=document.getElementById('no-conn-warn');
-  const cont=document.getElementById('clienti-content');
-  if(!grid)return;
-  const cfg=getPPLConfig();
-  const clienti=Object.entries(_data.clienti||{});
-  if(!cfg.firebase_apiKey&&!clienti.length){
-    if(warn)warn.style.display='block'; if(cont)cont.style.display='none'; return;
-  }
-  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
-  if(!clienti.length){
-    grid.innerHTML='<div style="font-family:\'DM Mono\',monospace;font-size:9px;color:var(--mu);letter-spacing:2px;text-transform:uppercase;padding:20px;">Nessun cliente — aggiungi con + Nuovo cliente</div>';
-    return;
-  }
-  grid.innerHTML=clienti.map(([cid,c])=>{
-    const abbs=Object.entries(_data.abbonamenti||{})
-      .filter(([,a])=>a.clienteId===cid)
-      .map(([aid,a])=>({id:aid,...a}));
-    const abbsA=abbs.filter(a=>a.stato==='Attivo');
-    const barsHtml=abbsA.map(a=>{
-      const tot=parseInt(a.creditiTotali||0);
-      const res=parseInt(a.creditiResidui||0);
-      const pct=tot>0?Math.round(res/tot*100):0;
-      const bc=pct>50?'#4DBD74':pct>20?'var(--org)':'var(--red)';
-      const pkg=_data.pacchetti?.[a.pacchettoId];
-      const pkgName=pkg?pkg.nome:(a.pacchetto||'Abbonamento');
-      const pkgColor=pkg?.colore||'var(--gold)';
-      return `<div class="client-sub-row">
-        <div class="client-sub-header">
-          <span class="client-sub-name">${pkgName}</span>
-          <span class="client-sub-credits" style="color:${bc}">${res}/${tot}</span>
-        </div>
-        <div class="credits-bar-track">
-          <div class="credits-bar-fill" style="width:${pct}%;background:${bc};"></div>
-        </div>
-        <div class="client-sub-meta">${a.dataScadenza?'scad. '+a.dataScadenza:''}</div>
-      </div>`;
-    }).join('');
-    const init=((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
-    const selfRegBadge = c.autoregistrato
-      ? '<span style="font-family:\'DM Mono\',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:2px;background:rgba(184,151,42,.15);border:1px solid rgba(184,151,42,.35);color:var(--gold);margin-left:6px;">🆕 Autoregistrato</span>'
-      : '';
-    return `<div class="client-card" onclick="openClient('${cid}')" style="${c.autoregistrato?'border-color:rgba(184,151,42,.4);':''}">
-      <div class="client-card-head">
-        <div class="client-avatar">${init}</div>
-        <div>
-          <div class="client-name">${c.nome||''} ${c.cognome||''}${selfRegBadge}</div>
-          <div class="client-pkg">${abbsA.length?abbsA.length+' abb. attiv'+(abbsA.length>1?'i':'o'):'Nessun abbonamento'}</div>
-        </div>
-      </div>
-      <div class="client-card-body">
-        ${barsHtml||'<div style="font-size:10px;color:var(--mu);">Nessun abbonamento attivo</div>'}
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function filterClients(q){
-  document.querySelectorAll('.client-card').forEach(c=>{
-    c.style.display=(c.querySelector('.client-name')?.textContent||'').toLowerCase().includes(q.toLowerCase())?'':'none';
-  });
-}
-
-/* ══ CALENDARIO ════════════════════════════════════════════════════════════ */
-const CAL_START_H=7, CAL_END_H=21;
-const SLOT_H=40;
-
-function renderCalendar(){
-  const grid=document.getElementById('cal-grid');
-  if(!grid)return;
-  const label=document.getElementById('cal-week-label');
-  const days=[];
-  for(let i=0;i<7;i++){
-    const d=new Date(_calWeekStart); d.setDate(d.getDate()+i); days.push(d);
-  }
-  const today=fmtDate(new Date());
-  if(label){
-    const e=new Date(days[6]);
-    label.textContent=fmtDateIT(days[0])+' — '+fmtDateIT(e);
-  }
-  // Build grid HTML
-  let html='';
-  // Header row
-  html+='<div class="cal-header-cell" style="grid-column:1;grid-row:1;"></div>';
-  days.forEach((d,i)=>{
-    const isToday=fmtDate(d)===today;
-    html+=`<div class="cal-header-cell" style="grid-column:${i+2};grid-row:1;">
-      <div class="cal-day-name">${IT_DAYS[i]}</div>
-      <div class="cal-day-num${isToday?' today':''}">${d.getDate()}</div>
-    </div>`;
-  });
-  // Time slots
-  const totalSlots=(CAL_END_H-CAL_START_H)*2;
-  for(let s=0;s<totalSlots;s++){
-    const h=CAL_START_H+Math.floor(s/2);
-    const m=s%2===0?'00':'30';
-    const row=s+2;
-    html+=`<div class="cal-time-col" style="grid-column:1;grid-row:${row};">
-      <div class="cal-time-cell"><span class="cal-time-label">${m==='00'?h+':00':''}</span></div>
-    </div>`;
-    days.forEach((d,i)=>{
-      html+=`<div class="cal-day-col cal-slot" style="grid-column:${i+2};grid-row:${row};"
-        data-date="${fmtDate(d)}" data-time="${String(h).padStart(2,'0')}:${m}"
-        onclick="calSlotClick(this)">
-        <button class="cal-add-btn" onclick="event.stopPropagation();openNewLessonAt('${fmtDate(d)}','${String(h).padStart(2,'0')}:${m}')">+</button>
-      </div>`;
-    });
-  }
-  grid.style.gridTemplateRows=`40px repeat(${totalSlots},${SLOT_H}px)`;
-  grid.innerHTML=html;
-  // Overlay lessons
-  const allLezioni=Object.entries(_data.lezioni||{});
-  const daysDates=days.map(d=>fmtDate(d));
-  allLezioni.forEach(([lid,l])=>{
-    if(!daysDates.includes(l.data))return;
-    const dayIdx=daysDates.indexOf(l.data);
-    const col=dayIdx+2;
-    const [lh,lm]=l.ora.split(':').map(Number);
-    const tipo=_data.tipiLezione?.[l.tipoId];
-    if(!tipo)return;
-    const startSlot=(lh-CAL_START_H)*2+(lm>=30?1:0);
-    const durSlots=Math.max(1,Math.round((tipo.durata||60)/30));
-    const topPx=startSlot*SLOT_H+2;
-    const heightPx=durSlots*SLOT_H-4;
-    const colEl=grid.querySelector(`[data-date="${l.data}"][data-time="${l.ora}"]`);
-    // Find the right cell or the closest
-    const cells=grid.querySelectorAll(`[data-date="${l.data}"]`);
-    let targetCell=null;
-    cells.forEach(c=>{
-      const ct=c.dataset.time;
-      const [ch,cm]=ct.split(':').map(Number);
-      if(ch===lh&&cm===(lm>=30?30:0))targetCell=c;
-    });
-    if(!targetCell){
-      // Find by position
-      cells.forEach(c=>{
-        const [ch,cm]=c.dataset.time.split(':').map(Number);
-        if(ch===lh&&cm===0&&lm<30)targetCell=c;
-      });
-    }
-    if(!targetCell)return;
-    const presenti=Object.keys(l.presenti||{}).length;
-    const postiMax=tipo.postiMax||6;
-    const bc=tipo.colore||'var(--gold)';
-    const block=document.createElement('div');
-    block.className='cal-lesson';
-    block.style.cssText=`top:2px;height:${heightPx}px;background:${bc}18;border-left-color:${bc};color:${bc};`;
-    block.innerHTML=`<div class="cal-lesson-name">${tipo.nome||'?'}</div>
-      <div class="cal-lesson-time">${l.ora} · ${tipo.durata||60}min</div>
-      <div class="cal-lesson-count">${presenti}/${postiMax} presenti</div>`;
-    block.onclick=(e)=>{e.stopPropagation();openAttendance(lid);};
-    targetCell.style.position='relative';
-    targetCell.appendChild(block);
-  });
-}
-
-function calPrevWeek(){ _calWeekStart.setDate(_calWeekStart.getDate()-7); renderCalendar(); }
-function calNextWeek(){ _calWeekStart.setDate(_calWeekStart.getDate()+7); renderCalendar(); }
-function calToday(){ _calWeekStart=getMonday(new Date()); renderCalendar(); }
-function calSlotClick(el){ openNewLessonAt(el.dataset.date,el.dataset.time); }
-
-function openNewLessonAt(date,time){
-  document.getElementById('new-lesson-data').value=date;
-  document.getElementById('new-lesson-ora').value=time;
-  openPanel('panel-palinsesto');
-}
-
-function refreshNewLessonTipi(){
-  const sel=document.getElementById('new-lesson-tipo');
-  if(!sel)return;
-  const tipi=Object.entries(_data.tipiLezione||{});
-  sel.innerHTML='<option value="">Seleziona tipo...</option>'+
-    tipi.map(([id,t])=>`<option value="${id}">${t.nome||id}</option>`).join('');
-}
-
-async function createLesson(){
-  const tipoId=document.getElementById('new-lesson-tipo').value;
-  const data  =document.getElementById('new-lesson-data').value;
-  const ora   =document.getElementById('new-lesson-ora').value;
-  const coach =document.getElementById('new-lesson-coach').value||'Leo';
-  const ricorr=document.getElementById('new-lesson-ricorrente').checked;
-  const msg   =document.getElementById('new-lesson-msg');
-  if(!tipoId||!data||!ora){msg.textContent='⚠ Compila tutti i campi.';msg.style.color='var(--org)';return;}
-  msg.textContent='⏳ Creazione...';msg.style.color='var(--mu)';
-  try{
-    if(ricorr){
-      // Save to palinsesto (weekly template)
-      const d=new Date(data);
-      const giorno=d.getDay()===0?6:d.getDay()-1;
-      await fbPush('ppl/palinsesto',{tipoId,giorno,ora,coach,attivo:true});
-      // Also create instances for next 8 weeks
-      for(let w=0;w<8;w++){
-        const wd=new Date(d); wd.setDate(wd.getDate()+w*7);
-        await fbPush('ppl/lezioni',{tipoId,data:fmtDate(wd),ora,coach,presenti:{},stato:'programmata'});
-      }
-      msg.textContent='✓ Lezione ricorrente creata (8 settimane)';
-    } else {
-      await fbPush('ppl/lezioni',{tipoId,data,ora,coach,presenti:{},stato:'programmata'});
-      msg.textContent='✓ Lezione creata';
-    }
-    msg.style.color='var(--grn)';
-    setTimeout(()=>closePanel('panel-palinsesto'),1200);
-  }catch(e){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}
-}
-
-/* ══ GESTIONE PRESENZE ══════════════════════════════════════════════════════ */
-function openAttendance(lessonId){
-  _currentLessonId=lessonId;
-  _attendance={};
-  const l=_data.lezioni?.[lessonId];
-  if(!l)return;
-  const tipo=_data.tipiLezione?.[l.tipoId];
-  const tipoNome=tipo?.nome||'Lezione';
-  const dt=new Date(l.data);
-  document.getElementById('att-modal-title').textContent=tipoNome+' — '+fmtDateIT(dt);
-  const info=document.getElementById('att-lesson-info');
-  if(info)info.innerHTML=`<strong>${tipoNome}</strong> · ${l.data} alle ${l.ora} · Coach: ${l.coach||'—'}
-    <br>Posti: ${Object.keys(l.presenti||{}).length} / ${tipo?.postiMax||'∞'} presenti`;
-  // Pre-fill current presenti
-  _attendance={...(l.presenti||{})};
-  // Build client list
-  const list=document.getElementById('att-client-list');
-  if(!list)return;
-  const tipoLezione=tipo;
-  const clienti=Object.entries(_data.clienti||{});
-  if(!clienti.length){list.innerHTML='<div style="padding:16px;color:var(--mu);font-size:11px;">Nessun cliente.</div>';openModal('modal-attendance');return;}
-  list.innerHTML=clienti.map(([cid,c])=>{
-    // Find best matching active subscription for this lesson type
-    const matchAbbs=Object.entries(_data.abbonamenti||{})
-      .filter(([,a])=>a.clienteId===cid&&a.stato==='Attivo')
-      .map(([aid,a])=>({id:aid,...a}));
-    // Match by tipo
-    const pkg=tipoLezione?Object.entries(_data.pacchetti||{})
-      .find(([,p])=>matchAbbs.some(a=>a.pacchettoId===p.id||a.tipo===tipoLezione.tipo)):null;
-    const bestAbb=matchAbbs.find(a=>{
-      const ap=_data.pacchetti?.[a.pacchettoId];
-      return ap?.tipo===tipoLezione?.tipo;
-    })||matchAbbs[0];
-    const isPresent=!!_attendance[cid];
-    const credits=bestAbb?`${bestAbb.creditiResidui}/${bestAbb.creditiTotali} cr.`:'—';
-    return `<div class="attendance-client-row" id="att-row-${cid}">
-      <div class="att-check ${isPresent?'checked':''}" id="att-check-${cid}"
-        onclick="toggleAttendance('${cid}','${bestAbb?.id||''}')">
-        ${isPresent?'✓':''}
-      </div>
-      <span class="att-name">${c.nome||''} ${c.cognome||''}</span>
-      <span class="att-sub-badge ${bestAbb?'active':''}">${bestAbb?_data.pacchetti?.[bestAbb.pacchettoId]?.nome||bestAbb.pacchetto||'Abb.':'—'}</span>
-      <span class="att-credits">${credits}</span>
-    </div>`;
-  }).join('');
-  openModal('modal-attendance');
-}
-
-function toggleAttendance(cid,abbId){
-  const check=document.getElementById('att-check-'+cid);
-  if(_attendance[cid]){
-    delete _attendance[cid];
-    if(check){check.classList.remove('checked');check.textContent='';}
-  } else {
-    _attendance[cid]=abbId||'manual';
-    if(check){check.classList.add('checked');check.textContent='✓';}
-  }
-}
-
-async function saveAttendance(){
-  if(!_currentLessonId){return;}
-  const res=document.getElementById('att-result');
-  res.textContent='⏳ Salvataggio...';res.style.color='var(--mu)';
-  try{
-    const l=_data.lezioni?.[_currentLessonId];
-    const oldPresenti=l?.presenti||{};
-    // Determine new and removed presences
-    const newPresenti={..._attendance};
-    // Scale credits for newly present clients
-    for(const [cid,abbId] of Object.entries(newPresenti)){
-      if(!oldPresenti[cid]&&abbId&&abbId!=='manual'){
-        const abb=_data.abbonamenti?.[abbId];
-        if(abb&&parseInt(abb.creditiResidui||0)>0){
-          const nuovi=parseInt(abb.creditiResidui)-1;
-                if(nuovi<=0){
-        await archiviaAbbonamento(abbId,'crediti_esauriti');
-      } else {
-        await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:'Attivo'});
-      }
-          // Log session
-          await fbPush('ppl/sessioni',{
-            clienteId:cid,abbonamentoId:abbId,lezioneId:_currentLessonId,
-            data:l?.data||fmtDate(new Date()),ora:l?.ora||'',
-            tipo:_data.tipiLezione?.[l?.tipoId]?.nome||'Lezione',
-            crediti:1,coach:l?.coach||'Leo',note:'Presenza lezione'
-          });
-        }
-      }
-    }
-    // Restore credits for removed clients
-    for(const [cid,abbId] of Object.entries(oldPresenti)){
-      if(!newPresenti[cid]&&abbId&&abbId!=='manual'){
-        const abb=_data.abbonamenti?.[abbId];
-        if(abb){
-          await fbUpdate('ppl/abbonamenti/'+abbId,{
-            creditiResidui:parseInt(abb.creditiResidui||0)+1,stato:'Attivo'
-          });
-        }
-      }
-    }
-    await fbUpdate('ppl/lezioni/'+_currentLessonId,{presenti:newPresenti,stato:'completata'});
-    res.textContent='✓ Presenze salvate';res.style.color='var(--grn)';
-    setTimeout(()=>closeModal('modal-attendance'),1200);
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-}
-
-async function deleteLesson(){
-  if(!_currentLessonId)return;
-  if(!confirm('Eliminare questa lezione? I crediti già scalati NON vengono ripristinati.'))return;
-  try{
-    await fbRemove('ppl/lezioni/'+_currentLessonId);
-    closeModal('modal-attendance');
-  }catch(e){alert('Errore: '+e.message);}
-}
-
-/* ══ PACCHETTI (panel) ════════════════════════════════════════════════════ */
-const PKG_COLORS=['#B8972A','#4DBD74','#2E9B9B','#9A7ACC','#E08C3A','#E05C5C','#4488CC'];
-
-function renderPkgList(){
-  const container=document.getElementById('pkg-list-panel');
-  if(!container)return;
-  const pkgs=Object.entries(_data.pacchetti||{});
-  if(!pkgs.length){container.innerHTML='<div style="color:var(--mu);font-size:11px;padding:8px;">Nessun pacchetto. Creane uno qui sotto.</div>';return;}
-  container.innerHTML=pkgs.map(([id,p])=>`
-    <div class="pkg-item-row" id="pkg-row-${id}">
-      <div class="pkg-color-dot" style="background:${p.colore||PKG_COLORS[0]}"></div>
-      <div class="pkg-item-info">
-        <div class="pkg-item-name">${p.nome||'—'}</div>
-        <div class="pkg-item-meta">${p.crediti||0} crediti · €${p.prezzo||0} · tipo: ${p.tipo||'—'}</div>
-      </div>
-      <div class="pkg-item-actions">
-        <button class="icon-btn" onclick="editPkgForm('${id}')">✏</button>
-        <button class="icon-btn del" onclick="deletePkg('${id}')">✕</button>
-      </div>
-    </div>`).join('');
-}
-
-function addPkgForm(prefill){
-  const f=document.getElementById('pkg-add-form');
-  if(!f)return;
-  const p=prefill||{};
-  const colorOpts=PKG_COLORS.map((c,i)=>`<option value="${c}" style="background:${c}" ${p.colore===c?'selected':''}>${c}</option>`).join('');
-  f.innerHTML=`<div class="pkg-edit-form" style="margin-top:10px;">
-    <div class="pkg-edit-row">
-      <div class="pkg-edit-field" style="flex:2;">
-        <span class="pkg-edit-lbl">Nome pacchetto *</span>
-        <input class="pkg-edit-inp" id="pf-nome" value="${p.nome||''}" placeholder="Small Class Entry (8 sess.)">
-      </div>
-    </div>
-    <div class="pkg-edit-row">
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Crediti *</span>
-        <input class="pkg-edit-inp" id="pf-crediti" type="number" value="${p.crediti||8}" min="1">
-      </div>
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Prezzo €</span>
-        <input class="pkg-edit-inp" id="pf-prezzo" type="number" value="${p.prezzo||120}" min="0">
-      </div>
-    </div>
-    <div class="pkg-edit-row">
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Tipo lezione compatibile</span>
-        <input class="pkg-edit-inp" id="pf-tipo" value="${p.tipo||''}" placeholder="small_entry">
-        <span style="font-size:9px;color:var(--g6);">Deve coincidere con il tipo del tipoLezione</span>
-      </div>
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Colore</span>
-        <select class="pkg-edit-inp" id="pf-colore">${colorOpts}</select>
-      </div>
-    </div>
-    <div class="pkg-edit-actions">
-      <button class="btn pri" style="flex:1;" onclick="savePkg('${p._id||''}')">✓ Salva</button>
-      <button class="btn" onclick="clearPkgForm()">Annulla</button>
-    </div>
-    <div id="pf-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>
-  </div>`;
-}
-
-function editPkgForm(id){
-  const p=_data.pacchetti?.[id]||{};
-  addPkgForm({...p,_id:id});
-}
-
-function clearPkgForm(){
-  const f=document.getElementById('pkg-add-form');
-  if(f)f.innerHTML='';
-}
-
-async function savePkg(existingId){
-  const nome   =document.getElementById('pf-nome')?.value.trim();
-  const crediti=parseInt(document.getElementById('pf-crediti')?.value)||0;
-  const prezzo =parseFloat(document.getElementById('pf-prezzo')?.value)||0;
-  const tipo   =document.getElementById('pf-tipo')?.value.trim();
-  const colore =document.getElementById('pf-colore')?.value;
-  const msg    =document.getElementById('pf-msg');
-  if(!nome){if(msg){msg.textContent='⚠ Nome obbligatorio.';msg.style.color='var(--org)';}return;}
-  const data={nome,crediti,prezzo,tipo:tipo||nome.toLowerCase().replace(/\s+/g,'_'),colore:colore||PKG_COLORS[0]};
-  try{
-    if(existingId){await fbUpdate('ppl/pacchetti/'+existingId,data);}
-    else{await fbPush('ppl/pacchetti',data);}
-    if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
-    setTimeout(clearPkgForm,900);
-  }catch(e){if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}}
-}
-
-async function deletePkg(id){
-  if(!confirm('Eliminare questo pacchetto?'))return;
-  try{await fbRemove('ppl/pacchetti/'+id);}catch(e){alert('Errore: '+e.message);}
-}
-
-/* ══ TIPI LEZIONE (panel) ════════════════════════════════════════════════ */
-function renderTipiList(){
-  const container=document.getElementById('tipi-list-panel');
-  if(!container)return;
-  const tipi=Object.entries(_data.tipiLezione||{});
-  if(!tipi.length){container.innerHTML='<div style="color:var(--mu);font-size:11px;padding:8px;">Nessun tipo. Creane uno qui sotto.</div>';return;}
-  container.innerHTML=tipi.map(([id,t])=>`
-    <div class="pkg-item-row">
-      <div class="pkg-color-dot" style="background:${t.colore||PKG_COLORS[0]}"></div>
-      <div class="pkg-item-info">
-        <div class="pkg-item-name">${t.nome||'—'}</div>
-        <div class="pkg-item-meta">${t.durata||60}min · max ${t.postiMax||6} posti · tipo: ${t.tipo||'—'}</div>
-      </div>
-      <div class="pkg-item-actions">
-        <button class="icon-btn" onclick="editTipoForm('${id}')">✏</button>
-        <button class="icon-btn del" onclick="deleteTipo('${id}')">✕</button>
-      </div>
-    </div>`).join('');
-}
-
-function addTipoForm(prefill){
-  const f=document.getElementById('tipo-add-form');
-  if(!f)return;
-  const t=prefill||{};
-  const colorOpts=PKG_COLORS.map((c,i)=>`<option value="${c}" ${t.colore===c?'selected':''}>${c}</option>`).join('');
-  f.innerHTML=`<div class="pkg-edit-form" style="margin-top:10px;">
-    <div class="pkg-edit-row">
-      <div class="pkg-edit-field" style="flex:2;">
-        <span class="pkg-edit-lbl">Nome tipo lezione *</span>
-        <input class="pkg-edit-inp" id="tf-nome" value="${t.nome||''}" placeholder="Small Class Entry">
-      </div>
-    </div>
-    <div class="pkg-edit-row">
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Tipo (chiave) *</span>
-        <input class="pkg-edit-inp" id="tf-tipo" value="${t.tipo||''}" placeholder="small_entry">
-      </div>
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Durata (min)</span>
-        <input class="pkg-edit-inp" id="tf-durata" type="number" value="${t.durata||60}" min="15">
-      </div>
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Posti max</span>
-        <input class="pkg-edit-inp" id="tf-posti" type="number" value="${t.postiMax||6}" min="1">
-      </div>
-    </div>
-    <div class="pkg-edit-row">
-      <div class="pkg-edit-field">
-        <span class="pkg-edit-lbl">Colore calendario</span>
-        <select class="pkg-edit-inp" id="tf-colore">${colorOpts}</select>
-      </div>
-    </div>
-    <div class="pkg-edit-actions">
-      <button class="btn pri" style="flex:1;" onclick="saveTipo('${t._id||''}')">✓ Salva</button>
-      <button class="btn" onclick="clearTipoForm()">Annulla</button>
-    </div>
-    <div id="tf-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>
-  </div>`;
-}
-function editTipoForm(id){const t=_data.tipiLezione?.[id]||{};addTipoForm({...t,_id:id});}
-function clearTipoForm(){const f=document.getElementById('tipo-add-form');if(f)f.innerHTML='';}
-async function saveTipo(existingId){
-  const nome  =document.getElementById('tf-nome')?.value.trim();
-  const tipo  =document.getElementById('tf-tipo')?.value.trim();
-  const durata=parseInt(document.getElementById('tf-durata')?.value)||60;
-  const posti =parseInt(document.getElementById('tf-posti')?.value)||6;
-  const colore=document.getElementById('tf-colore')?.value;
-  const msg   =document.getElementById('tf-msg');
-  if(!nome||!tipo){if(msg){msg.textContent='⚠ Nome e Tipo obbligatori.';msg.style.color='var(--org)';}return;}
-  const data={nome,tipo,durata,postiMax:posti,colore:colore||PKG_COLORS[0]};
-  try{
-    if(existingId){await fbUpdate('ppl/tipiLezione/'+existingId,data);}
-    else{await fbPush('ppl/tipiLezione',data);}
-    if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
-    setTimeout(clearTipoForm,900);
-  }catch(e){if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}}
-}
-async function deleteTipo(id){
-  if(!confirm('Eliminare questo tipo di lezione?'))return;
-  try{await fbRemove('ppl/tipiLezione/'+id);}catch(e){alert('Errore: '+e.message);}
-}
-
-/* ══ ABBONAMENTI (modal) ════════════════════════════════════════════════ */
-function onPacchettoChange(sel){
-  const id=sel.value;
-  const preview=document.getElementById('na-pkg-preview');
-  if(!id){if(preview)preview.style.display='none';return;}
-  const pkg=_data.pacchetti?.[id];
-  if(!pkg){if(preview)preview.style.display='none';return;}
-  document.getElementById('na-preview-crediti').textContent=pkg.crediti||0;
-  document.getElementById('na-preview-tipo').textContent=pkg.tipo||'—';
-  document.getElementById('na-preview-prezzo').textContent='€'+(pkg.prezzo||0);
-  if(preview)preview.style.display='block';
-}
-
-// openNewAbb: overridden below
-
-
-// submitNewAbb: overridden below
-
-
-/* ══ CLIENTI MODAL ══════════════════════════════════════════════════════ */
-function openNewClient(){
-  ['nc-nome','nc-cognome','nc-telefono','nc-email','nc-note'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  const r=document.getElementById('nc-result');if(r){r.textContent='';r.style.color='';}
-  openModal('modal-new-client');
-  setTimeout(()=>document.getElementById('nc-nome')?.focus(),100);
-}
-async function submitNewClient(){
-  if(!_db){alert('Firebase non connesso.');return;}
-  const nome   =document.getElementById('nc-nome')?.value.trim();
-  const cognome=document.getElementById('nc-cognome')?.value.trim();
-  const tel    =document.getElementById('nc-telefono')?.value.trim();
-  const email  =document.getElementById('nc-email')?.value.trim();
-  const note   =document.getElementById('nc-note')?.value.trim();
-  const res    =document.getElementById('nc-result');
-  if(!nome||!cognome){res.textContent='⚠ Nome e cognome obbligatori.';res.style.color='var(--org)';return;}
-  const btn=event.target;btn.textContent='⏳ Salvataggio...';btn.disabled=true;
-  try{
-    await fbPush('ppl/clienti',{nome,cognome,email:email||'',telefono:tel||'',note:note||'',dataIscrizione:new Date().toLocaleDateString('it-IT')});
-    res.textContent='✓ Cliente aggiunto';res.style.color='var(--grn)';
-    setTimeout(()=>closeModal('modal-new-client'),1200);
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-  finally{btn.textContent='✓ Aggiungi cliente';btn.disabled=false;}
-}
-
-// openClient: overridden below
-
-
-/* ══ SESSIONI / STORICO ════════════════════════════════════════════════ */
-// renderSessioniForm: overridden below
-
-// loadAbbonamenti: overridden below
-
-// registraSessione: overridden below
-
-// renderStorico: overridden below
-
-
-/* ══ PANEL / MODAL HELPERS ════════════════════════════════════════════ */
-function openPanel(id){
-  document.getElementById(id)?.classList.add('open');
-  document.getElementById('panel-overlay')?.classList.add('open');
-  if(id==='panel-palinsesto')refreshNewLessonTipi();
-}
-function closePanel(id){
-  document.getElementById(id)?.classList.remove('open');
-  const anyOpen=[...document.querySelectorAll('.side-panel.open')].length;
-  if(!anyOpen)document.getElementById('panel-overlay')?.classList.remove('open');
-}
-function closeAllPanels(){
-  document.querySelectorAll('.side-panel').forEach(p=>p.classList.remove('open'));
-  document.getElementById('panel-overlay')?.classList.remove('open');
-}
-function openModal(id){const m=document.getElementById(id);if(m)m.classList.add('open');}
-function closeModal(id){const m=document.getElementById(id);if(m)m.classList.remove('open');}
-function closeOnOverlay(e,id){if(e.target===e.currentTarget)closeModal(id);}
-function switchBkTab(id,el){
-  document.querySelectorAll('.bk-tab').forEach(t=>t.classList.remove('active'));
-  document.querySelectorAll('.bk-section').forEach(s=>s.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('bksec-'+id)?.classList.add('active');
-  if(id==='calendario') renderCalendar();
-  if(id==='scadenze')   renderScadenze();
-}
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){
-    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
-    closeAllPanels();
-  }
-});
-
-/* ══ NAV ══════════════════════════════════════════════════════════════ */
-function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
-document.addEventListener('click',function(e){
-  if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}
-});
-
-/* ══ INIT ═════════════════════════════════════════════════════════════ */
-
-document.addEventListener('DOMContentLoaded',initFirebase);
-
-
-
-/* ══ NEW FEATURES ══ */
-
-/* ══ COMBO SEARCHABLE SELECT ════════════════════════════════════════════════
-   _comboClients: [{value:'C_xxx',label:'Mario Rossi'}]
-   Built from _data.clienti on every Firebase update
-   ══════════════════════════════════════════════════════════════════════════ */
-let _comboClients = [];
-   // last opened from card (for pre-select in new-abb)
-
-function buildComboClients(){
-  _comboClients = Object.entries(_data.clienti||{})
-    .map(([id,c])=>({value:id, label:(c.nome||'')+' '+(c.cognome||'')}))
-    .sort((a,b)=>a.label.localeCompare(b.label));
-}
-
-function comboFilter(dropId, query, opts, hiddenId, onSelect){
-  const drop = document.getElementById(dropId);
-  const hiddenEl = document.getElementById(hiddenId);
-  if(!drop) return;
-  const q = (query||'').toLowerCase().trim();
-  const filtered = q ? opts.filter(o=>o.label.toLowerCase().includes(q)) : opts;
-  renderComboOptions(drop, filtered, q, hiddenId, onSelect);
-  drop.classList.toggle('open', filtered.length > 0);
-  // Clear hidden value when typing
-  if(hiddenEl && hiddenEl.value){
-    const cur = opts.find(o=>o.value===hiddenEl.value);
-    if(!cur || !cur.label.toLowerCase().startsWith(q.toLowerCase())){
-      hiddenEl.value = '';
-    }
-  }
-}
-
-function comboOpen(dropId, query, opts, hiddenId, onSelect){
-  const drop = document.getElementById(dropId);
-  if(!drop) return;
-  const q = (query||'').toLowerCase();
-  const filtered = q ? opts.filter(o=>o.label.toLowerCase().includes(q)) : opts;
-  renderComboOptions(drop, filtered, q, hiddenId, onSelect);
-  drop.classList.toggle('open', filtered.length > 0);
-}
-
-function renderComboOptions(drop, filtered, q, hiddenId, onSelect){
-  if(!filtered.length){
-    drop.innerHTML = '<div class="combo-none">Nessun risultato</div>';
-    drop.classList.add('open');
-    return;
-  }
-  drop.innerHTML = filtered.slice(0,40).map(o=>{
-    const hl = q ? o.label.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')', 'gi'), '<mark>$1</mark>') : o.label;
-    return `<div class="combo-opt" data-value="${o.value}"
-      onmousedown="selectCombo('${drop.id}','${hiddenId}',this.dataset.value,'${o.label.replace(/'/g,"\\'")}',${onSelect?'true':'false'})">${hl}</div>`;
-  }).join('');
-}
-
-function selectCombo(dropId, hiddenId, value, label, hasCallback){
-  const drop = document.getElementById(dropId);
-  const hidden = document.getElementById(hiddenId);
-  if(hidden) hidden.value = value;
-  // Fill the input
-  const inputId = hiddenId.replace('-val','-input');
-  const input = document.getElementById(inputId);
-  if(input) input.value = label;
-  if(drop) drop.classList.remove('open');
-  // Fire callback via ID convention
-  if(hasCallback){
-    if(hiddenId === 'sess-client-val') loadAbbonamenti(value);
-    if(hiddenId === 'na-cliente-val') { /* nothing extra */ }
-  }
-}
-
-function comboClose(dropId){
-  const drop = document.getElementById(dropId);
-  if(drop) drop.classList.remove('open');
-}
-
-// Helper: get combo value
-function getComboVal(hiddenId){ return document.getElementById(hiddenId)?.value || ''; }
-
-// Reset a combo
-function resetCombo(inputId, dropId, hiddenId){
-  const i=document.getElementById(inputId); if(i)i.value='';
-  const d=document.getElementById(dropId); if(d)d.classList.remove('open');
-  const h=document.getElementById(hiddenId); if(h)h.value='';
-}
-
-/* ══ STORICO FILTER ════════════════════════════════════════════════════════ */
-let _storicoAll = [];
-
-function renderStorico(){
-  const warn=document.getElementById('no-conn-warn3');
-  const cont=document.getElementById('storico-content');
-  const list=document.getElementById('storico-list');
-  if(!list)return;
-  _storicoAll = Object.entries(_data.sessioni||{}).map(([id,s])=>({id,...s}))
-    .sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,200);
-  if(!_connected&&!_storicoAll.length){if(warn)warn.style.display='block';return;}
-  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
-  const q = document.getElementById('storico-search')?.value||'';
-  renderStoricoList(_storicoAll, q);
-}
-
-function filterStorico(q){
-  renderStoricoList(_storicoAll, q);
-}
-
-function renderStoricoList(items, q){
-  const list=document.getElementById('storico-list'); if(!list)return;
-  const clienti=_data.clienti||{};
-  const filtered = q ? items.filter(s=>{
-    const c=clienti[s.clienteId]||{};
-    const name=(c.nome||'')+' '+(c.cognome||'');
-    return name.toLowerCase().includes(q.toLowerCase())
-      ||(s.tipo||'').toLowerCase().includes(q.toLowerCase())
-      ||(s.data||'').includes(q);
-  }) : items;
-  list.innerHTML = filtered.slice(0,100).map(s=>{
-    const c=clienti[s.clienteId]||{};
-    return `<div style="display:flex;align-items:center;gap:12px;padding:8px 0;
-      border-bottom:1px solid rgba(34,34,34,.6);font-size:11px;">
-      <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;">${s.data||''}</span>
-      <span style="flex:1;color:var(--mu2);">${s.tipo||''}</span>
-      <span style="color:var(--wh);">${c.nome||''} ${c.cognome||s.clienteId||''}</span>
-      <span style="font-family:'DM Mono',monospace;color:var(--red);">-${s.crediti||1}</span>
-    </div>`;
-  }).join('')||'<div style="font-size:11px;color:var(--mu);padding:12px 0;">Nessun risultato</div>';
-}
-
-/* ══ REGISTRA — ORA DINAMICA DA CALENDARIO ═════════════════════════════════ */
-function loadSessOrari(){
-  const data  = document.getElementById('sess-data')?.value;
-  const tipoEl= document.getElementById('sess-tipo');
-  const oraEl = document.getElementById('sess-ora');
-  if(!oraEl) return;
-  // Populate tipo select if empty
-  if(tipoEl && tipoEl.options.length <= 1){
-    const tipi = Object.entries(_data.tipiLezione||{});
-    tipoEl.innerHTML = '<option value="">Seleziona tipo...</option>' +
-      tipi.map(([id,t])=>`<option value="${t.tipo||id}">${t.nome||id}</option>`).join('');
-  }
-  const tipo = tipoEl?.value;
-  if(!data || !tipo){
-    oraEl.innerHTML='<option value="">— seleziona tipo e data —</option>';
-    return;
-  }
-  // Find lessons on this date with matching tipo
-  const matches = Object.entries(_data.lezioni||{})
-    .filter(([,l])=>{
-      const lt = _data.tipiLezione?.[l.tipoId];
-      return l.data === data && (lt?.tipo === tipo || l.tipoId === tipo);
-    })
-    .map(([lid,l])=>({id:lid,...l}))
-    .sort((a,b)=>a.ora.localeCompare(b.ora));
-  if(!matches.length){
-    oraEl.innerHTML='<option value="">Nessuna lezione in calendario per questa data e tipo</option>';
-  } else {
-    const tipiLezione = _data.tipiLezione||{};
-    oraEl.innerHTML = matches.map(l=>{
-      const presenti = Object.keys(l.presenti||{}).length;
-      const tipo_o = tipiLezione[l.tipoId];
-      return `<option value="${l.ora}" data-lesson-id="${l.id}">
-        ${l.ora} — ${presenti}/${tipo_o?.postiMax||'∞'} presenti
-      </option>`;
-    }).join('');
-  }
-}
-
-/* ══ ATTENDANCE MODAL REWORK ════════════════════════════════════════════════ */
-// _attendance: { clienteId: abbonamentoId }  ← presenti correnti
-
-function openAttendance(lessonId){
-  _currentLessonId = lessonId;
-  const l = _data.lezioni?.[lessonId]; if(!l)return;
-  const tipo = _data.tipiLezione?.[l.tipoId];
-  const dt = new Date(l.data);
-  document.getElementById('att-modal-title').textContent =
-    (tipo?.nome||'Lezione')+' — '+l.data+' '+l.ora;
-  const info = document.getElementById('att-lesson-info');
-  if(info) info.innerHTML = `<strong>${tipo?.nome||'—'}</strong> · ${l.data} · ${l.ora} · Coach: ${l.coach||'—'}`;
-  // Init attendance from current presenti
-  _attendance = {...(l.presenti||{})};
-  renderAttendance();
-  document.getElementById('att-search').value = '';
-  openModal('modal-attendance');
-}
-
-function renderAttendance(){
-  renderAttPresent();
-  renderAttAvail('');
-  const count = document.getElementById('att-count');
-  if(count) count.textContent = Object.keys(_attendance).length;
-}
-
-function renderAttPresent(){
-  const container = document.getElementById('att-present-inner'); if(!container)return;
-  const clienti = _data.clienti||{};
-  const presentIds = Object.keys(_attendance);
-  if(!presentIds.length){
-    container.innerHTML='<div style="padding:10px 12px;font-size:11px;color:var(--g6);font-style:italic;">Nessun cliente segnato presente</div>';
-    return;
-  }
-  container.innerHTML = presentIds.map(cid=>{
-    const c=clienti[cid]||{};
-    const abbId=_attendance[cid];
-    const abb=abbId&&abbId!=='manual'?_data.abbonamenti?.[abbId]:null;
-    const pkg=abb?_data.pacchetti?.[abb.pacchettoId]:null;
-    return `<div class="att-present-row">
-      <div class="att-present-name">${c.nome||''} ${c.cognome||cid}</div>
-      <span class="att-present-pkg">${pkg?.nome||abb?.pacchetto||'manuale'}</span>
-      <button class="att-remove-btn" onclick="removeAttendance('${cid}')">✕</button>
-    </div>`;
-  }).join('');
-}
-
-function renderAttAvail(q){
-  const container=document.getElementById('att-avail-list'); if(!container)return;
-  const l=_data.lezioni?.[_currentLessonId];
-  const tipo=_data.tipiLezione?.[l?.tipoId];
-  const clienti=Object.entries(_data.clienti||{});
-  const available = clienti.filter(([cid])=>!_attendance[cid]);
-  const filtered = q ? available.filter(([,c])=>
-    ((c.nome||'')+' '+(c.cognome||'')).toLowerCase().includes(q.toLowerCase())
-  ) : available;
-  if(!filtered.length){
-    container.innerHTML='<div class="combo-none">Nessun cliente disponibile</div>';return;
-  }
-  container.innerHTML = filtered.slice(0,50).map(([cid,c])=>{
-    // Find best matching abb
-    const abbs = Object.entries(_data.abbonamenti||{})
-      .filter(([,a])=>a.clienteId===cid&&a.stato==='Attivo')
-      .map(([aid,a])=>({id:aid,...a}));
-    const bestAbb = tipo ? (abbs.find(a=>_data.pacchetti?.[a.pacchettoId]?.tipo===tipo.tipo)||abbs[0]) : abbs[0];
-    const pkg = bestAbb?_data.pacchetti?.[bestAbb.pacchettoId]:null;
-    const hasCredits = bestAbb && parseInt(bestAbb.creditiResidui||0)>0;
-    return `<div class="att-avail-row" onclick="addAttendance('${cid}','${bestAbb?.id||'manual'}')">
-      <div class="att-avail-name">${c.nome||''} ${c.cognome||''}</div>
-      <span class="att-avail-pkg">${pkg?.nome||bestAbb?.pacchetto||'—'}</span>
-      <span class="att-avail-cr">${bestAbb?bestAbb.creditiResidui+' cr.':'—'}</span>
-      ${hasCredits?'<button class="att-add-btn">+ Aggiungi</button>':'<span style="font-size:9px;color:var(--red);">No crediti</span>'}
-    </div>`;
-  }).join('');
-}
-
-function filterAttAvail(q){ renderAttAvail(q); }
-
-function addAttendance(cid, abbId){
-  _attendance[cid] = abbId||'manual';
-  document.getElementById('att-search').value='';
-  renderAttendance();
-}
-
-function removeAttendance(cid){
-  delete _attendance[cid];
-  renderAttendance();
-}
-
-/* ══ CLIENT EDIT / DELETE ════════════════════════════════════════════════ */
-
-
-function openEditClient(){
-  const c = _data.clienti?.[_currentClientId]; if(!c)return;
-  const form = document.getElementById('edit-client-form'); if(!form)return;
-  form.style.display='block';
-  form.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-    color:var(--gold);text-transform:uppercase;margin-bottom:10px;">Modifica cliente</div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <div style="flex:1;min-width:120px;"><div class="pkg-edit-lbl">Nome</div>
-        <input class="pkg-edit-inp" id="ec-nome" value="${c.nome||''}"></div>
-      <div style="flex:1;min-width:120px;"><div class="pkg-edit-lbl">Cognome</div>
-        <input class="pkg-edit-inp" id="ec-cognome" value="${c.cognome||''}"></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <div style="flex:1;"><div class="pkg-edit-lbl">Telefono</div>
-        <input class="pkg-edit-inp" id="ec-tel" value="${c.telefono||''}"></div>
-      <div style="flex:1;"><div class="pkg-edit-lbl">Email</div>
-        <input class="pkg-edit-inp" id="ec-email" value="${c.email||''}"></div>
-    </div>
-    <div style="margin-bottom:10px;"><div class="pkg-edit-lbl">Note</div>
-      <input class="pkg-edit-inp" id="ec-note" value="${c.note||''}"></div>
-    <div style="display:flex;gap:8px;">
-      <button class="btn pri" style="flex:1;" onclick="saveEditClient()">✓ Salva</button>
-      <button class="btn" onclick="document.getElementById('edit-client-form').style.display='none'">Annulla</button>
-    </div>
-    <div id="ec-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>`;
-}
-
-async function saveEditClient(){
-  const nome   =document.getElementById('ec-nome')?.value.trim();
-  const cognome=document.getElementById('ec-cognome')?.value.trim();
-  const tel    =document.getElementById('ec-tel')?.value.trim();
-  const email  =document.getElementById('ec-email')?.value.trim();
-  const note   =document.getElementById('ec-note')?.value.trim();
-  const msg    =document.getElementById('ec-msg');
-  if(!nome||!cognome){if(msg){msg.textContent='⚠ Nome e cognome obbligatori.';msg.style.color='var(--org)';}return;}
-  try{
-    await fbUpdate('ppl/clienti/'+_currentClientId,{nome,cognome,telefono:tel||'',email:email||'',note:note||''});
-    if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
-    setTimeout(()=>{
-      document.getElementById('edit-client-form').style.display='none';
-      const title=document.getElementById('detail-title');
-      if(title)title.textContent=nome+' '+cognome;
-    },900);
-  }catch(e){if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}}
-}
-
-async function deleteClient(){
-  const c=_data.clienti?.[_currentClientId];
-  if(!c)return;
-  if(!confirm(`Eliminare il cliente ${c.nome} ${c.cognome}?\nVerranno eliminati anche tutti i suoi abbonamenti e sessioni.`))return;
-  try{
-    await fbRemove('ppl/clienti/'+_currentClientId);
-    // Remove abbonamenti
-    const abbIds=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===_currentClientId).map(([id])=>id);
-    for(const id of abbIds) await fbRemove('ppl/abbonamenti/'+id);
-    // Remove sessioni
-    const sessIds=Object.entries(_data.sessioni||{}).filter(([,s])=>s.clienteId===_currentClientId).map(([id])=>id);
-    for(const id of sessIds) await fbRemove('ppl/sessioni/'+id);
-    closeModal('modal-client-detail');
-  }catch(e){alert('Errore: '+e.message);}
-}
-
-/* ══ SUBSCRIPTION EDIT / DELETE ═════════════════════════════════════════ */
-async function deleteAbb(abbId){
-  if(!confirm('Eliminare questo abbonamento?'))return;
-  try{
-    await fbRemove('ppl/abbonamenti/'+abbId);
-  }catch(e){alert('Errore: '+e.message);}
-}
-
-function openEditAbb(abbId){
-  const abb=_data.abbonamenti?.[abbId]; if(!abb)return;
-  const el=document.getElementById('abb-edit-'+abbId); if(!el)return;
-  const pkg=_data.pacchetti?.[abb.pacchettoId];
-  el.style.display=el.style.display==='none'?'block':'none';
-  el.innerHTML=`<div style="padding:10px;background:var(--g2);border-top:1px solid var(--g4);">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <div style="flex:1;"><div class="pkg-edit-lbl">Crediti residui</div>
-        <input class="pkg-edit-inp" id="ea-cr-${abbId}" type="number" value="${abb.creditiResidui||0}" min="0"></div>
-      <div style="flex:1;"><div class="pkg-edit-lbl">Stato</div>
-        <select class="pkg-edit-inp" id="ea-stato-${abbId}">
-          <option ${abb.stato==='Attivo'?'selected':''}>Attivo</option>
-          <option ${abb.stato==='Esaurito'?'selected':''}>Esaurito</option>
-          <option ${abb.stato==='Sospeso'?'selected':''}>Sospeso</option>
-        </select></div>
-    </div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
-      <div style="flex:1;"><div class="pkg-edit-lbl">Scadenza</div>
-        <input class="pkg-edit-inp" id="ea-scad-${abbId}" type="date" value="${abb.dataScadenza||''}"></div>
-    </div>
-    <div style="display:flex;gap:6px;">
-      <button class="btn pri" style="flex:1;font-size:9px;" onclick="saveEditAbb('${abbId}')">✓ Salva</button>
-      <button class="btn" style="font-size:9px;" onclick="document.getElementById('abb-edit-${abbId}').style.display='none'">Annulla</button>
-    </div>
-    <div id="ea-msg-${abbId}" style="margin-top:4px;font-size:11px;min-height:12px;"></div>
-  </div>`;
-}
-
-async function saveEditAbb(abbId){
-  const cr   =parseInt(document.getElementById('ea-cr-'+abbId)?.value)||0;
-  const stato=document.getElementById('ea-stato-'+abbId)?.value||'Attivo';
-  const scad =document.getElementById('ea-scad-'+abbId)?.value||'';
-  const msg  =document.getElementById('ea-msg-'+abbId);
-  try{
-    await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:cr,stato,dataScadenza:scad});
-    if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
-    setTimeout(()=>openClient(_currentClientId),900);
-  }catch(e){if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}}
-}
-
-/* ══ OVERRIDE openClient (store _currentClientId + enhanced detail-abbs) ═ */
-function openClient(cid){
-  _currentClientId = cid;
-  const c=_data.clienti?.[cid]; if(!c)return;
-  const title=document.getElementById('detail-title');
-  if(title)title.textContent=c.nome+' '+c.cognome;
-  // Hide edit form
-  const ef=document.getElementById('edit-client-form');if(ef)ef.style.display='none';
-  const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid).map(([aid,a])=>({id:aid,...a}));
-  const sess=Object.entries(_data.sessioni||{}).filter(([,s])=>s.clienteId===cid).map(([sid,s])=>({id:sid,...s}));
-  const abbsA=abbs.filter(a=>a.stato==='Attivo');
-  const stats=document.getElementById('detail-stats');
-  if(stats)stats.innerHTML=[
-    {v:abbsA.length,l:'Abb. attivi'},
-    {v:abbsA.reduce((s,a)=>s+parseInt(a.creditiResidui||0),0),l:'Crediti'},
-    {v:sess.length,l:'Sessioni'},
-  ].map(s=>`<div class="client-stat"><div class="client-stat-val">${s.v}</div><div class="client-stat-lbl">${s.l}</div></div>`).join('');
-  const da=document.getElementById('detail-abbs');
-  if(da)da.innerHTML=abbs.length?abbs.map(a=>{
-    const pkg=_data.pacchetti?.[a.pacchettoId];
-    const pct=parseInt(a.creditiTotali||0)>0?Math.round(parseInt(a.creditiResidui||0)/parseInt(a.creditiTotali||1)*100):0;
-    const bc=pct>50?'#4DBD74':pct>20?'var(--org)':'var(--red)';
-    return `<div style="background:var(--g2);border-radius:3px;margin-bottom:6px;overflow:hidden;">
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px 6px;">
-        <span style="font-size:12px;color:var(--wh);">${pkg?.nome||a.pacchetto||'—'}</span>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-family:'DM Mono',monospace;font-size:10px;color:${a.stato==='Attivo'?'var(--grn)':'var(--mu)'};">${a.stato}</span>
-          <button class="icon-btn" onclick="openEditAbb('${a.id}')" title="Modifica">✏</button>
-          <button class="icon-btn del" onclick="deleteAbb('${a.id}')" title="Elimina">✕</button>
-        </div>
-      </div>
-      <div style="padding:0 12px 6px;">
-        <div class="credits-bar-track" style="margin-bottom:4px;">
-          <div class="credits-bar-fill" style="width:${pct}%;background:${bc};"></div>
-        </div>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">
-          ${a.creditiResidui}/${a.creditiTotali} crediti · ${a.dataScadenza?'scad. '+a.dataScadenza:''}</div>
-      </div>
-      <div id="abb-edit-${a.id}" style="display:none;"></div>
-    </div>`;
-  }).join(''):'<div style="font-size:11px;color:var(--mu);">Nessun abbonamento</div>';
-  const ds=document.getElementById('detail-sess');
-  if(ds){
-    const l10=[...sess].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,10);
-    ds.innerHTML=l10.length?l10.map(s=>`<div class="client-sess-row">
-      <span class="client-sess-date">${s.data||''}</span>
-      <span class="client-sess-type">${s.tipo||''}</span>
-      <span class="client-sess-cr">-${s.crediti||1}</span></div>`).join('')
-      :'<div style="font-size:11px;color:var(--mu);">Nessuna sessione</div>';
-  }
-  renderCertMedico();
-  openModal('modal-client-detail');
-}
-
-/* ══ OVERRIDE openNewAbb — pre-select if from client card ══════════════ */
-function openNewAbb(preselectedId){
-  // If called from client detail, use _currentClientId
-  const cid = preselectedId || _currentClientId || '';
-  const selP=document.getElementById('na-pacchetto');
-  if(selP){
-    selP.innerHTML='<option value="">Seleziona pacchetto...</option>'+
-      Object.entries(_data.pacchetti||{}).map(([id,p])=>
-        `<option value="${id}">${p.nome} (${p.crediti} cr. · €${p.prezzo})</option>`).join('');
-  }
-  // Set combo
-  resetCombo('na-cliente-input','na-combo','na-cliente-val');
-  if(cid){
-    const c=_data.clienti?.[cid];
-    if(c){
-      const inputEl=document.getElementById('na-cliente-input');
-      if(inputEl)inputEl.value=c.nome+' '+c.cognome;
-      const hiddenEl=document.getElementById('na-cliente-val');
-      if(hiddenEl)hiddenEl.value=cid;
-    }
-  }
-  const preview=document.getElementById('na-pkg-preview');if(preview)preview.style.display='none';
-  const r=document.getElementById('na-result');if(r){r.textContent='';r.style.color='';}
-  closeModal('modal-client-detail');
-  openModal('modal-new-abb');
-}
-
-/* ══ OVERRIDE submitNewAbb — use combo value ════════════════════════════ */
-async function submitNewAbb(){
-  const clienteId  = getComboVal('na-cliente-val');
-  const pacchettoId= document.getElementById('na-pacchetto')?.value;
-  const dataI      = document.getElementById('na-inizio')?.value;
-  const dataS      = document.getElementById('na-scadenza')?.value;
-  const note       = document.getElementById('na-note')?.value.trim();
-  const res        = document.getElementById('na-result');
-  if(!clienteId){res.textContent='⚠ Seleziona cliente.';res.style.color='var(--org)';return;}
-  if(!pacchettoId){res.textContent='⚠ Seleziona pacchetto.';res.style.color='var(--org)';return;}
-  const pkg=_data.pacchetti?.[pacchettoId];
-  if(!pkg){res.textContent='⚠ Pacchetto non trovato.';res.style.color='var(--org)';return;}
-  const btn=event.target;btn.textContent='⏳ Creazione...';btn.disabled=true;
-  try{
-    const oggi=new Date().toLocaleDateString('it-IT');
-    await fbPush('ppl/abbonamenti',{
-      clienteId,pacchettoId,
-      pacchetto:pkg.nome,tipo:pkg.tipo||'',
-      creditiTotali:pkg.crediti,creditiResidui:pkg.crediti,
-      dataInizio:dataI||oggi,dataScadenza:dataS||'',
-      stato:'Attivo',note:note||''
-    });
-    res.textContent='✓ Abbonamento creato ('+pkg.crediti+' crediti)';res.style.color='var(--grn)';
-    setTimeout(()=>closeModal('modal-new-abb'),1200);
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-  finally{btn.textContent='✓ Crea abbonamento';btn.disabled=false;}
-}
-
-/* ══ OVERRIDE registraSessione — use combo value ════════════════════════ */
-async function registraSessione(){
-  if(!_db){alert('Firebase non connesso.');return;}
-  const clienteId=getComboVal('sess-client-val');
-  const abbId    =document.getElementById('sess-abbonamento')?.value;
-  const data     =document.getElementById('sess-data')?.value;
-  const oraEl    =document.getElementById('sess-ora');
-  const ora      =oraEl?.value;
-  const tipo     =document.getElementById('sess-tipo')?.value;
-  const crediti  =parseInt(document.getElementById('sess-crediti')?.value)||1;
-  const note     =document.getElementById('sess-note')?.value;
-  const res      =document.getElementById('sess-result');
-  if(!clienteId){res.textContent='⚠ Seleziona cliente.';res.style.color='var(--org)';return;}
-  const abb=abbId?_data.abbonamenti?.[abbId]:null;
-  if(abb&&parseInt(abb.creditiResidui||0)<crediti){
-    res.textContent='✕ Crediti insufficienti: '+abb.creditiResidui;res.style.color='var(--red)';return;
-  }
-  res.textContent='⏳ Registrazione...';res.style.color='var(--mu)';
-  try{
-    await fbPush('ppl/sessioni',{clienteId,abbonamentoId:abbId||'',data,ora,tipo,crediti,coach:'Leo',note:note||''});
-    if(abb){
-      const nuovi=parseInt(abb.creditiResidui)-crediti;
-      if(nuovi<=0){
-        await archiviaAbbonamento(abbId,'crediti_esauriti');
-      } else {
-        await fbUpdate('ppl/abbonamenti/'+abbId,{creditiResidui:nuovi,stato:'Attivo'});
-      }
-    }
-    res.textContent='✓ Registrata';res.style.color='var(--grn)';
-  }catch(e){res.textContent='✕ '+e.message;res.style.color='var(--red)';}
-}
-
-/* ══ OVERRIDE renderSessioniForm — init combo + tipo ════════════════════ */
-function renderSessioniForm(){
-  const warn=document.getElementById('no-conn-warn2');
-  const cont=document.getElementById('sessioni-content');
-  if(!_connected&&!Object.keys(_data.clienti||{}).length)return;
-  if(warn)warn.style.display='none'; if(cont)cont.style.display='block';
-  buildComboClients();
-  const tipoSel=document.getElementById('sess-tipo');
-  if(tipoSel){
-    const tipi=Object.entries(_data.tipiLezione||{});
-    tipoSel.innerHTML='<option value="">Seleziona tipo...</option>'+
-      tipi.map(([id,t])=>`<option value="${t.tipo||id}">${t.nome||id}</option>`).join('');
-  }
-  const di=document.getElementById('sess-data');if(di&&!di.value)di.value=new Date().toISOString().split('T')[0];
-}
-
-function loadAbbonamenti(cid){
-  const sel=document.getElementById('sess-abbonamento');if(!sel)return;
-  const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid&&a.stato==='Attivo');
-  sel.innerHTML=abbs.length?abbs.map(([id,a])=>`<option value="${id}">${a.pacchetto||'Abb.'} (${a.creditiResidui} cr.)</option>`).join('')
-    :'<option value="">Nessun abbonamento attivo</option>';
-}
-
-/* ══ OVERRIDE renderClienti — rebuild combo clients after Firebase update ═ */
-
-
-
-/* ══ SCADENZE ═══════════════════════════════════════════════════════════
-   1. Crediti esauriti (stato Esaurito)
-   2. Abbonamenti scaduti per data (dataScadenza < oggi, ancora Attivo)
-   3. In scadenza entro N giorni
-   4. Crediti in esaurimento (<=2 rimasti)
-   Gli abbonamenti esauriti NON vengono mai cancellati — restano come storico.
-   ═══════════════════════════════════════════════════════════════════════ */
-function renderScadenze(){
-  const list    = document.getElementById('scad-list');
-  const countEl = document.getElementById('scad-count');
-  const tab     = document.getElementById('tab-scadenze');
-  if(!list) return;
-
-  const days   = parseInt(document.getElementById('scad-days')?.value)||30;
-  const today  = new Date(); today.setHours(0,0,0,0);
-  const cutoff = new Date(today); cutoff.setDate(cutoff.getDate()+days);
-
-  function parseScadDate(str){
-    if(!str||!str.trim()) return null;
-    if(str.includes('/')){
-      const p=str.split('/');
-      if(p.length!==3) return null;
-      return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
-    }
-    if(str.includes('-')) return new Date(str+'T00:00:00');
-    return null;
-  }
-
-  const clienti = _data.clienti||{};
-  const esauriti=[],scaduti=[],inScadenza=[],lowCred=[];
-
-  Object.entries(_data.abbonamenti||{}).forEach(([id,a])=>{
-    const c = clienti[a.clienteId];
-    if(!c) return;
-    const pkg = _data.pacchetti?.[a.pacchettoId];
-    const sd  = parseScadDate(a.dataScadenza);
-    const cr  = parseInt(a.creditiResidui||0);
-    const e   = {id,a,c,pkg,sd,cr};
-    if(a.stato==='Esaurito'||a.stato==='Archiviato'){
-      // These shouldn't appear here (auto-archived) but just in case
-      return;
-    } else if(a.stato==='Attivo'){
-      if(sd && sd < today)        scaduti.push(e);
-      else if(sd && sd <= cutoff) inScadenza.push(e);
-      if(cr<=2)                   lowCred.push(e);
-    }
-  });
-
-  const sortDate = arr=>arr.sort((x,y)=>(x.sd&&y.sd)?x.sd-y.sd:x.cr-y.cr);
-  [esauriti,scaduti,inScadenza,lowCred].forEach(sortDate);
-  const total = esauriti.length+scaduti.length+inScadenza.length+lowCred.length;
-
-  if(countEl) countEl.textContent = total ? total+' alert' : 'Tutto ok \u2713';
-  if(tab) tab.textContent = total ? '\u26A0 Scadenze ('+total+')' : '\u26A0 Scadenze';
-
-  if(!total){
-    list.innerHTML='<div class="scad-empty">\u2713 Nessuna scadenza o esaurimento rilevato</div>';
-    return;
-  }
-
-  function scadRow(e, alertCls, badgeCls, badgeTxt, crColor){
-    const {a,c,pkg,sd,cr}=e;
-    const init = ((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
-    const tot  = parseInt(a.creditiTotali||0);
-    const sdStr= sd ? sd.toLocaleDateString('it-IT') : '\u2014';
-    let daysStr='';
-    if(sd){
-      const dl=Math.round((sd-today)/86400000);
-      daysStr=dl<0?'(scaduto '+Math.abs(dl)+'gg fa)':dl===0?'(scade oggi)':'('+dl+'gg)';
-    }
-    const cid = a.clienteId;
-    const pname = pkg ? pkg.nome : (a.pacchetto||'\u2014');
-    return `<div class="scad-row ${alertCls}" onclick="openClient('${cid}')">
-      <div class="scad-avatar">${init}</div>
-      <div class="scad-info">
-        <div class="scad-name">${c.nome||''} ${c.cognome||''}</div>
-        <div class="scad-pkg">${pname} &middot; scad. ${sdStr} ${daysStr}</div>
-      </div>
-      <span class="scad-badge ${badgeCls}">${badgeTxt}</span>
-      <div class="scad-credits" style="color:${crColor};">${cr}/${tot}</div>
-      <button class="scad-action" onclick="event.stopPropagation();openNewAbb('${cid}')">+ Rinnova</button>
-    </div>`;
-  }
-
-  let html='';
-  if(esauriti.length){
-    html+=`<div class="scad-section-lbl red">Crediti esauriti (${esauriti.length})</div>`;
-    html+=esauriti.map(e=>scadRow(e,'alert-red','red','Esaurito','var(--red)')).join('');
-  }
-  if(scaduti.length){
-    html+=`<div class="scad-section-lbl red">Scaduti per data (${scaduti.length})</div>`;
-    html+=scaduti.map(e=>scadRow(e,'alert-red','red','Scaduto','var(--org)')).join('');
-  }
-  if(inScadenza.length){
-    html+=`<div class="scad-section-lbl org">In scadenza entro ${days} giorni (${inScadenza.length})</div>`;
-    html+=inScadenza.map(e=>scadRow(e,'alert-org','org','In scadenza','var(--org)')).join('');
-  }
-  if(lowCred.length){
-    html+=`<div class="scad-section-lbl org">Crediti in esaurimento &mdash; &le;2 rimasti (${lowCred.length})</div>`;
-    html+=lowCred.map(e=>scadRow(e,'alert-org','org','Low credit','var(--org)')).join('');
-  }
-  list.innerHTML=html;
+let _autoSaveIdTimer = null;
+function autoSaveIdentity(){
+  markUnsaved();
+  clearTimeout(_autoSaveIdTimer);
+  _autoSaveIdTimer = setTimeout(()=>{
+    const cfg = cfgGet();
+    cfg.studio_name = document.getElementById('cfg-studio')?.value.trim()||'';
+    cfg.coach_name  = document.getElementById('cfg-coach')?.value.trim()||'';
+    cfg.city        = document.getElementById('cfg-city')?.value.trim()||'';
+    cfgSet(cfg);
+    _unsaved = false;
+    const brand = document.getElementById('tb-studio-name');
+    if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
+    updateStatus(cfg, kpiGet()||{...DCFG_KPI});
+  }, 300);
 }
 
 
-
-/* ══ AUTO-ARCHIVIAZIONE ABBONAMENTI ══════════════════════════════════════
-   Quando un abbonamento termina (crediti=0 o data scaduta) viene spostato
-   da /ppl/abbonamenti/ → /ppl/storico_abbonamenti/ con timestamp e motivo.
-   Il cliente vede solo abbonamenti attivi. Lo storico è consultabile su
-   Firebase Console o in futuro via tab Storico abbonamenti.
+/* ══ CONFIG KEY ═══════════════════════════════════════════════════════════
+   Chiave condivisa tra tutte le pagine del gestionale.
+   ppl_config → identità studio + URL connessioni
+   ppl_c      → target KPI (usata anche dalla dashboard)
    ════════════════════════════════════════════════════════════════════════ */
+const CFG_KEY  = 'ppl_config';
+const KPI_KEY  = 'ppl_c';
+const DCFG_KPI = {be:2210, rev:5400, tick:127, cli:44, sat:77, churn:5, clv:55, cvi:65, ref:30};
 
-async function archiviaAbbonamento(abbId, motivazione){
-  if(!_db) return;
-  const abb = _data.abbonamenti?.[abbId];
-  if(!abb) return;
-  const archivio = {
-    ...abb,
-    stato:        'Archiviato',
-    motivazione,  // 'crediti_esauriti' | 'scadenza_data'
-    terminato_il: new Date().toLocaleDateString('it-IT'),
-    terminato_ts: Date.now(),
-  };
-  try{
-    await fbSet('ppl/storico_abbonamenti/'+abbId, archivio);
-    await fbRemove('ppl/abbonamenti/'+abbId);
-    console.log('Abbonamento archiviato:', abbId, motivazione);
-  }catch(e){
-    console.error('Errore archiviazione:', e);
-  }
-}
+function cfgGet(){ try{ const v=localStorage.getItem(CFG_KEY); return v?JSON.parse(v):{} }catch(e){return{}} }
+function cfgSet(v){ try{ localStorage.setItem(CFG_KEY, JSON.stringify(v)) }catch(e){} }
+function kpiGet(){ try{ const v=localStorage.getItem(KPI_KEY); return v?JSON.parse(v):null }catch(e){return null} }
+function kpiSet(v){ try{ localStorage.setItem(KPI_KEY, JSON.stringify(v)) }catch(e){} }
 
-/* Controlla abbonamenti scaduti per data — chiamato ad ogni update Firebase */
-async function checkExpiredAbbonamenti(){
-  if(!_db || !_connected) return;
-  const today = new Date(); today.setHours(0,0,0,0);
-  const toArchive = [];
+let _unsaved = false;
 
-  Object.entries(_data.abbonamenti||{}).forEach(([id,a])=>{
-    if(a.stato==='Archiviato') return; // skip already archived
-    const sd = parseDataScadenza(a.dataScadenza);
-    // Auto-archive if expiry date is TODAY or earlier (not "in scadenza", ma proprio scaduto)
-    if(sd && sd <= today && a.stato==='Attivo'){
-      toArchive.push({id, motivazione:'scadenza_data'});
-    }
-    // Also catch any leftover Esaurito (from previous logic)
-    if(a.stato==='Esaurito'){
-      toArchive.push({id, motivazione:'crediti_esauriti'});
-    }
+function markUnsaved(){ _unsaved = true; }
+
+// ── LOAD ────────────────────────────────────────────────────────────────────
+function loadAll(){
+  const cfg = cfgGet();
+  const kpi = kpiGet() || {...DCFG_KPI};
+
+  // Identity
+  if(cfg.studio_name){ document.getElementById('cfg-studio').value = cfg.studio_name; }
+  if(cfg.coach_name){  document.getElementById('cfg-coach').value  = cfg.coach_name; }
+  if(cfg.city){        document.getElementById('cfg-city').value   = cfg.city; }
+
+  // KPI targets
+  const kpiFields = {be:'kpi-be', rev:'kpi-rev', tick:'kpi-tick', cli:'kpi-cli', sat:'kpi-sat', churn:'kpi-churn'};
+  Object.entries(kpiFields).forEach(([k,id])=>{
+    const el = document.getElementById(id);
+    if(el) el.value = kpi[k] ?? DCFG_KPI[k] ?? '';
   });
 
-  for(const {id,motivazione} of toArchive){
-    await archiviaAbbonamento(id, motivazione);
-  }
+  // Update topbar brand
+  const brand = document.getElementById('tb-studio-name');
+  if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
+
+  loadFirebase();
+  updateStatus(cfg, kpi);
 }
 
-function parseDataScadenza(str){
-  if(!str||!str.trim()) return null;
-  if(str.includes('/')){
-    const p=str.split('/');
-    if(p.length!==3) return null;
-    return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));
-  }
-  if(str.includes('-')) return new Date(str+'T00:00:00');
-  return null;
+// ── STATUS INDICATORS ────────────────────────────────────────────────────────
+
+/* ── Firebase config ── */
+function loadFirebase(){
+  const cfg = cfgGet();
+  const fields = {
+    'cfg-firebase-key':  cfg.firebase_apiKey,
+    'cfg-firebase-db':   cfg.firebase_databaseURL,
+    'cfg-firebase-pid':  cfg.firebase_projectId,
+    'cfg-firebase-auth': cfg.firebase_authDomain,
+  };
+  Object.entries(fields).forEach(([id, val])=>{
+    const el = document.getElementById(id);
+    if(el && val) el.value = val;
+  });
 }
 
-/* ══ ACCESSO PORTALE CLIENTE ═══════════════════════════════════════════════
-   Crea un account Firebase Auth per il cliente usando un'istanza SECONDARIA
-   dell'app Firebase (stessa configurazione, sessione isolata). Questo evita
-   di disconnettere il coach durante la creazione dell'account del cliente
-   — tecnica standard e interamente client-side, nessun server richiesto.
-   ═══════════════════════════════════════════════════════════════════════ */
-
-function openClientAuthPanel(){
-  const c = _data.clienti?.[_currentClientId];
-  if(!c) return;
-  const panel = document.getElementById('client-auth-panel');
-  if(!panel) return;
-  panel.style.display = 'block';
-
-  if(c.authUid){
-    panel.innerHTML = `
-      <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-        color:var(--grn);text-transform:uppercase;margin-bottom:8px;">✓ Accesso portale attivo</div>
-      <div style="font-size:11px;color:var(--mu2);margin-bottom:10px;">
-        Email di accesso: <strong style="color:var(--wh);">${c.authEmail||c.email||'—'}</strong>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn" style="font-size:9px;" onclick="resetClientPassword('${c.authEmail||c.email}')">
-          ✉ Invia reset password</button>
-        <button class="btn danger" style="font-size:9px;" onclick="revokeClientAuth()">
-          🗑 Revoca accesso</button>
-      </div>
-      <div id="auth-panel-msg" style="margin-top:8px;font-size:11px;min-height:14px;"></div>`;
-    return;
-  }
-
-  const suggestedEmail = c.email || '';
-  panel.innerHTML = `
-    <div style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;
-      color:var(--gold);text-transform:uppercase;margin-bottom:8px;">🔑 Crea accesso al portale clienti</div>
-    <div style="font-size:10px;color:var(--mu);margin-bottom:12px;">
-      Il cliente riceverà email e password per accedere al portale prenotazioni da
-      <strong style="color:var(--mu2);">portale_cliente.html</strong>
-    </div>
-    <div style="margin-bottom:10px;">
-      <div class="pkg-edit-lbl" style="margin-bottom:4px;">Email di accesso</div>
-      <input class="pkg-edit-inp" id="auth-email" type="email" value="${suggestedEmail}"
-        placeholder="mario.rossi@email.com">
-    </div>
-    <div style="margin-bottom:10px;">
-      <div class="pkg-edit-lbl" style="margin-bottom:4px;">Password provvisoria</div>
-      <div style="display:flex;gap:6px;">
-        <input class="pkg-edit-inp" id="auth-pw" type="text" value="${genTempPassword()}" style="flex:1;">
-        <button class="btn" style="font-size:9px;padding:6px 10px;" onclick="document.getElementById('auth-pw').value=genTempPassword()">↻</button>
-      </div>
-      <div style="font-size:9px;color:var(--g6);margin-top:4px;font-style:italic;">
-        Comunica queste credenziali al cliente. Potrà cambiarla dal suo profilo.
-      </div>
-    </div>
-    <button class="btn pri" style="width:100%;" onclick="createClientAuth()">✓ Crea accesso</button>
-    <div id="auth-panel-msg" style="margin-top:8px;font-size:11px;min-height:14px;"></div>`;
+function saveFirebase(){
+  const key  = (document.getElementById('cfg-firebase-key')?.value||'').trim();
+  const db   = (document.getElementById('cfg-firebase-db')?.value||'').trim();
+  const pid  = (document.getElementById('cfg-firebase-pid')?.value||'').trim();
+  const auth = (document.getElementById('cfg-firebase-auth')?.value||'').trim();
+  if(!key || !db){ showMsg('firebase-save-msg','⚠ API Key e Database URL obbligatori'); return; }
+  const cfg = cfgGet();
+  cfg.firebase_apiKey      = key;
+  cfg.firebase_databaseURL = db;
+  cfg.firebase_projectId   = pid;
+  cfg.firebase_authDomain  = auth || (pid ? pid+'.firebaseapp.com' : '');
+  cfgSet(cfg);
+  _unsaved = false;
+  showMsg('firebase-save-msg','✓ Configurazione Firebase salvata');
+  updateStatus(cfg, kpiGet()||{...DCFG_KPI});
 }
 
-function genTempPassword(){
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
-  let pw = '';
-  for(let i=0;i<8;i++) pw += chars[Math.floor(Math.random()*chars.length)];
-  return pw;
-}
-
-async function createClientAuth(){
-  const email = document.getElementById('auth-email')?.value.trim();
-  const pw    = document.getElementById('auth-pw')?.value;
-  const msg   = document.getElementById('auth-panel-msg');
-
-  if(!email || !pw){
-    if(msg){ msg.textContent='⚠ Email e password obbligatorie.'; msg.style.color='var(--org)'; }
-    return;
-  }
-  if(pw.length < 6){
-    if(msg){ msg.textContent='⚠ La password deve avere almeno 6 caratteri.'; msg.style.color='var(--org)'; }
-    return;
-  }
-
-  if(msg){ msg.textContent='⏳ Creazione account...'; msg.style.color='var(--mu)'; }
-
+async function testFirebase(){
+  const key = document.getElementById('cfg-firebase-key')?.value.trim();
+  const db  = document.getElementById('cfg-firebase-db')?.value.trim();
+  const pid = document.getElementById('cfg-firebase-pid')?.value.trim();
+  const res = document.getElementById('test-firebase-result');
+  if(!key||!db){ res.textContent='⚠ Inserisci API Key e Database URL.'; res.style.color='var(--org)'; return; }
+  res.textContent='⏳ Test connessione...'; res.style.color='var(--mu)';
   try{
-    // Istanza Firebase SECONDARIA — evita di disconnettere il coach
-    const cfg = getPPLConfig();
-    const secondaryApp = firebase.apps.find(a=>a.name==='secondary')
-      || firebase.initializeApp({
-          apiKey: cfg.firebase_apiKey,
-          authDomain: cfg.firebase_authDomain || (cfg.firebase_projectId+'.firebaseapp.com'),
-          databaseURL: cfg.firebase_databaseURL,
-          projectId: cfg.firebase_projectId,
-        }, 'secondary');
-
-    const secondaryAuth = firebase.auth(secondaryApp);
-    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, pw);
-    const newUid = cred.user.uid;
-
-    // Disconnetti subito la sessione secondaria (non serve più)
-    await secondaryAuth.signOut();
-
-    // Collega l'authUid al cliente nel database principale
-    await fbUpdate('ppl/clienti/'+_currentClientId, {
-      authUid: newUid,
-      authEmail: email,
-    });
-
-    if(msg){ msg.textContent='✓ Accesso creato con successo'; msg.style.color='var(--grn)'; }
-    setTimeout(()=>openClientAuthPanel(), 1200);
-
-  }catch(e){
-    const errMsgs = {
-      'auth/email-already-in-use': "Questa email è già registrata. Usa un'altra email o contatta il cliente.",
-      'auth/invalid-email': 'Email non valida.',
-      'auth/weak-password': 'Password troppo debole (minimo 6 caratteri).',
-    };
-    if(msg){ msg.textContent='✕ '+(errMsgs[e.code]||e.message); msg.style.color='var(--red)'; }
-  }
-}
-
-async function resetClientPassword(email){
-  if(!email){ alert('Nessuna email associata.'); return; }
-  const msg = document.getElementById('auth-panel-msg');
-  try{
-    const cfg = getPPLConfig();
-    const secondaryApp = firebase.apps.find(a=>a.name==='secondary')
-      || firebase.initializeApp({
-          apiKey: cfg.firebase_apiKey,
-          authDomain: cfg.firebase_authDomain || (cfg.firebase_projectId+'.firebaseapp.com'),
-          databaseURL: cfg.firebase_databaseURL,
-          projectId: cfg.firebase_projectId,
-        }, 'secondary');
-    const secondaryAuth = firebase.auth(secondaryApp);
-    await secondaryAuth.sendPasswordResetEmail(email);
-    if(msg){ msg.textContent='✓ Email di reset inviata a '+email; msg.style.color='var(--grn)'; }
-  }catch(e){
-    if(msg){ msg.textContent='✕ '+e.message; msg.style.color='var(--red)'; }
-  }
-}
-
-async function revokeClientAuth(){
-  if(!confirm("Revocare l'accesso al portale per questo cliente? Il cliente non potrà più accedere finché non gli crei un nuovo accesso.\n\nNota: questo rimuove solo il collegamento — per eliminare completamente l'account servirà farlo dalla Console Firebase (Authentication).")) return;
-  try{
-    await fbUpdate('ppl/clienti/'+_currentClientId, { authUid: null, authEmail: null });
-    openClientAuthPanel();
-  }catch(e){ alert('Errore: '+e.message); }
-}
-
-
-/* ══ CERTIFICATO MEDICO ═══════════════════════════════════════════════════
-   Upload PDF su Firebase Storage a percorso FISSO per cliente:
-   certificati/{clienteId}/certificato.pdf
-   Caricare un nuovo file sullo stesso percorso SOVRASCRIVE automaticamente
-   il precedente — nessuno spazio sprecato, nessun file vecchio da eliminare
-   manualmente. Il metadato (data caricamento, eventuale scadenza) vive nel
-   Database accanto al cliente.
-   ═══════════════════════════════════════════════════════════════════════ */
-let _certStorage = null;
-function getCertStorage(){
-  if(_certStorage) return _certStorage;
-  if(!firebase.apps.length) return null;
-  try{ _certStorage = firebase.storage(); return _certStorage; }
-  catch(e){ console.error('Storage non disponibile:', e); return null; }
-}
-
-function renderCertMedico(){
-  const c = _data.clienti?.[_currentClientId];
-  const panel = document.getElementById('cert-medico-panel');
-  if(!c || !panel) return;
-
-  const cert = c.certificatoMedico;
-  const oggi = new Date().toISOString().split('T')[0];
-  const scaduto = cert?.scadenza && cert.scadenza < oggi;
-
-  if(cert?.url){
-    panel.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-        <span style="font-size:18px;">${scaduto ? '⚠️' : '🏥'}</span>
-        <div style="flex:1;">
-          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
-            text-transform:uppercase;color:${scaduto?'var(--red)':'var(--grn)'};">
-            ${scaduto ? 'Certificato scaduto' : 'Certificato medico presente'}
-          </div>
-          <div style="font-size:10px;color:var(--mu);margin-top:2px;">
-            Caricato il ${cert.dataCaricamento||'—'}${cert.scadenza ? ' · Scadenza: '+new Date(cert.scadenza).toLocaleDateString('it-IT') : ''}
-          </div>
-        </div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <a href="${cert.url}" target="_blank" class="btn" style="font-size:9px;text-decoration:none;">👁 Visualizza PDF</a>
-        <label class="btn" style="font-size:9px;cursor:pointer;margin:0;">
-          ↻ Sostituisci
-          <input type="file" accept="application/pdf" onchange="uploadCertMedico(this)" style="display:none;">
-        </label>
-        <input type="date" id="cert-scadenza-inp" class="pkg-edit-inp" style="width:140px;font-size:10px;padding:5px 8px;"
-          value="${cert.scadenza||''}" onchange="updateCertScadenza(this.value)" title="Data scadenza certificato">
-        <button class="btn danger" style="font-size:9px;" onclick="removeCertMedico()">🗑 Rimuovi</button>
-      </div>
-      <div id="cert-upload-progress" style="display:none;font-size:10px;color:var(--gold);margin-top:8px;">⏳ Caricamento... <span id="cert-upload-pct">0%</span></div>
-      <div id="cert-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>`;
-  } else {
-    panel.innerHTML = `
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-        <span style="font-size:18px;">🏥</span>
-        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
-          text-transform:uppercase;color:var(--mu);">Nessun certificato medico caricato</div>
-      </div>
-      <label class="btn pri" style="font-size:9px;cursor:pointer;display:inline-block;">
-        📎 Carica certificato PDF
-        <input type="file" accept="application/pdf" onchange="uploadCertMedico(this)" style="display:none;">
-      </label>
-      <div id="cert-upload-progress" style="display:none;font-size:10px;color:var(--gold);margin-top:8px;">⏳ Caricamento... <span id="cert-upload-pct">0%</span></div>
-      <div id="cert-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>`;
-  }
-}
-
-async function uploadCertMedico(input){
-  const file = input.files?.[0];
-  if(!file) return;
-  if(file.type !== 'application/pdf'){
-    alert('Il certificato deve essere un file PDF.');
-    return;
-  }
-  if(file.size > 10*1024*1024){
-    alert('File troppo grande (max 10 MB).');
-    return;
-  }
-
-  const msg = document.getElementById('cert-msg');
-  const storage = getCertStorage();
-  if(!storage){
-    if(msg){ msg.textContent = '✕ Firebase Storage non configurato.'; msg.style.color='var(--red)'; }
-    return;
-  }
-
-  if(msg){ msg.textContent=''; }
-  const progEl = document.getElementById('cert-upload-progress');
-  const pctEl = document.getElementById('cert-upload-pct');
-  if(progEl) progEl.style.display='block';
-
-  try{
-    // Percorso FISSO — ogni nuovo upload sovrascrive il precedente automaticamente
-    const path = 'certificati/'+_currentClientId+'/certificato.pdf';
-    const ref = storage.ref().child(path);
-    const task = ref.put(file, { contentDisposition: 'inline; filename="certificato_medico.pdf"' });
-
-    task.on('state_changed',
-      snap=>{ if(pctEl) pctEl.textContent = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%'; },
-      err=>{
-        if(progEl) progEl.style.display='none';
-        if(msg){ msg.textContent='✕ '+err.message; msg.style.color='var(--red)'; }
-      },
-      async ()=>{
-        if(progEl) progEl.style.display='none';
-        const url = await task.snapshot.ref.getDownloadURL();
-        const oggi = new Date().toLocaleDateString('it-IT');
-        await fbUpdate('ppl/clienti/'+_currentClientId, {
-          certificatoMedico: { url, dataCaricamento: oggi, scadenza: '' }
-        });
-        if(msg){ msg.textContent='✓ Certificato caricato'; msg.style.color='var(--grn)'; }
-        setTimeout(()=>renderCertMedico(), 800);
-      }
-    );
-  }catch(e){
-    if(progEl) progEl.style.display='none';
-    if(msg){ msg.textContent='✕ '+e.message; msg.style.color='var(--red)'; }
-  }
-}
-
-async function updateCertScadenza(scadenza){
-  const c = _data.clienti?.[_currentClientId];
-  const cert = c?.certificatoMedico || {};
-  try{
-    await fbUpdate('ppl/clienti/'+_currentClientId, {
-      certificatoMedico: { ...cert, scadenza }
-    });
-  }catch(e){ console.error(e); }
-}
-
-async function removeCertMedico(){
-  if(!confirm('Rimuovere il certificato medico caricato?')) return;
-  try{
-    const storage = getCertStorage();
-    if(storage){
-      try{ await storage.ref().child('certificati/'+_currentClientId+'/certificato.pdf').delete(); }
-      catch(e){ /* file già assente, ignora */ }
+    // Test: ping il database REST endpoint
+    const pingUrl = db.replace(/\/$/, '') + '/ppl/.json?shallow=true';
+    const r = await fetch(pingUrl);
+    if(r.ok || r.status===200 || r.status===204 || r.status===null){
+      res.textContent = '✓ Database raggiungibile';
+      res.style.color = 'var(--grn)';
+      // Save on successful test
+      saveFirebase();
+      const badge = document.getElementById('badge-firebase');
+      if(badge){badge.className='res-card-badge badge-ok';badge.textContent='Configurato ✓';}
+    } else if(r.status===401||r.status===403){
+      res.textContent = '⚠ Connesso ma accesso negato — verifica le Security Rules (vedi istruzioni)';
+      res.style.color='var(--org)';
+    } else {
+      throw new Error('HTTP '+r.status);
     }
-    await fbUpdate('ppl/clienti/'+_currentClientId, { certificatoMedico: null });
-    renderCertMedico();
-  }catch(e){ alert('Errore: '+e.message); }
+  }catch(e){
+    res.textContent='✕ '+e.message+' — verifica URL e API Key';
+    res.style.color='var(--red)';
+  }
 }
 
+function updateStatus(cfg, kpi){
+  // Identity
+  const hasIdentity = !!(cfg.studio_name || cfg.coach_name);
+  setDot('dot-identity', hasIdentity ? 'ok' : 'nd');
+  document.getElementById('val-identity').textContent = cfg.studio_name || 'Non configurata';
+  document.getElementById('badge-identity').className = 'res-card-badge ' + (hasIdentity ? 'badge-ok' : 'badge-nd');
+  document.getElementById('badge-identity').textContent = hasIdentity ? 'Configurato' : 'Non configurato';
+  // KPI
+  const kpiModified = kpi && JSON.stringify(kpi) !== JSON.stringify(DCFG_KPI);
+  // Firebase
+  const hasFb = !!(cfg.firebase_apiKey && cfg.firebase_databaseURL);
+  setDot('dot-firebase', hasFb ? 'ok' : 'nd');
+  const val_fb = document.getElementById('val-firebase');
+  if(val_fb) val_fb.textContent = hasFb ? cfg.firebase_projectId||'Configurato' : 'Non configurato';
+  const badge_fb = document.getElementById('badge-firebase');
+  if(badge_fb){ badge_fb.className='res-card-badge '+(hasFb?'badge-ok':'badge-nd'); badge_fb.textContent=hasFb?'Configurato ✓':'Non configurato'; }
 
+  setDot('dot-kpi', kpiModified ? 'ok' : 'nd');
+  document.getElementById('val-kpi').textContent = kpiModified ? 'Personalizzati' : 'Default sistema';
+  document.getElementById('badge-kpi').className = 'res-card-badge ' + (kpiModified ? 'badge-ok' : 'badge-nd');
+  document.getElementById('badge-kpi').textContent = kpiModified ? 'Personalizzati' : 'Default sistema';
+}
 
+function setDot(id, cls){ const el = document.getElementById(id); if(el){ el.className = 'status-dot ' + cls; } }
+
+// ── SAVE IDENTITY ──────────────────────────────────────────────────────────
+function saveIdentity(){
+  const cfg = cfgGet();
+  cfg.studio_name = document.getElementById('cfg-studio').value.trim();
+  cfg.coach_name  = document.getElementById('cfg-coach').value.trim();
+  cfg.city        = document.getElementById('cfg-city').value.trim();
+  cfgSet(cfg);
+  _unsaved = false;
+
+  const brand = document.getElementById('tb-studio-name');
+  if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
+
+  showMsg('msg-identity', '✓ Salvato');
+  updateStatus(cfg, kpiGet() || {...DCFG_KPI});
+}
+
+// ── SAVE KPI TARGETS ────────────────────────────────────────────────────────
+function saveKPI(){
+  const fields = {be:'kpi-be', rev:'kpi-rev', tick:'kpi-tick', cli:'kpi-cli', sat:'kpi-sat', churn:'kpi-churn'};
+  const existing = kpiGet() || {...DCFG_KPI};
+  const updated = {...existing};
+  Object.entries(fields).forEach(([k,id])=>{
+    const v = parseFloat(document.getElementById(id)?.value);
+    if(!isNaN(v)) updated[k] = v;
+  });
+  kpiSet(updated);
+  _unsaved = false;
+  showMsg('msg-kpi', '✓ Target salvati — si aggiorneranno alla prossima apertura della Dashboard');
+  updateStatus(cfgGet(), updated);
+}
+
+function resetKPI(){
+  kpiSet({...DCFG_KPI});
+  const fields = {be:'kpi-be', rev:'kpi-rev', tick:'kpi-tick', cli:'kpi-cli', sat:'kpi-sat', churn:'kpi-churn'};
+  Object.entries(fields).forEach(([k,id])=>{
+    const el = document.getElementById(id);
+    if(el) el.value = DCFG_KPI[k];
+  });
+  showMsg('msg-kpi', '↺ Default ripristinati');
+  updateStatus(cfgGet(), {...DCFG_KPI});
+}
+
+// ── HELPERS ─────────────────────────────────────────────────────────────────
+function showMsg(id, text){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.textContent = text;
+  setTimeout(()=>{ el.textContent=''; }, 3000);
+}
+
+// Warn before leaving with unsaved changes
+window.addEventListener('beforeunload', e=>{
+  if(_unsaved){ e.preventDefault(); e.returnValue=''; }
+});
+
+// Nav
+function toggleNav(){
+  const nav = document.getElementById('ppl-topnav');
+  if(nav) nav.classList.toggle('nav-open');
+}
+document.addEventListener('click', e=>{
+  if(e.target.classList.contains('tn-link')){
+    const nav = document.getElementById('ppl-topnav');
+    if(nav) nav.classList.remove('nav-open');
+  }
+});
+
+// Init
+document.addEventListener('DOMContentLoaded', loadAll);
 
 </script>
 </html>
