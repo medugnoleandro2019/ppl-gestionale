@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPL · Zone Corsa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bk:#0A0A0A;--g1:#111;--g2:#181818;--g3:#222;--g4:#2E2E2E;--g5:#3A3A3A;--g6:#555;
+  --gold:#B8972A;--gold2:#D4AF45;--goldd:rgba(184,151,42,.12);
+  --wh:#F5F0E8;--mu:#888;--mu2:#AAA;
+  /* zone colors */
+  --z1:#6B9FCC;--z2:#4DBD74;--z3:#D4AF45;--z4:#E08C3A;--z5:#E05C5C;--z6:#9A7ACC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{background:var(--bk);color:var(--wh);font-family:'DM Sans',sans-serif;font-size:13px;min-height:100%;}
+body{margin-top:40px;}
+
+.topbar{background:var(--g1);border-bottom:1px solid var(--g3);padding:0 20px;height:50px;
+  display:flex;align-items:center;gap:14px;position:sticky;top:40px;z-index:100;}
+.tb-brand{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:300;letter-spacing:5px;color:var(--gold);text-transform:uppercase;}
+.tb-sep{width:1px;height:20px;background:var(--g4);}
+.tb-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);text-transform:uppercase;}
+.tb-sp{flex:1;}
+.tb-src{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--g6);text-transform:uppercase;}
+
+.page{max-width:960px;margin:0 auto;padding:20px 16px 60px;}
+.slbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:3px;color:var(--gold);
+  text-transform:uppercase;margin:22px 0 10px;display:flex;align-items:center;gap:10px;}
+.slbl::after{content:'';flex:1;height:1px;background:var(--g3);}
+.slbl:first-child{margin-top:0;}
+
+/* ── SISTEMA ZONE TAB ── */
+.sys-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.sys-tab{flex:1;padding:11px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.sys-tab:last-child{border-right:none;}
+.sys-tab:hover{background:var(--g2);}
+.sys-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.sys-tab-title{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;letter-spacing:1px;color:var(--mu2);}
+.sys-tab.active .sys-tab-title{color:var(--gold);}
+.sys-tab-sub{font-size:9px;color:var(--g6);margin-top:2px;line-height:1.3;}
+
+/* ── VIA TABS ── */
+.via-tabs{display:flex;gap:0;background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:16px;}
+.via-tab{flex:1;padding:12px 10px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;user-select:none;}
+.via-tab:last-child{border-right:none;}
+.via-tab:hover{background:var(--g2);}
+.via-tab.active{background:var(--goldd);border-bottom:2px solid var(--gold);}
+.via-num{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:3px;}
+.via-tab:not(.active) .via-num{color:var(--mu);}
+.via-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;color:var(--mu2);line-height:1.3;}
+.via-tab.active .via-lbl{color:var(--wh);}
+.via-panel{display:none;}
+.via-panel.active{display:block;}
+
+/* ── INPUTS ── */
+.inp-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+.inp-group{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px;}
+.inp-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.inp-lbl span{color:var(--gold);margin-left:4px;}
+.inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:16px;font-weight:500;
+  padding:8px 10px;outline:none;width:100%;transition:.15s;}
+.inp:focus{border-color:var(--gold);background:var(--g1);}
+.inp::placeholder{color:var(--g5);font-size:13px;}
+.inp-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:2px;}
+.inp-row-3{display:flex;gap:8px;margin-bottom:14px;}
+.inp-sm{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Mono',monospace;font-size:15px;font-weight:500;
+  padding:8px 8px;outline:none;width:70px;text-align:center;transition:.15s;}
+.inp-sm:focus{border-color:var(--gold);}
+.inp-colon{font-family:'DM Mono',monospace;font-size:18px;color:var(--mu);padding:0 2px;line-height:40px;}
+
+/* ── FCR METHOD TOGGLE ── */
+.fcr-row{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
+.fcr-opt{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:6px 12px;cursor:pointer;font-family:'DM Mono',monospace;font-size:9px;
+  letter-spacing:1px;text-transform:uppercase;color:var(--mu2);transition:.15s;}
+.fcr-opt:hover{border-color:var(--gold2);color:var(--wh);}
+.fcr-opt.active{border-color:var(--gold);background:var(--goldd);color:var(--gold);}
+.fcr-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;color:var(--mu);text-transform:uppercase;}
+
+/* ── WARN ── */
+.warn-box{background:rgba(184,151,42,.06);border:1px solid rgba(184,151,42,.25);border-radius:4px;
+  padding:10px 14px;margin-bottom:14px;font-size:10px;color:var(--mu2);line-height:1.6;}
+.warn-box strong{color:var(--gold2);}
+.note-box{background:var(--g1);border:1px solid var(--g3);border-left:3px solid var(--z6);
+  border-radius:0 4px 4px 0;padding:12px 14px;margin-bottom:10px;font-size:11px;color:var(--mu2);line-height:1.65;}
+.note-box strong{color:var(--wh);}
+.note-box .src{font-family:'DM Mono',monospace;font-size:8px;color:var(--g6);letter-spacing:1px;text-transform:uppercase;margin-top:6px;}
+
+/* ── ZONE RESULT TABLE ── */
+.zone-table-wrap{border-radius:4px;overflow:hidden;border:1px solid var(--g3);}
+.zone-table{width:100%;border-collapse:collapse;}
+.zone-table th{background:var(--g2);padding:8px 12px;font-family:'DM Mono',monospace;
+  font-size:8px;letter-spacing:1px;color:var(--gold);text-transform:uppercase;
+  border-bottom:1px solid var(--g3);text-align:left;white-space:nowrap;}
+.zone-table th:not(:first-child){text-align:center;}
+.zone-table td{padding:0;border-bottom:1px solid var(--g2);}
+.zone-table tr:last-child td{border-bottom:none;}
+.zone-row{display:flex;align-items:stretch;}
+.zone-color-bar{width:5px;flex-shrink:0;}
+.zone-cells{display:flex;align-items:center;flex:1;flex-wrap:wrap;}
+.zc{padding:10px 12px;text-align:center;flex:1;min-width:80px;}
+.zc.left{text-align:left;min-width:140px;}
+.zone-name{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;color:var(--wh);display:block;}
+.zone-sys{font-size:9px;color:var(--mu);display:block;margin-top:1px;}
+.zone-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--wh);}
+.zone-val.big{font-size:15px;}
+.zone-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);display:block;margin-top:2px;}
+.zone-obiettivo{font-size:10px;color:var(--mu2);line-height:1.4;}
+/* highlight current zone */
+.zone-table tr.current td{background:rgba(255,255,255,.03);}
+.current-badge{display:inline-block;background:var(--gold);color:#000;
+  font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;font-weight:bold;
+  padding:1px 5px;border-radius:2px;margin-left:6px;vertical-align:middle;}
+
+/* ── RESULT CARD ── */
+.result-card{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:12px;}
+.result-main{padding:16px 18px;border-bottom:1px solid var(--g3);}
+.result-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;color:var(--gold);line-height:1;margin-bottom:4px;}
+.result-val span{font-size:16px;color:var(--mu);margin-left:4px;}
+.result-sub{font-size:11px;color:var(--mu2);}
+
+/* ── FORMULA ── */
+.formula-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  background:var(--g2);border-radius:4px;padding:9px 14px;margin-bottom:12px;}
+.f-part{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);}
+.f-hi{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2);font-weight:500;}
+.f-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--z2);font-weight:500;}
+
+/* ── EMPTY ── */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:36px 20px;color:var(--mu);}
+.empty-icon{font-size:30px;opacity:.3;margin-bottom:8px;}
+.empty-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;}
+.empty-s{font-size:10px;color:var(--g6);}
+
+/* ── GARA PRESET ── */
+.gara-presets{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.gara-btn{background:var(--g2);border:1px solid var(--g4);border-radius:3px;
+  padding:5px 10px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;color:var(--mu2);cursor:pointer;transition:.15s;}
+.gara-btn:hover{border-color:var(--gold2);color:var(--wh);}
+.gara-btn.active{border-color:var(--gold);color:var(--gold);}
+
+/* ── FC CALCULATOR MODULE ── */
+.fc-module{background:var(--g1);border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.fc-mod-head{display:flex;align-items:center;gap:12px;padding:12px 16px;cursor:pointer;border-bottom:1px solid var(--g3);user-select:none;}
+.fc-mod-head:hover{background:var(--g2);}
+.fc-mod-icon{font-size:18px;flex-shrink:0;}
+.fc-mod-title{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex:1;}
+.fc-mod-badge{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border-radius:2px;}
+.fc-mod-badge.saved{background:rgba(77,189,116,.15);border:1px solid rgba(77,189,116,.3);color:var(--z2);}
+.fc-mod-badge.empty{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.fc-mod-arr{color:var(--mu);font-size:11px;}
+.fc-mod-body{padding:16px;display:none;}
+.fc-mod-body.open{display:block;}
+
+/* formula compare grid */
+.formula-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.formula-card{flex:1;min-width:130px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;padding:10px 12px;transition:.15s;}
+.formula-card.best{border-color:var(--gold);background:rgba(184,151,42,.06);}
+.formula-card.ok{border-color:rgba(46,155,155,.35);}
+.fc-name{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--mu2);text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:6px;}
+.fc-val{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold);line-height:1;}
+.formula-card:not(.best) .fc-val{color:var(--mu2);}
+.fc-formula{font-size:9px;color:var(--mu);margin-top:4px;font-family:'DM Mono',monospace;}
+.fc-err{font-size:9px;margin-top:3px;}
+.fc-err.hi{color:var(--red);}.fc-err.med{color:var(--org);}.fc-err.lo{color:var(--z2);}
+.badge-best{background:var(--gold);color:#000;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;font-weight:bold;}
+.badge-ok{background:rgba(46,155,155,.2);color:var(--teal);font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;padding:1px 5px;border-radius:2px;}
+
+/* test cards */
+.test-cards{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.test-card{flex:1;min-width:220px;background:var(--g2);border:1px solid var(--g4);border-radius:4px;overflow:hidden;}
+.test-card-head{padding:10px 12px;border-bottom:1px solid var(--g3);display:flex;align-items:center;gap:8px;}
+.test-card-num{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--gold);width:28px;flex-shrink:0;}
+.test-card-title{font-size:12px;font-weight:500;color:var(--wh);}
+.test-card-sub{font-size:9px;color:var(--mu);margin-top:1px;}
+.test-card-body{padding:10px 12px;}
+.test-step{display:flex;gap:8px;margin-bottom:7px;font-size:10px;color:var(--mu2);line-height:1.5;}
+.test-step-num{font-family:'DM Mono',monospace;font-size:9px;color:var(--gold);width:14px;flex-shrink:0;padding-top:1px;}
+.test-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:1px 6px;border-radius:2px;margin-right:4px;}
+.test-tag.easy{background:rgba(77,189,116,.15);color:var(--z2);}
+.test-tag.med{background:rgba(224,140,58,.15);color:var(--org);}
+.test-tag.hard{background:rgba(224,92,92,.15);color:var(--red);}
+.test-tag.equip{background:rgba(154,122,204,.15);color:var(--z6);}
+.test-result-input-row{display:flex;gap:8px;align-items:flex-end;margin-top:10px;flex-wrap:wrap;}
+.test-result-note{font-size:9px;color:var(--mu);margin-top:4px;font-style:italic;}
+
+/* record atleta */
+.record-grid{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.record-field{flex:1;min-width:120px;display:flex;flex-direction:column;gap:3px;}
+.record-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--mu);text-transform:uppercase;}
+.record-lbl span{color:var(--gold);margin-left:4px;}
+.record-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:7px 9px;outline:none;width:100%;transition:.15s;}
+.record-inp:focus{border-color:var(--gold);}
+.record-display{background:var(--g2);border:1px solid var(--g3);border-radius:4px;padding:12px 14px;margin-bottom:10px;}
+.rd-row{display:flex;flex-wrap:wrap;gap:14px;}
+.rd-item{display:flex;flex-direction:column;gap:2px;}
+.rd-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.rd-val{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;color:var(--gold);}
+.rd-val.sec{color:var(--teal);}
+.rd-val.nd{color:var(--g6);font-size:13px;}
+.rd-sub{font-size:9px;color:var(--mu);}
+.use-record-btn{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;text-transform:uppercase;background:rgba(77,189,116,.1);border:1px solid rgba(77,189,116,.3);color:var(--z2);padding:6px 14px;border-radius:3px;cursor:pointer;transition:.15s;}
+.use-record-btn:hover{background:rgba(77,189,116,.2);border-color:var(--z2);}
+.history-list{margin-top:10px;}
+.history-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--g2);border:1px solid var(--g3);border-radius:3px;margin-bottom:5px;}
+.hi-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);width:80px;flex-shrink:0;}
+.hi-val{font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);}
+.hi-method{font-size:9px;color:var(--mu2);flex:1;}
+.hi-del{background:none;border:none;color:var(--g5);cursor:pointer;font-size:13px;}
+.hi-del:hover{color:var(--red);}
+
+  .zc{min-width:60px;padding:8px 8px;}.zc.left{min-width:120px;}
+  .zone-name{font-size:9px;}.zone-val{font-size:12px;}.zone-val.big{font-size:13px;}
+  .result-val{font-size:30px;}
+  .sys-tab-title{font-size:9px;}.sys-tab-sub{font-size:8px;}
+  .topbar{padding:0 12px;}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ══ PPL TOPNAV ══ */
+nav.ppl-topnav{
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:0 16px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  position:fixed !important;
+  top:0 !important; left:0 !important; right:0 !important;
+  z-index:99999 !important;
+  box-sizing:border-box !important;
+  gap:0 !important;
+}
+nav.ppl-topnav .tn-brand{
+  color:#B8972A !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:10px !important;
+  letter-spacing:4px !important;
+  text-transform:uppercase !important;
+  padding-right:14px !important;
+  border-right:1px solid #333 !important;
+  margin-right:0 !important;
+  white-space:nowrap !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-links{
+  display:flex !important;
+  align-items:center !important;
+  overflow:hidden !important;
+  flex:1 !important;
+}
+nav.ppl-topnav a.tn-link{
+  color:#777 !important;
+  font-family:'DM Mono',monospace !important;
+  font-size:7.5px !important;
+  letter-spacing:1.5px !important;
+  text-transform:uppercase !important;
+  padding:0 10px !important;
+  height:40px !important;
+  display:flex !important;
+  align-items:center !important;
+  text-decoration:none !important;
+  border-bottom:2px solid transparent !important;
+  white-space:nowrap !important;
+  transition:color .15s !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav a.tn-link:hover{ color:#F5F0E8 !important; }
+nav.ppl-topnav a.tn-link.active{
+  color:#B8972A !important;
+  border-bottom-color:#B8972A !important;
+}
+nav.ppl-topnav .tn-toggle{
+  display:none !important;
+  background:none !important;
+  border:1px solid #333 !important;
+  color:#888 !important;
+  font-size:14px !important;
+  padding:3px 8px !important;
+  border-radius:3px !important;
+  cursor:pointer !important;
+  margin-left:auto !important;
+  flex-shrink:0 !important;
+}
+nav.ppl-topnav .tn-toggle:hover{ color:#B8972A !important; border-color:#B8972A !important; }
+/* Collapsed mobile/overflow nav */
+nav.ppl-topnav.nav-open .tn-links{
+  display:flex !important;
+  flex-direction:column !important;
+  position:fixed !important;
+  top:40px !important; left:0 !important; right:0 !important;
+  background:#111 !important;
+  border-bottom:1px solid rgba(184,151,42,.3) !important;
+  padding:4px 0 !important;
+  overflow:visible !important;
+  z-index:99998 !important;
+  box-shadow:0 4px 20px rgba(0,0,0,.5) !important;
+}
+nav.ppl-topnav.nav-open a.tn-link{
+  height:36px !important;
+  padding:0 20px !important;
+  width:100% !important;
+  font-size:9px !important;
+  letter-spacing:2px !important;
+}
+@media(max-width:900px){
+  nav.ppl-topnav .tn-links{ display:none !important; }
+  nav.ppl-topnav .tn-toggle{ display:flex !important; }
+  nav.ppl-topnav.nav-open .tn-links{ display:flex !important; }
+}
+
+/* ── Zone Bici specifiche ── */
+.zone-row{display:flex;align-items:stretch;gap:0;border:1px solid var(--g3);border-radius:4px;overflow:hidden;margin-bottom:6px;}
+.zone-label{width:130px;flex-shrink:0;padding:10px 12px;display:flex;flex-direction:column;justify-content:center;}
+.zone-num{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--mu);}
+.zone-name{font-size:13px;font-weight:500;color:var(--wh);margin:2px 0;}
+.zone-fis{font-size:9px;color:var(--mu);font-style:italic;line-height:1.3;}
+.zone-data{flex:1;display:flex;align-items:center;padding:10px 14px;background:var(--g1);gap:16px;flex-wrap:wrap;}
+.zone-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu2);min-width:90px;flex-shrink:0;}
+.zone-watts{font-family:'DM Mono',monospace;font-size:15px;font-weight:500;}
+.zone-wkg{font-family:'DM Mono',monospace;font-size:11px;color:var(--mu);}
+.zone-bar{height:4px;border-radius:2px;margin-top:6px;transition:width .4s;}
+.calc-block{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:16px 18px;margin-bottom:14px;}
+.calc-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;}
+.calc-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:110px;}
+.calc-lbl-s{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.calc-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:18px;font-weight:500;padding:8px 10px;outline:none;width:100%;transition:.15s;text-align:right;}
+.calc-inp:focus{border-color:var(--gold);}
+.calc-inp::placeholder{color:var(--g6);}
+.calc-hint{font-size:10px;color:var(--g6);font-style:italic;margin-top:4px;}
+.ss-banner{background:rgba(184,151,42,.1);border:1px solid rgba(184,151,42,.3);border-radius:4px;padding:10px 14px;margin:8px 0 4px;display:flex;align-items:center;gap:12px;}
+.ss-label{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;flex-shrink:0;}
+.ss-range{font-family:'DM Mono',monospace;font-size:18px;color:var(--gold2);}
+.ss-note{font-size:10px;color:var(--mu);flex:1;}
+.wkg-table{width:100%;border-collapse:collapse;font-size:11px;}
+.wkg-table th{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;padding:6px 10px;text-align:left;border-bottom:1px solid var(--g3);}
+.wkg-table td{padding:8px 10px;border-bottom:1px solid rgba(34,34,34,.4);color:var(--mu2);}
+.wkg-table tr:last-child td{border-bottom:none;}
+.wkg-table .val{font-family:'DM Mono',monospace;color:var(--wh);font-weight:500;}
+.ftp-result{background:var(--g1);border:1px solid var(--g3);border-radius:4px;padding:14px 18px;margin-bottom:10px;}
+.ftp-result-val{font-family:'DM Mono',monospace;font-size:36px;font-weight:500;color:var(--gold);}
+.test-tabs{display:flex;gap:0;margin-bottom:12px;border:1px solid var(--g3);border-radius:4px;overflow:hidden;}
+.test-tab{flex:1;padding:10px 8px;text-align:center;cursor:pointer;border-right:1px solid var(--g3);transition:.15s;}
+.test-tab:last-child{border-right:none;}
+.test-tab:hover{background:var(--g2);}
+.test-tab.active{background:var(--g2);border-bottom:2px solid var(--gold);}
+.test-tab-name{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--mu2);}
+.test-tab.active .test-tab-name{color:var(--gold);}
+.test-tab-desc{font-size:9px;color:var(--g6);margin-top:2px;}
+.test-panel{display:none;}.test-panel.active{display:block;}
+.src-list{display:flex;flex-direction:column;gap:8px;font-size:11px;color:var(--mu);}
+.src-list em{color:var(--mu2);}
+@media(max-width:600px){
+  .zone-row{flex-direction:column;}
+  .zone-label{width:auto;border-bottom:1px solid var(--g3);}
+  .calc-row{flex-direction:column;}
+  .wkg-table{font-size:10px;}
+}
+
+
+/* ══ COMUNICAZIONI ══════════════════════════════════════════════════════ */
+.status-badge{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1px;text-transform:uppercase;
+  padding:4px 8px;border-radius:2px;}
+.status-badge.ok{background:rgba(77,189,116,.12);border:1px solid rgba(77,189,116,.3);color:#4DBD74;}
+.status-badge.warn{background:rgba(184,151,42,.12);border:1px solid rgba(184,151,42,.3);color:var(--gold);}
+.status-badge.nd{background:var(--g3);border:1px solid var(--g4);color:var(--mu);}
+.status-badge.err{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.3);color:var(--red);}
+
+.btn{background:var(--g2);border:1px solid var(--g4);color:var(--mu2);font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:8px 16px;border-radius:3px;cursor:pointer;transition:.15s;}
+.btn:hover{border-color:var(--gold2);color:var(--wh);}
+.btn.pri{background:var(--gold);border-color:var(--gold);color:#000;}
+.btn.pri:hover{background:var(--gold2);}
+.icon-btn{background:none;border:1px solid var(--g4);color:var(--mu);border-radius:3px;
+  padding:4px 8px;font-size:11px;cursor:pointer;transition:.15s;}
+.icon-btn:hover{border-color:var(--gold2);color:var(--gold);}
+.icon-btn.del:hover{border-color:var(--red);color:var(--red);}
+
+.form-card{background:var(--g1);border:1px solid var(--gold);border-radius:6px;padding:18px;margin-bottom:20px;}
+.form-title{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--gold);
+  text-transform:uppercase;margin-bottom:14px;}
+.form-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.form-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:150px;}
+.form-lbl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:2px;color:var(--mu);text-transform:uppercase;}
+.form-inp{background:var(--g2);border:1px solid var(--g4);border-radius:4px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:9px 12px;outline:none;width:100%;transition:.15s;
+  resize:vertical;}
+.form-inp:focus{border-color:var(--gold);}
+.form-hint{font-size:9px;color:var(--g6);font-style:italic;margin:-4px 0 4px;}
+.form-actions{display:flex;gap:8px;margin-top:6px;}
+.form-msg{font-size:11px;margin-top:8px;min-height:16px;}
+
+.ann-card{background:var(--g1);border:1px solid var(--g3);border-radius:6px;overflow:hidden;margin-bottom:14px;}
+.ann-head{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--g3);}
+.ann-icon{font-size:20px;flex-shrink:0;}
+.ann-title{font-size:14px;color:var(--wh);font-weight:500;}
+.ann-date{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);margin-top:2px;}
+.ann-actions{display:flex;gap:6px;flex-shrink:0;}
+.ann-img{width:100%;max-height:220px;object-fit:cover;display:block;}
+.ann-body{padding:14px 16px;font-size:12px;color:var(--mu2);line-height:1.6;white-space:pre-wrap;}
+.ann-link,.ann-attach{display:block;margin:0 16px 14px;font-size:11px;color:var(--gold);
+  padding:8px 12px;background:var(--g2);border-radius:4px;border:1px solid var(--g3);transition:.15s;}
+.ann-link:hover,.ann-attach:hover{border-color:var(--gold2);background:var(--g3);}
+
+.empty-state{text-align:center;padding:50px 20px;}
+.empty-state-icon{font-size:32px;margin-bottom:12px;opacity:.5;}
+.empty-state-text{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;
+  text-transform:uppercase;color:var(--mu);}
+
+.form-file-inp{
+  background:var(--g2);border:1px solid var(--g4);border-radius:4px;color:var(--mu2);
+  font-family:'DM Sans',sans-serif;font-size:11px;padding:9px 10px;outline:none;width:100%;
+  cursor:pointer;transition:.15s;
+}
+.form-file-inp:hover{border-color:var(--gold2);}
+.form-file-inp::file-selector-button{
+  background:var(--gold);border:none;color:#000;font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:6px 12px;
+  border-radius:3px;cursor:pointer;margin-right:10px;transition:.15s;
+}
+.form-file-inp::file-selector-button:hover{background:var(--gold2);}
+
+</style>
+</head>
+<body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link active" href="comunicazioni.html">📢 Comunicazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
+  <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
+<div class="topbar">
+  <span class="tb-brand">PPL</span><div class="tb-sep"></div>
+  <span class="tb-title">Comunicazioni</span><div class="tb-sp"></div>
+  <span id="conn-status" class="status-badge nd">● Connessione...</span>
+</div>
+<div class="page">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+    <div style="font-size:11px;color:var(--mu);max-width:480px;">
+      Gli annunci pubblicati qui appaiono automaticamente nella bacheca del portale clienti.
+    </div>
+    <button class="btn pri" onclick="openNewAnnuncio()">+ Nuovo annuncio</button>
+  </div>
+
+  <div id="annuncio-form-wrap" style="display:none;"></div>
+
+
+  <div class="slbl" style="margin-top:28px;">Strumenti coach</div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+    <button class="btn" onclick="toggleDigest()">📋 Digest settimanale</button>
+    <button class="btn" onclick="toggleReminder()">🔔 Promemoria lezioni domani</button>
+  </div>
+
+  <div id="digest-wrap" style="display:none;margin-bottom:20px;"></div>
+  <div id="reminder-wrap" style="display:none;margin-bottom:20px;"></div>
+
+  <div class="slbl">Annunci pubblicati</div>
+  <div id="annunci-list">
+    <div class="empty-state">
+      <div class="loading-spinner" style="display:inline-block;width:16px;height:16px;
+        border:2px solid var(--g4);border-top-color:var(--gold);border-radius:50%;
+        animation:spin .7s linear infinite;"></div>
+    </div>
+  </div>
+
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+</body>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════════════
+   PPL COMUNICAZIONI — Bacheca annunci per il portale cliente
+   Firebase Realtime Database: ppl/annunci/
+   ══════════════════════════════════════════════════════════════════════════ */
+
+const PPL_CFG_KEY = 'ppl_config';
+function getPPLConfig(){ try{const v=localStorage.getItem(PPL_CFG_KEY);return v?JSON.parse(v):{};}catch(e){return{};} }
+
+let _db = null, _connected = false;
+let _annunci = {};
+let _editingId = null;
+
+/* ── Firebase ── */
+function initFirebase(){
+  const cfg = getPPLConfig();
+  const badge = document.getElementById('conn-status');
+  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL){
+    setStatus(badge,'nd','● Firebase non configurato');
+    return;
+  }
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey: cfg.firebase_apiKey,
+        authDomain: cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
+        databaseURL: cfg.firebase_databaseURL,
+        projectId: cfg.firebase_projectId,
+      });
+    }
+    _db = firebase.database();
+    setStatus(badge,'warn','● Connessione...');
+    startListening();
+  }catch(e){
+    setStatus(badge,'err','● Errore: '+e.message);
+  }
+}
+function startListening(){
+  if(!_db) return;
+  const badge = document.getElementById('conn-status');
+  _db.ref('ppl/annunci').on('value', snap=>{
+    _annunci = snap.val()||{};
+    _connected = true;
+    setStatus(badge,'ok','● Firebase connesso');
+    renderAnnunci();
+  }, err=>{
+    _connected = false;
+    setStatus(badge,'err','● '+err.code);
+  });
+}
+function setStatus(el,cls,txt){ if(el){el.className='status-badge '+cls;el.textContent=txt;} }
+async function fbPush(path,val){ if(!_db)throw new Error('Non connesso');const r=await _db.ref(path).push(val);return r.key; }
+async function fbUpdate(path,val){ if(!_db)throw new Error('Non connesso');return _db.ref(path).update(val); }
+async function fbRemove(path){ if(!_db)throw new Error('Non connesso');return _db.ref(path).remove(); }
+
+/* ── Form nuovo/modifica annuncio ── */
+function openNewAnnuncio(){
+  _editingId = null;
+  renderForm(null);
+  document.getElementById('annuncio-form-wrap').style.display = 'block';
+  document.getElementById('annuncio-form-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function editAnnuncio(id){
+  _editingId = id;
+  renderForm(_annunci[id]);
+  document.getElementById('annuncio-form-wrap').style.display = 'block';
+  document.getElementById('annuncio-form-wrap').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function closeAnnuncioForm(){
+  document.getElementById('annuncio-form-wrap').style.display = 'none';
+  _editingId = null;
+}
+
+const ICONS = ['📌','🎉','📢','⚡','🔥','🎁','⏰','✨','🏆','📅'];
+
+function renderForm(a){
+  _pendingImageFile = null;
+  _pendingAttachFile = null;
+  const wrap = document.getElementById('annuncio-form-wrap');
+  const iconOpts = ICONS.map(ic=>`<option value="${ic}" ${a?.icona===ic?'selected':''}>${ic}</option>`).join('');
+  wrap.innerHTML = `
+    <div class="form-card">
+      <div class="form-title">${a ? '✏ Modifica annuncio' : '+ Nuovo annuncio'}</div>
+
+      <div class="form-row">
+        <div class="form-field" style="flex:0.4;min-width:70px;">
+          <span class="form-lbl">Icona</span>
+          <select class="form-inp" id="an-icona">${iconOpts}</select>
+        </div>
+        <div class="form-field" style="flex:2;">
+          <span class="form-lbl">Titolo *</span>
+          <input class="form-inp" id="an-titolo" value="${esc(a?.titolo)}" placeholder="Nuovo orario estivo">
+        </div>
+      </div>
+
+      <div class="form-field" style="margin-bottom:12px;">
+        <span class="form-lbl">Testo *</span>
+        <textarea class="form-inp" id="an-testo" rows="4" placeholder="Scrivi qui il contenuto dell'annuncio...">${esc(a?.testo)}</textarea>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field">
+          <span class="form-lbl">Immagine (opzionale)</span>
+          <input type="file" class="form-file-inp" id="an-img-file" accept="image/*" onchange="previewImageFile(this)">
+          <input type="hidden" id="an-img" value="${esc(a?.immagineUrl)}">
+          <div id="img-preview-wrap" style="margin-top:8px;${a?.immagineUrl?'':'display:none;'}">
+            <img id="img-preview" src="${esc(a?.immagineUrl)}" style="max-width:180px;max-height:120px;border-radius:6px;border:1px solid var(--g4);display:block;">
+            <button class="btn" style="margin-top:6px;font-size:8px;" onclick="removeImage()">✕ Rimuovi immagine</button>
+          </div>
+          <div id="img-upload-progress" style="display:none;font-size:10px;color:var(--gold);margin-top:6px;">⏳ Caricamento... <span id="img-upload-pct">0%</span></div>
+        </div>
+      </div>
+      <div class="form-hint">Formati supportati: JPG, PNG, WebP. Max 5 MB.</div>
+
+      <div class="form-row" style="margin-top:12px;">
+        <div class="form-field">
+          <span class="form-lbl">Link (opzionale)</span>
+          <input class="form-inp" id="an-link" value="${esc(a?.linkUrl)}" placeholder="https://...">
+        </div>
+        <div class="form-field">
+          <span class="form-lbl">Testo del link</span>
+          <input class="form-inp" id="an-link-label" value="${esc(a?.linkLabel)}" placeholder="Scopri di più">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-field" style="max-width:200px;">
+          <span class="form-lbl">Valido fino al (opzionale)</span>
+          <input class="form-inp" id="an-scadenza" type="date" value="${a?.validoFino||''}">
+        </div>
+      </div>
+      <div class="form-hint">Se impostata, l'annuncio sparisce automaticamente dalla bacheca clienti dopo questa data — utile per promozioni a tempo. Resta comunque visibile qui per lo storico.</div>
+
+      <div class="form-row" style="margin-top:12px;">
+        <div class="form-field">
+          <span class="form-lbl">Allegato — file scaricabile (opzionale)</span>
+          <input type="file" class="form-file-inp" id="an-allegato-file" onchange="previewAttachFile(this)">
+          <input type="hidden" id="an-allegato" value="${esc(a?.allegatoUrl)}">
+          <input type="hidden" id="an-allegato-label" value="${esc(a?.allegatoLabel)}">
+          <div id="attach-preview-wrap" style="margin-top:8px;${a?.allegatoUrl?'':'display:none;'}">
+            <span style="font-size:11px;color:var(--gold);">📎 <span id="attach-name-display">${esc(a?.allegatoLabel)}</span></span>
+            <button class="btn" style="margin-top:6px;font-size:8px;display:block;" onclick="removeAttachment()">✕ Rimuovi allegato</button>
+          </div>
+          <div id="attach-upload-progress" style="display:none;font-size:10px;color:var(--gold);margin-top:6px;">⏳ Caricamento... <span id="attach-upload-pct">0%</span></div>
+        </div>
+      </div>
+      <div class="form-hint">PDF, Word, immagini o qualsiasi file. Il cliente potrà scaricarlo dal portale. Max 10 MB.</div>
+
+      <div class="form-actions">
+        <button class="btn pri" onclick="saveAnnuncio()">✓ ${a?'Salva modifiche':'Pubblica annuncio'}</button>
+        <button class="btn" onclick="closeAnnuncioForm()">Annulla</button>
+      </div>
+      <div id="annuncio-msg" class="form-msg"></div>
+    </div>`;
+}
+
+function esc(v){ return (v||'').replace(/"/g,'&quot;'); }
+
+/* ══ FIREBASE STORAGE — upload immagine e allegato ══════════════════════════
+   Richiede Firebase Storage attivo (servizio separato dal Database).
+   Console Firebase → Storage → Inizia → configura Security Rules.
+   ═══════════════════════════════════════════════════════════════════════ */
+let _storage = null;
+let _pendingImageFile = null;
+let _pendingAttachFile = null;
+
+function getStorage(){
+  if(_storage) return _storage;
+  if(!firebase.apps.length) return null;
+  try{
+    _storage = firebase.storage();
+    return _storage;
+  }catch(e){
+    console.error('Storage non disponibile:', e);
+    return null;
+  }
+}
+
+/* ── Anteprima immagine selezionata (prima dell'upload) ── */
+function previewImageFile(input){
+  const file = input.files?.[0];
+  if(!file) return;
+  if(file.size > 5*1024*1024){
+    alert('Immagine troppo grande (max 5 MB).');
+    input.value = '';
+    return;
+  }
+  _pendingImageFile = file;
+  const reader = new FileReader();
+  reader.onload = e=>{
+    document.getElementById('img-preview').src = e.target.result;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(){
+  _pendingImageFile = null;
+  document.getElementById('an-img-file').value = '';
+  document.getElementById('an-img').value = '';
+  document.getElementById('img-preview-wrap').style.display = 'none';
+}
+
+/* ── Anteprima allegato selezionato ── */
+function previewAttachFile(input){
+  const file = input.files?.[0];
+  if(!file) return;
+  if(file.size > 10*1024*1024){
+    alert('File troppo grande (max 10 MB).');
+    input.value = '';
+    return;
+  }
+  _pendingAttachFile = file;
+  document.getElementById('attach-name-display').textContent = file.name;
+  document.getElementById('an-allegato-label').value = file.name;
+  document.getElementById('attach-preview-wrap').style.display = 'block';
+}
+
+function removeAttachment(){
+  _pendingAttachFile = null;
+  document.getElementById('an-allegato-file').value = '';
+  document.getElementById('an-allegato').value = '';
+  document.getElementById('an-allegato-label').value = '';
+  document.getElementById('attach-preview-wrap').style.display = 'none';
+}
+
+/* ── Upload effettivo su Firebase Storage con barra di progresso ── */
+function uploadFile(file, path, progressElId, pctElId, contentDisposition){
+  return new Promise((resolve, reject)=>{
+    const storage = getStorage();
+    if(!storage){ reject(new Error('Firebase Storage non configurato. Attivalo dalla Console Firebase.')); return; }
+
+    const progressEl = document.getElementById(progressElId);
+    const pctEl = document.getElementById(pctElId);
+    if(progressEl) progressEl.style.display = 'block';
+
+    const metadata = contentDisposition ? { contentDisposition } : undefined;
+    const ref = storage.ref().child(path);
+    const task = ref.put(file, metadata);
+
+    task.on('state_changed',
+      snap=>{
+        const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+        if(pctEl) pctEl.textContent = pct + '%';
+      },
+      err=>{ if(progressEl) progressEl.style.display='none'; reject(err); },
+      async ()=>{
+        if(progressEl) progressEl.style.display='none';
+        const url = await task.snapshot.ref.getDownloadURL();
+        resolve(url);
+      }
+    );
+  });
+}
+
+function sanitizeFilename(name){
+  return name.replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+async function saveAnnuncio(){
+  const icona   = document.getElementById('an-icona')?.value || '📌';
+  const titolo  = document.getElementById('an-titolo')?.value.trim();
+  const testo   = document.getElementById('an-testo')?.value.trim();
+  const link    = document.getElementById('an-link')?.value.trim();
+  const validoFino = document.getElementById('an-scadenza')?.value || '';
+  const linkLbl = document.getElementById('an-link-label')?.value.trim();
+  const msg = document.getElementById('annuncio-msg');
+
+  if(!titolo || !testo){
+    msg.textContent = '⚠ Titolo e testo sono obbligatori.';
+    msg.style.color = 'var(--org)';
+    return;
+  }
+
+  msg.textContent = '⏳ Salvataggio...'; msg.style.color = 'var(--mu)';
+
+  try{
+    const annuncioId = _editingId || 'A_' + Date.now();
+    let img    = document.getElementById('an-img')?.value.trim();
+    let alleg  = document.getElementById('an-allegato')?.value.trim();
+    let allegLbl = document.getElementById('an-allegato-label')?.value.trim();
+
+    // Upload immagine se selezionata (nuova o sostituita)
+    if(_pendingImageFile){
+      msg.textContent = '⏳ Caricamento immagine...';
+      const fname = sanitizeFilename(_pendingImageFile.name);
+      img = await uploadFile(_pendingImageFile, 'annunci/'+annuncioId+'/img_'+fname,
+        'img-upload-progress', 'img-upload-pct');
+    }
+
+    // Upload allegato se selezionato
+    if(_pendingAttachFile){
+      msg.textContent = '⏳ Caricamento allegato...';
+      const fname = sanitizeFilename(_pendingAttachFile.name);
+      alleg = await uploadFile(_pendingAttachFile, 'annunci/'+annuncioId+'/file_'+fname,
+        'attach-upload-progress', 'attach-upload-pct',
+        'attachment; filename="'+_pendingAttachFile.name+'"');
+      allegLbl = _pendingAttachFile.name;
+    }
+
+    const oggi = new Date().toLocaleDateString('it-IT');
+    const data = {
+      icona, titolo, testo,
+      immagineUrl: img || '',
+      linkUrl: link || '', linkLabel: linkLbl || '',
+      allegatoUrl: alleg || '', allegatoLabel: allegLbl || '',
+      validoFino: validoFino || '',
+      data: oggi,
+      timestamp: _editingId ? (_annunci[_editingId]?.timestamp || Date.now()) : Date.now(),
+    };
+
+    msg.textContent = '⏳ Pubblicazione...';
+    if(_editingId){
+      await fbUpdate('ppl/annunci/'+_editingId, data);
+    } else {
+      await _db.ref('ppl/annunci/'+annuncioId).set(data);
+    }
+    msg.textContent = '✓ Pubblicato con successo'; msg.style.color = 'var(--grn)';
+    _pendingImageFile = null; _pendingAttachFile = null;
+    setTimeout(closeAnnuncioForm, 900);
+  }catch(e){
+    msg.textContent = '✕ '+e.message; msg.style.color = 'var(--red)';
+  }
+}
+
+async function deleteAnnuncio(id){
+  if(!confirm('Eliminare questo annuncio? Sparirà anche dalla bacheca dei clienti e i file allegati verranno rimossi.')) return;
+  try{
+    await fbRemove('ppl/annunci/'+id);
+    // Rimuovi anche i file da Storage (se presenti) — best-effort, non bloccante
+    const storage = getStorage();
+    if(storage){
+      try{
+        const folderRef = storage.ref().child('annunci/'+id);
+        const list = await folderRef.listAll();
+        await Promise.all(list.items.map(item=>item.delete().catch(()=>{})));
+      }catch(e){ /* cartella vuota o già rimossa, ignora */ }
+    }
+  }catch(e){ alert('Errore: '+e.message); }
+}
+
+/* ── Render lista annunci ── */
+function renderAnnunci(){
+  const container = document.getElementById('annunci-list');
+  const items = Object.entries(_annunci)
+    .map(([id,a])=>({id,...a}))
+    .sort((a,b)=>(b.timestamp||0)-(a.timestamp||0));
+
+  if(!items.length){
+    container.innerHTML = `<div class="empty-state">
+      <div class="empty-state-icon">📢</div>
+      <div class="empty-state-text">Nessun annuncio pubblicato</div>
+      <div style="font-size:11px;color:var(--mu);margin-top:8px;">Crea il primo annuncio per i tuoi clienti</div>
+    </div>`;
+    return;
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  container.innerHTML = items.map(a=>{
+    const isExpired = a.validoFino && a.validoFino < today;
+    return `
+    <div class="ann-card" style="${isExpired?'opacity:.5;':''}">
+      <div class="ann-head">
+        <span class="ann-icon">${a.icona||'📌'}</span>
+        <div style="flex:1;">
+          <div class="ann-title">${a.titolo||''} ${isExpired?'<span style=\'font-family:"DM Mono",monospace;font-size:8px;color:var(--red);margin-left:6px;\'>SCADUTO</span>':''}</div>
+          <div class="ann-date">${a.data||''}${a.validoFino?' · valido fino al '+new Date(a.validoFino).toLocaleDateString('it-IT'):''}</div>
+        </div>
+        <div class="ann-actions">
+          <button class="icon-btn" onclick="editAnnuncio('${a.id}')">✏</button>
+          <button class="icon-btn del" onclick="deleteAnnuncio('${a.id}')">✕</button>
+        </div>
+      </div>
+      ${a.immagineUrl ? `<img src="${a.immagineUrl}" class="ann-img" onerror="this.style.display='none'">` : ''}
+      <div class="ann-body">${a.testo||''}</div>
+      ${a.linkUrl ? `<a href="${a.linkUrl}" target="_blank" class="ann-link">🔗 ${a.linkLabel||a.linkUrl}</a>` : ''}
+      ${a.allegatoUrl ? `<a href="${a.allegatoUrl}" target="_blank" class="ann-attach">📎 ${a.allegatoLabel||'Allegato'}</a>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ── Nav ── */
+function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}
+});
+
+document.addEventListener('DOMContentLoaded', initFirebase);
+
+
+/* ══ AUTOMAZIONE 3 — DIGEST SETTIMANALE ══════════════════════════════════
+   Riepilogo di 7 giorni: nuovi clienti, abbonamenti in scadenza, sessioni.
+   Nessun invio automatico — genera testo pronto da copiare e incollare
+   su WhatsApp/email, perché non è ancora configurato un servizio di invio.
+   ═══════════════════════════════════════════════════════════════════════ */
+let _digestOpen = false;
+async function toggleDigest(){
+  _digestOpen = !_digestOpen;
+  const wrap = document.getElementById('digest-wrap');
+  if(!_digestOpen){ wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="empty-state"><div class="empty-state-text">Caricamento dati...</div></div>';
+
+  // Carica dati freschi da Firebase per il digest (lettura singola, non listener)
+  const snap = await _db.ref('ppl').once('value');
+  const d = snap.val()||{};
+  const clienti = d.clienti||{};
+  const abbonamenti = d.abbonamenti||{};
+  const sessioni = d.sessioni||{};
+  const pacchetti = d.pacchetti||{};
+
+  const oggi = new Date(); oggi.setHours(0,0,0,0);
+  const settimanaFa = new Date(oggi); settimanaFa.setDate(settimanaFa.getDate()-7);
+  const settimanaAvanti = new Date(oggi); settimanaAvanti.setDate(settimanaAvanti.getDate()+7);
+
+  function parseIT(str){
+    if(!str) return null;
+    if(str.includes('/')){ const p=str.split('/'); return new Date(+p[2],+p[1]-1,+p[0]); }
+    if(str.includes('-')) return new Date(str+'T00:00:00');
+    return null;
+  }
+
+  const nuoviClienti = Object.values(clienti).filter(c=>{
+    const d2 = parseIT(c.dataIscrizione);
+    return d2 && d2 >= settimanaFa;
+  });
+
+  const inScadenza = Object.values(abbonamenti).filter(a=>{
+    if(a.stato!=='Attivo') return false;
+    const sd = parseIT(a.dataScadenza);
+    const crLow = parseInt(a.creditiResidui||0) <= 2;
+    return crLow || (sd && sd <= settimanaAvanti);
+  });
+
+  const sessioniSettimana = Object.values(sessioni).filter(s=>{
+    const sd = parseIT(s.data);
+    return sd && sd >= settimanaFa && sd <= oggi;
+  });
+
+  const testo = `📋 DIGEST SETTIMANALE — ${oggi.toLocaleDateString('it-IT')}
+
+👥 Nuovi clienti: ${nuoviClienti.length}
+${nuoviClienti.map(c=>'  • '+c.nome+' '+c.cognome).join('\\n')||'  Nessuno'}
+
+⚠ Abbonamenti da rinnovare: ${inScadenza.length}
+${inScadenza.map(a=>{
+    const c = Object.values(clienti).find(cl=>Object.entries(clienti).find(([id,cc])=>cc===cl&&id===a.clienteId));
+    const cliName = clienti[a.clienteId] ? clienti[a.clienteId].nome+' '+clienti[a.clienteId].cognome : '—';
+    return '  • '+cliName+' — '+(a.creditiResidui||0)+' crediti rimasti';
+  }).join('\\n')||'  Nessuno'}
+
+📅 Sessioni negli ultimi 7 giorni: ${sessioniSettimana.length}`;
+
+  wrap.innerHTML = `
+    <div class="form-card">
+      <div class="form-title">📋 Digest — ${oggi.toLocaleDateString('it-IT')}</div>
+      <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;">
+        <div><div class="form-lbl">Nuovi clienti</div>
+          <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--gold);">${nuoviClienti.length}</div></div>
+        <div><div class="form-lbl">Da rinnovare</div>
+          <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--org);">${inScadenza.length}</div></div>
+        <div><div class="form-lbl">Sessioni settimana</div>
+          <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--grn);">${sessioniSettimana.length}</div></div>
+      </div>
+      <textarea class="form-inp" rows="10" readonly style="font-family:'DM Mono',monospace;font-size:11px;" id="digest-text">${testo}</textarea>
+      <div class="form-actions">
+        <button class="btn pri" onclick="copyDigest()">📋 Copia testo</button>
+      </div>
+      <div id="digest-msg" class="form-msg"></div>
+    </div>`;
+}
+
+function copyDigest(){
+  const ta = document.getElementById('digest-text');
+  ta.select();
+  document.execCommand('copy');
+  const msg = document.getElementById('digest-msg');
+  msg.textContent = '✓ Copiato negli appunti'; msg.style.color='var(--grn)';
+  setTimeout(()=>{msg.textContent='';}, 2000);
+}
+
+/* ══ AUTOMAZIONE 4 — PROMEMORIA LEZIONI DI DOMANI ═══════════════════════
+   Nessun invio automatico (richiederebbe un servizio WhatsApp/email a
+   parte, non ancora configurato) — genera la lista clienti da contattare,
+   pronta da incollare in una chat o da usare per chiamate rapide.
+   ═══════════════════════════════════════════════════════════════════════ */
+let _reminderOpen = false;
+async function toggleReminder(){
+  _reminderOpen = !_reminderOpen;
+  const wrap = document.getElementById('reminder-wrap');
+  if(!_reminderOpen){ wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  wrap.innerHTML = '<div class="empty-state"><div class="empty-state-text">Caricamento...</div></div>';
+
+  const snap = await _db.ref('ppl').once('value');
+  const d = snap.val()||{};
+  const clienti = d.clienti||{};
+  const lezioni = d.lezioni||{};
+  const tipiLezione = d.tipiLezione||{};
+
+  const domani = new Date(); domani.setDate(domani.getDate()+1);
+  const domaniStr = domani.getFullYear()+'-'+String(domani.getMonth()+1).padStart(2,'0')+'-'+String(domani.getDate()).padStart(2,'0');
+
+  const lezioniDomani = Object.entries(lezioni)
+    .filter(([,l])=>l.data===domaniStr)
+    .map(([id,l])=>({id,...l}))
+    .sort((a,b)=>a.ora.localeCompare(b.ora));
+
+  if(!lezioniDomani.length){
+    wrap.innerHTML = `<div class="form-card"><div class="empty-state">
+      <div class="empty-state-text">Nessuna lezione programmata per domani</div>
+    </div></div>`;
+    return;
+  }
+
+  let testo = `🔔 LEZIONI DI DOMANI — ${domani.toLocaleDateString('it-IT')}\\n\\n`;
+  let html = '';
+  lezioniDomani.forEach(l=>{
+    const tipo = tipiLezione[l.tipoId];
+    const presentiIds = Object.keys(l.presenti||{});
+    const nomi = presentiIds.map(cid=>{
+      const c = clienti[cid];
+      return c ? c.nome+' '+c.cognome : cid;
+    });
+    testo += `${l.ora} — ${tipo?.nome||'Lezione'} (${nomi.length} iscritti)\\n`;
+    testo += nomi.map(n=>'  • '+n).join('\\n') + (nomi.length?'\\n':'  Nessun iscritto\\n') + '\\n';
+
+    html += `<div style="background:var(--g2);border-radius:6px;padding:12px 14px;margin-bottom:8px;">
+      <div style="font-size:13px;color:var(--wh);font-weight:500;">${l.ora} — ${tipo?.nome||'Lezione'}
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--mu);">(${nomi.length} iscritti)</span></div>
+      <div style="font-size:11px;color:var(--mu2);margin-top:6px;">${nomi.join(' · ')||'Nessun iscritto'}</div>
+    </div>`;
+  });
+
+  wrap.innerHTML = `
+    <div class="form-card">
+      <div class="form-title">🔔 Lezioni di domani — ${domani.toLocaleDateString('it-IT')}</div>
+      ${html}
+      <textarea class="form-inp" rows="8" readonly style="font-family:'DM Mono',monospace;font-size:10px;margin-top:10px;" id="reminder-text">${testo}</textarea>
+      <div class="form-actions">
+        <button class="btn pri" onclick="copyReminder()">📋 Copia lista</button>
+      </div>
+      <div id="reminder-msg" class="form-msg"></div>
+    </div>`;
+}
+
+function copyReminder(){
+  const ta = document.getElementById('reminder-text');
+  ta.select();
+  document.execCommand('copy');
+  const msg = document.getElementById('reminder-msg');
+  msg.textContent = '✓ Copiato negli appunti'; msg.style.color='var(--grn)';
+  setTimeout(()=>{msg.textContent='';}, 2000);
+}
+
+</script>
+</html>
