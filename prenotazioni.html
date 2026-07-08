@@ -1019,6 +1019,7 @@ select.pkg-edit-inp{cursor:pointer;}
   <a class="tn-link" href="intensita.html">⚡ Intensità</a>
   <a class="tn-link" href="sop.html">📁 SOP</a>
   <a class="tn-link active" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="comunicazioni.html">📢 Comunicazioni</a>
   <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
   <a class="tn-link" href="listino.html">💰 Listino</a>
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
@@ -1028,6 +1029,37 @@ select.pkg-edit-inp{cursor:pointer;}
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
 </nav>
+<!-- ══ COACH LOGIN GATE — richiesto solo quando le Security Rules sono attive ══ -->
+<div id="coach-login-overlay" class="app-hidden" style="position:fixed;inset:0;z-index:99999;
+  background:var(--bk);display:flex;align-items:center;justify-content:center;padding:24px;">
+  <div style="width:100%;max-width:360px;background:var(--g1);border:1px solid var(--g3);
+    border-radius:10px;padding:28px 24px;">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;
+      letter-spacing:8px;color:var(--gold);text-transform:uppercase;text-align:center;margin-bottom:4px;">PPL</div>
+    <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:3px;color:var(--mu);
+      text-transform:uppercase;text-align:center;margin-bottom:28px;">Accesso Coach</div>
+    <div style="margin-bottom:14px;">
+      <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);
+        text-transform:uppercase;display:block;margin-bottom:6px;">Email</span>
+      <input id="coach-login-email" type="email" placeholder="tuo@email.com"
+        style="width:100%;background:var(--g2);border:1px solid var(--g4);border-radius:6px;
+        color:var(--wh);font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box;">
+    </div>
+    <div style="margin-bottom:18px;">
+      <span style="font-family:'DM Mono',monospace;font-size:8px;letter-spacing:2px;color:var(--mu);
+        text-transform:uppercase;display:block;margin-bottom:6px;">Password</span>
+      <input id="coach-login-pw" type="password" placeholder="••••••••"
+        style="width:100%;background:var(--g2);border:1px solid var(--g4);border-radius:6px;
+        color:var(--wh);font-size:14px;padding:11px 14px;outline:none;box-sizing:border-box;">
+    </div>
+    <button id="coach-login-btn" onclick="doCoachLogin()"
+      style="width:100%;background:var(--gold);border:none;border-radius:6px;color:#000;
+      font-size:14px;font-weight:600;padding:13px;cursor:pointer;">Accedi</button>
+    <div id="coach-login-error" style="font-size:12px;color:var(--red);margin-top:10px;
+      text-align:center;min-height:16px;"></div>
+  </div>
+</div>
+
 <div class="standalone-wrap">
   <div class="topbar-simple">
     <span class="tb-title-s">Prenotazioni & Crediti</span>
@@ -1346,6 +1378,8 @@ select.pkg-edit-inp{cursor:pointer;}
         border-radius:4px;padding:12px;margin-bottom:12px;"></div>
       <div id="client-auth-panel" style="display:none;background:var(--g2);border:1px solid var(--g4);
         border-radius:4px;padding:14px;margin-bottom:12px;"></div>
+      <div id="cert-medico-panel" style="background:var(--g2);border:1px solid var(--g4);
+        border-radius:4px;padding:14px;margin-bottom:12px;"></div>
       <div class="client-detail-grid" id="detail-stats" style="margin-bottom:14px;"></div>
       <div class="slbl-mini">Abbonamenti</div>
       <div id="detail-abbs" style="margin-bottom:14px;"></div>
@@ -1403,6 +1437,7 @@ select.pkg-edit-inp{cursor:pointer;}
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-storage-compat.js"></script>
 <script>
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -1566,11 +1601,14 @@ function renderClienti(){
       </div>`;
     }).join('');
     const init=((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
-    return `<div class="client-card" onclick="openClient('${cid}')">
+    const selfRegBadge = c.autoregistrato
+      ? '<span style="font-family:\'DM Mono\',monospace;font-size:7px;letter-spacing:1px;text-transform:uppercase;padding:2px 6px;border-radius:2px;background:rgba(184,151,42,.15);border:1px solid rgba(184,151,42,.35);color:var(--gold);margin-left:6px;">🆕 Autoregistrato</span>'
+      : '';
+    return `<div class="client-card" onclick="openClient('${cid}')" style="${c.autoregistrato?'border-color:rgba(184,151,42,.4);':''}">
       <div class="client-card-head">
         <div class="client-avatar">${init}</div>
         <div>
-          <div class="client-name">${c.nome||''} ${c.cognome||''}</div>
+          <div class="client-name">${c.nome||''} ${c.cognome||''}${selfRegBadge}</div>
           <div class="client-pkg">${abbsA.length?abbsA.length+' abb. attiv'+(abbsA.length>1?'i':'o'):'Nessun abbonamento'}</div>
         </div>
       </div>
@@ -2119,7 +2157,7 @@ document.addEventListener('click',function(e){
 
 /* ══ INIT ═════════════════════════════════════════════════════════════ */
 
-document.addEventListener('DOMContentLoaded',initFirebase);
+document.addEventListener('DOMContentLoaded',()=>initCoachGate(initFirebase));
 
 
 
@@ -2541,6 +2579,7 @@ function openClient(cid){
       <span class="client-sess-cr">-${s.crediti||1}</span></div>`).join('')
       :'<div style="font-size:11px;color:var(--mu);">Nessuna sessione</div>';
   }
+  renderCertMedico();
   openModal('modal-client-detail');
 }
 
@@ -2970,6 +3009,231 @@ async function revokeClientAuth(){
     await fbUpdate('ppl/clienti/'+_currentClientId, { authUid: null, authEmail: null });
     openClientAuthPanel();
   }catch(e){ alert('Errore: '+e.message); }
+}
+
+
+/* ══ CERTIFICATO MEDICO ═══════════════════════════════════════════════════
+   Upload PDF su Firebase Storage a percorso FISSO per cliente:
+   certificati/{clienteId}/certificato.pdf
+   Caricare un nuovo file sullo stesso percorso SOVRASCRIVE automaticamente
+   il precedente — nessuno spazio sprecato, nessun file vecchio da eliminare
+   manualmente. Il metadato (data caricamento, eventuale scadenza) vive nel
+   Database accanto al cliente.
+   ═══════════════════════════════════════════════════════════════════════ */
+let _certStorage = null;
+function getCertStorage(){
+  if(_certStorage) return _certStorage;
+  if(!firebase.apps.length) return null;
+  try{ _certStorage = firebase.storage(); return _certStorage; }
+  catch(e){ console.error('Storage non disponibile:', e); return null; }
+}
+
+function renderCertMedico(){
+  const c = _data.clienti?.[_currentClientId];
+  const panel = document.getElementById('cert-medico-panel');
+  if(!c || !panel) return;
+
+  const cert = c.certificatoMedico;
+  const oggi = new Date().toISOString().split('T')[0];
+  const scaduto = cert?.scadenza && cert.scadenza < oggi;
+
+  if(cert?.url){
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        <span style="font-size:18px;">${scaduto ? '⚠️' : '🏥'}</span>
+        <div style="flex:1;">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
+            text-transform:uppercase;color:${scaduto?'var(--red)':'var(--grn)'};">
+            ${scaduto ? 'Certificato scaduto' : 'Certificato medico presente'}
+          </div>
+          <div style="font-size:10px;color:var(--mu);margin-top:2px;">
+            Caricato il ${cert.dataCaricamento||'—'}${cert.scadenza ? ' · Scadenza: '+new Date(cert.scadenza).toLocaleDateString('it-IT') : ''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <a href="${cert.url}" target="_blank" class="btn" style="font-size:9px;text-decoration:none;">👁 Visualizza PDF</a>
+        <label class="btn" style="font-size:9px;cursor:pointer;margin:0;">
+          ↻ Sostituisci
+          <input type="file" accept="application/pdf" onchange="uploadCertMedico(this)" style="display:none;">
+        </label>
+        <input type="date" id="cert-scadenza-inp" class="pkg-edit-inp" style="width:140px;font-size:10px;padding:5px 8px;"
+          value="${cert.scadenza||''}" onchange="updateCertScadenza(this.value)" title="Data scadenza certificato">
+        <button class="btn danger" style="font-size:9px;" onclick="removeCertMedico()">🗑 Rimuovi</button>
+      </div>
+      <div id="cert-upload-progress" style="display:none;font-size:10px;color:var(--gold);margin-top:8px;">⏳ Caricamento... <span id="cert-upload-pct">0%</span></div>
+      <div id="cert-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>`;
+  } else {
+    panel.innerHTML = `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <span style="font-size:18px;">🏥</span>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;
+          text-transform:uppercase;color:var(--mu);">Nessun certificato medico caricato</div>
+      </div>
+      <label class="btn pri" style="font-size:9px;cursor:pointer;display:inline-block;">
+        📎 Carica certificato PDF
+        <input type="file" accept="application/pdf" onchange="uploadCertMedico(this)" style="display:none;">
+      </label>
+      <div id="cert-upload-progress" style="display:none;font-size:10px;color:var(--gold);margin-top:8px;">⏳ Caricamento... <span id="cert-upload-pct">0%</span></div>
+      <div id="cert-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>`;
+  }
+}
+
+async function uploadCertMedico(input){
+  const file = input.files?.[0];
+  if(!file) return;
+  if(file.type !== 'application/pdf'){
+    alert('Il certificato deve essere un file PDF.');
+    return;
+  }
+  if(file.size > 10*1024*1024){
+    alert('File troppo grande (max 10 MB).');
+    return;
+  }
+
+  const msg = document.getElementById('cert-msg');
+  const storage = getCertStorage();
+  if(!storage){
+    if(msg){ msg.textContent = '✕ Firebase Storage non configurato.'; msg.style.color='var(--red)'; }
+    return;
+  }
+
+  if(msg){ msg.textContent=''; }
+  const progEl = document.getElementById('cert-upload-progress');
+  const pctEl = document.getElementById('cert-upload-pct');
+  if(progEl) progEl.style.display='block';
+
+  try{
+    // Percorso FISSO — ogni nuovo upload sovrascrive il precedente automaticamente
+    const path = 'certificati/'+_currentClientId+'/certificato.pdf';
+    const ref = storage.ref().child(path);
+    const task = ref.put(file, { contentDisposition: 'inline; filename="certificato_medico.pdf"' });
+
+    task.on('state_changed',
+      snap=>{ if(pctEl) pctEl.textContent = Math.round((snap.bytesTransferred/snap.totalBytes)*100)+'%'; },
+      err=>{
+        if(progEl) progEl.style.display='none';
+        if(msg){ msg.textContent='✕ '+err.message; msg.style.color='var(--red)'; }
+      },
+      async ()=>{
+        if(progEl) progEl.style.display='none';
+        const url = await task.snapshot.ref.getDownloadURL();
+        const oggi = new Date().toLocaleDateString('it-IT');
+        await fbUpdate('ppl/clienti/'+_currentClientId, {
+          certificatoMedico: { url, dataCaricamento: oggi, scadenza: '' }
+        });
+        if(msg){ msg.textContent='✓ Certificato caricato'; msg.style.color='var(--grn)'; }
+        setTimeout(()=>renderCertMedico(), 800);
+      }
+    );
+  }catch(e){
+    if(progEl) progEl.style.display='none';
+    if(msg){ msg.textContent='✕ '+e.message; msg.style.color='var(--red)'; }
+  }
+}
+
+async function updateCertScadenza(scadenza){
+  const c = _data.clienti?.[_currentClientId];
+  const cert = c?.certificatoMedico || {};
+  try{
+    await fbUpdate('ppl/clienti/'+_currentClientId, {
+      certificatoMedico: { ...cert, scadenza }
+    });
+  }catch(e){ console.error(e); }
+}
+
+async function removeCertMedico(){
+  if(!confirm('Rimuovere il certificato medico caricato?')) return;
+  try{
+    const storage = getCertStorage();
+    if(storage){
+      try{ await storage.ref().child('certificati/'+_currentClientId+'/certificato.pdf').delete(); }
+      catch(e){ /* file già assente, ignora */ }
+    }
+    await fbUpdate('ppl/clienti/'+_currentClientId, { certificatoMedico: null });
+    renderCertMedico();
+  }catch(e){ alert('Errore: '+e.message); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COACH LOGIN GATE ═══════════════════════════════════════════════════════
+   Wrapper di autenticazione per il gestionale coach. Finché le Security
+   Rules restano aperte (Fase 1), questo overlay è disattivato e il
+   gestionale funziona esattamente come prima — zero rischio.
+   Quando le Security Rules verranno bloccate (Fase 2), impostare
+   COACH_AUTH_REQUIRED = true per attivare il login obbligatorio.
+   ═══════════════════════════════════════════════════════════════════════ */
+const COACH_AUTH_REQUIRED = false; // ← passa a true SOLO dopo aver bloccato le Security Rules
+
+let _coachAuth = null;
+let _coachAuthenticated = false;
+
+function initCoachGate(originalInit){
+  if(!COACH_AUTH_REQUIRED){
+    // Fase 1: nessun gate, comportamento identico a prima
+    originalInit();
+    return;
+  }
+
+  const cfg = getPPLConfig();
+  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL){
+    originalInit(); // lascia che initFirebase gestisca il messaggio "non configurato"
+    return;
+  }
+
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey: cfg.firebase_apiKey,
+        authDomain: cfg.firebase_authDomain || (cfg.firebase_projectId+'.firebaseapp.com'),
+        databaseURL: cfg.firebase_databaseURL,
+        projectId: cfg.firebase_projectId,
+      });
+    }
+    _coachAuth = firebase.auth();
+  }catch(e){
+    console.error('Coach auth init error:', e);
+    originalInit();
+    return;
+  }
+
+  _coachAuth.onAuthStateChanged(user=>{
+    if(user){
+      _coachAuthenticated = true;
+      document.getElementById('coach-login-overlay')?.classList.add('app-hidden');
+      originalInit();
+    } else {
+      _coachAuthenticated = false;
+      document.getElementById('coach-login-overlay')?.classList.remove('app-hidden');
+    }
+  });
+}
+
+async function doCoachLogin(){
+  const email = document.getElementById('coach-login-email')?.value.trim();
+  const pw    = document.getElementById('coach-login-pw')?.value;
+  const errEl = document.getElementById('coach-login-error');
+  const btn   = document.getElementById('coach-login-btn');
+  errEl.textContent = '';
+
+  if(!email || !pw){ errEl.textContent = 'Inserisci email e password.'; return; }
+
+  btn.disabled = true; btn.textContent = 'Accesso...';
+  try{
+    await _coachAuth.signInWithEmailAndPassword(email, pw);
+    // onAuthStateChanged gestisce il resto
+  }catch(e){
+    const msgs = {
+      'auth/wrong-password': 'Password errata.',
+      'auth/user-not-found': 'Nessun account coach trovato con questa email.',
+      'auth/invalid-credential': 'Email o password errati.',
+      'auth/too-many-requests': 'Troppi tentativi. Riprova più tardi.',
+    };
+    errEl.textContent = msgs[e.code] || 'Errore: ' + e.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Accedi';
+  }
 }
 
 </script>
