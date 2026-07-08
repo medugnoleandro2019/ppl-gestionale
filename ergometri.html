@@ -483,6 +483,13 @@ nav.ppl-topnav.nav-open a.tn-link{
   .erg-tab{min-width:50%;}
 }
 
+.mode-toggle{display:flex;gap:0;margin-bottom:14px;border:1px solid var(--g3);border-radius:4px;overflow:hidden;width:fit-content;}
+.mode-btn{padding:7px 14px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;
+  text-transform:uppercase;cursor:pointer;background:var(--g1);color:var(--mu);border:none;transition:.15s;}
+.mode-btn.active{background:var(--gold);color:#000;}
+.mode-panel{display:none;}
+.mode-panel.active{display:block;}
+
 </style>
 </head>
 <body>
@@ -495,6 +502,7 @@ nav.ppl-topnav.nav-open a.tn-link{
   <a class="tn-link" href="intensita.html">⚡ Intensità</a>
   <a class="tn-link" href="sop.html">📁 SOP</a>
   <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="comunicazioni.html">📢 Comunicazioni</a>
   <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
   <a class="tn-link" href="listino.html">💰 Listino</a>
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
@@ -546,22 +554,48 @@ nav.ppl-topnav.nav-open a.tn-link{
 <!-- CALCULATORE PACE ↔ WATT -->
 <div id="erg-panel-row" class="erg-panel active">
   <div class="slbl">Calcolatore Pace ↔ Watt — RowErg</div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="row-mode-split-btn" onclick="setErgMode('row','split',this)">Split 500m</button>
+    <button class="mode-btn" id="row-mode-real-btn" onclick="setErgMode('row','real',this)">Distanza e tempo reali</button>
+  </div>
+
   <div class="calc-block">
-    <div class="calc-row">
-      <div class="calc-field">
-        <span class="calc-lbl-s">Minuti split 500m</span>
-        <input class="calc-inp" id="row-min" type="number" min="0" max="9" placeholder="1" oninput="calcErg('row')">
+    <div class="mode-panel active" id="row-mode-split">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Minuti split 500m</span>
+          <input class="calc-inp" id="row-min" type="number" min="0" max="9" placeholder="1" oninput="calcErg('row')">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Secondi</span>
+          <input class="calc-inp" id="row-sec" type="number" min="0" max="59" placeholder="55" oninput="calcErg('row')">
+        </div>
+        <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Watt (inverso)</span>
+          <input class="calc-inp" id="row-watt" type="number" min="0" max="2000" placeholder="200" oninput="calcErgFromWatt('row')">
+        </div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">Secondi</span>
-        <input class="calc-inp" id="row-sec" type="number" min="0" max="59" placeholder="55" oninput="calcErg('row')">
+    </div>
+    <div class="mode-panel" id="row-mode-real">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Distanza percorsa (m)</span>
+          <input class="calc-inp" id="row-real-dist" type="number" min="1" max="50000" placeholder="es. 350" oninput="calcErgReal('row')">
+        </div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Minuti impiegati</span>
+          <input class="calc-inp" id="row-real-min" type="number" min="0" max="120" placeholder="1" oninput="calcErgReal('row')">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Secondi</span>
+          <input class="calc-inp" id="row-real-sec" type="number" min="0" max="59" placeholder="30" oninput="calcErgReal('row')">
+        </div>
       </div>
-      <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">Watt (inverso)</span>
-        <input class="calc-inp" id="row-watt" type="number" min="0" max="2000" placeholder="200" oninput="calcErgFromWatt('row')">
-      </div>
+      <div class="calc-hint">Inserisci qualsiasi distanza realmente percorsa (es. 200m, 350m, 700m) — non serve che sia un multiplo di 500.</div>
     </div>
     <div class="result-strip" id="row-results">
       <div class="result-cell"><div class="result-lbl">Watt</div><div class="result-val nd" id="row-res-watt">—</div></div>
@@ -590,22 +624,48 @@ nav.ppl-topnav.nav-open a.tn-link{
 
 <div id="erg-panel-ski" class="erg-panel">
   <div class="slbl">Calcolatore Pace ↔ Watt — SkiErg</div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="ski-mode-split-btn" onclick="setErgMode('ski','split',this)">Split 500m</button>
+    <button class="mode-btn" id="ski-mode-real-btn" onclick="setErgMode('ski','real',this)">Distanza e tempo reali</button>
+  </div>
+
   <div class="calc-block">
-    <div class="calc-row">
-      <div class="calc-field">
-        <span class="calc-lbl-s">Minuti split 500m</span>
-        <input class="calc-inp" id="ski-min" type="number" min="0" max="9" placeholder="1" oninput="calcErg('ski')">
+    <div class="mode-panel active" id="ski-mode-split">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Minuti split 500m</span>
+          <input class="calc-inp" id="ski-min" type="number" min="0" max="9" placeholder="1" oninput="calcErg('ski')">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Secondi</span>
+          <input class="calc-inp" id="ski-sec" type="number" min="0" max="59" placeholder="50" oninput="calcErg('ski')">
+        </div>
+        <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Watt (inverso)</span>
+          <input class="calc-inp" id="ski-watt" type="number" min="0" max="2000" placeholder="180" oninput="calcErgFromWatt('ski')">
+        </div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">Secondi</span>
-        <input class="calc-inp" id="ski-sec" type="number" min="0" max="59" placeholder="50" oninput="calcErg('ski')">
+    </div>
+    <div class="mode-panel" id="ski-mode-real">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Distanza percorsa (m)</span>
+          <input class="calc-inp" id="ski-real-dist" type="number" min="1" max="50000" placeholder="es. 350" oninput="calcErgReal('ski')">
+        </div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Minuti impiegati</span>
+          <input class="calc-inp" id="ski-real-min" type="number" min="0" max="120" placeholder="1" oninput="calcErgReal('ski')">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Secondi</span>
+          <input class="calc-inp" id="ski-real-sec" type="number" min="0" max="59" placeholder="30" oninput="calcErgReal('ski')">
+        </div>
       </div>
-      <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">Watt (inverso)</span>
-        <input class="calc-inp" id="ski-watt" type="number" min="0" max="2000" placeholder="180" oninput="calcErgFromWatt('ski')">
-      </div>
+      <div class="calc-hint">Inserisci qualsiasi distanza realmente percorsa — non serve un multiplo di 500.</div>
     </div>
     <div class="result-strip">
       <div class="result-cell"><div class="result-lbl">Watt</div><div class="result-val nd" id="ski-res-watt">—</div></div>
@@ -618,22 +678,48 @@ nav.ppl-topnav.nav-open a.tn-link{
 
 <div id="erg-panel-bike" class="erg-panel">
   <div class="slbl">Calcolatore Pace ↔ Watt — BikeErg</div>
+
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="bike-mode-split-btn" onclick="setErgMode('bike','split',this)">Split 1000m</button>
+    <button class="mode-btn" id="bike-mode-real-btn" onclick="setErgMode('bike','real',this)">Distanza e tempo reali</button>
+  </div>
+
   <div class="calc-block">
-    <div class="calc-row">
-      <div class="calc-field">
-        <span class="calc-lbl-s">Minuti split 1000m</span>
-        <input class="calc-inp" id="bike-min" type="number" min="0" max="9" placeholder="3" oninput="calcErg('bike')">
+    <div class="mode-panel active" id="bike-mode-split">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Minuti split 1000m</span>
+          <input class="calc-inp" id="bike-min" type="number" min="0" max="9" placeholder="3" oninput="calcErg('bike')">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Secondi</span>
+          <input class="calc-inp" id="bike-sec" type="number" min="0" max="59" placeholder="30" oninput="calcErg('bike')">
+        </div>
+        <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Watt (inverso)</span>
+          <input class="calc-inp" id="bike-watt" type="number" min="0" max="2000" placeholder="200" oninput="calcErgFromWatt('bike')">
+        </div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">Secondi</span>
-        <input class="calc-inp" id="bike-sec" type="number" min="0" max="59" placeholder="30" oninput="calcErg('bike')">
+    </div>
+    <div class="mode-panel" id="bike-mode-real">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Distanza percorsa (m)</span>
+          <input class="calc-inp" id="bike-real-dist" type="number" min="1" max="100000" placeholder="es. 750" oninput="calcErgReal('bike')">
+        </div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Minuti impiegati</span>
+          <input class="calc-inp" id="bike-real-min" type="number" min="0" max="120" placeholder="2" oninput="calcErgReal('bike')">
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:24px;color:var(--mu);align-self:flex-end;padding-bottom:8px;">:</div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Secondi</span>
+          <input class="calc-inp" id="bike-real-sec" type="number" min="0" max="59" placeholder="15" oninput="calcErgReal('bike')">
+        </div>
       </div>
-      <div style="flex:0.2;min-width:30px;align-self:flex-end;padding-bottom:10px;font-size:18px;color:var(--mu);">oppure</div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">Watt (inverso)</span>
-        <input class="calc-inp" id="bike-watt" type="number" min="0" max="2000" placeholder="200" oninput="calcErgFromWatt('bike')">
-      </div>
+      <div class="calc-hint">Inserisci qualsiasi distanza realmente percorsa in bici — non serve un multiplo di 1000.</div>
     </div>
     <div class="result-strip">
       <div class="result-cell"><div class="result-lbl">Watt</div><div class="result-val nd" id="bike-res-watt">—</div></div>
@@ -839,6 +925,52 @@ function calcErgFromWatt(type){
   if(secEl) secEl.value = s;
   updateErgResults(type, splitSec, watts);
 }
+
+/* ══ MODALITÀ DISTANZA E TEMPO REALI ═══════════════════════════════════════
+   La formula Concept2 (W = 2,8 / secPerMetro³) dipende solo dal ritmo in
+   secondi-per-metro — non dalla distanza standard di 500m/1000m. Questa
+   modalità permette di inserire QUALSIASI distanza realmente percorsa
+   (200m, 350m, 700m, ecc.) e il tempo impiegato, calcolando ritmo e watt
+   reali senza dover convertire mentalmente allo split standard.
+   ═══════════════════════════════════════════════════════════════════════ */
+const _ergMode = { row:'split', ski:'split', bike:'split' };
+
+function setErgMode(type, mode, el){
+  _ergMode[type] = mode;
+  document.getElementById(type+'-mode-split-btn').classList.toggle('active', mode==='split');
+  document.getElementById(type+'-mode-real-btn').classList.toggle('active', mode==='real');
+  document.getElementById(type+'-mode-split').classList.toggle('active', mode==='split');
+  document.getElementById(type+'-mode-real').classList.toggle('active', mode==='real');
+}
+
+function calcErgReal(type){
+  const dist = parseFloat(document.getElementById(type+'-real-dist')?.value) || 0;
+  const min  = parseFloat(document.getElementById(type+'-real-min')?.value) || 0;
+  const sec  = parseFloat(document.getElementById(type+'-real-sec')?.value) || 0;
+  const totalSec = min*60 + sec;
+  if(dist <= 0 || totalSec <= 0) return;
+
+  // Ritmo effettivo in secondi/metro — indipendente dalla distanza standard
+  const secPerMeter = totalSec / dist;
+  const watts = 2.8 / Math.pow(secPerMeter, 3);
+
+  // Split equivalente sulla distanza standard del tipo di macchina (per confronto/benchmark)
+  const standardDist = type==='bike' ? 1000 : 500;
+  const equivalentSplitSec = secPerMeter * standardDist;
+
+  updateErgResults(type, equivalentSplitSec, watts);
+
+  // Aggiorna anche i campi "split standard" cosicché Hyrox/Deka restino coerenti
+  const m = Math.floor(equivalentSplitSec/60);
+  const s = Math.round(equivalentSplitSec%60);
+  const minEl = document.getElementById(type+'-min');
+  const secEl = document.getElementById(type+'-sec');
+  const wattEl = document.getElementById(type+'-watt');
+  if(minEl) minEl.value = m;
+  if(secEl) secEl.value = s;
+  if(wattEl) wattEl.value = Math.round(watts);
+}
+
 
 function updateErgResults(type, splitSec, watts){
   const set = (id, val) => { const el=document.getElementById(id); if(el){el.textContent=val;el.classList.remove('nd');} };
