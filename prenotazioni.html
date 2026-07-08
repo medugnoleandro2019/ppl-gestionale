@@ -3164,7 +3164,7 @@ async function removeCertMedico(){
    Quando le Security Rules verranno bloccate (Fase 2), impostare
    COACH_AUTH_REQUIRED = true per attivare il login obbligatorio.
    ═══════════════════════════════════════════════════════════════════════ */
-const COACH_AUTH_REQUIRED = true; // ← passa a true SOLO dopo aver bloccato le Security Rules
+const COACH_AUTH_REQUIRED = false; // ← passa a true SOLO dopo aver bloccato le Security Rules
 
 let _coachAuth = null;
 let _coachAuthenticated = false;
@@ -3221,8 +3221,17 @@ async function doCoachLogin(){
 
   btn.disabled = true; btn.textContent = 'Accesso...';
   try{
-    await _coachAuth.signInWithEmailAndPassword(email, pw);
-    // onAuthStateChanged gestisce il resto
+    await _coachAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+    const cred = await _coachAuth.signInWithEmailAndPassword(email, pw);
+    console.log('[Coach Login] Autenticazione riuscita, UID:', cred.user.uid);
+    setTimeout(()=>{
+      if(!_coachAuthenticated){
+        console.warn('[Coach Login] onAuthStateChanged non scattato dopo 2s - sblocco manuale.');
+        _coachAuthenticated = true;
+        document.getElementById('coach-login-overlay')?.classList.add('app-hidden');
+        initFirebase();
+      }
+    }, 2000);
   }catch(e){
     const msgs = {
       'auth/wrong-password': 'Password errata.',
