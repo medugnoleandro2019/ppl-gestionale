@@ -3219,6 +3219,22 @@ async function doCoachLogin(){
 
   if(!email || !pw){ errEl.textContent = 'Inserisci email e password.'; return; }
 
+  // Attende fino a 3 secondi che _coachAuth sia pronto, per evitare race condition
+  // se l'utente clicca Accedi prima che l'inizializzazione Firebase sia completata
+  if(!_coachAuth){
+    errEl.textContent = 'Inizializzazione in corso, un secondo...';
+    let waited = 0;
+    while(!_coachAuth && waited < 3000){
+      await new Promise(r=>setTimeout(r,100));
+      waited += 100;
+    }
+    if(!_coachAuth){
+      errEl.textContent = 'Errore: Firebase non si è inizializzato. Ricarica la pagina e riprova.';
+      return;
+    }
+    errEl.textContent = '';
+  }
+
   btn.disabled = true; btn.textContent = 'Accesso...';
   try{
     await _coachAuth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
