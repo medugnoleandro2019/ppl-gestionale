@@ -295,6 +295,14 @@ nav.ppl-topnav.nav-open a.tn-link{
           <input class="res-inp" id="cfg-firebase-auth" type="text"
             placeholder="tuo-progetto.firebaseapp.com" oninput="autoSaveFirebase()">
         </div>
+        <div class="res-field">
+          <span class="res-lbl">Storage Bucket <span style="color:var(--g6);font-size:9px;">(richiesto per foto/PDF)</span></span>
+          <input class="res-inp" id="cfg-firebase-bucket" type="text"
+            placeholder="tuo-progetto.firebasestorage.app" oninput="autoSaveFirebase()">
+          <span style="font-size:9px;color:var(--g6);margin-top:3px;display:block;">
+            Console Firebase → Storage → in alto trovi "gs://nome-bucket" — copia solo il nome, senza "gs://"
+          </span>
+        </div>
         <div class="res-actions" style="margin-top:12px;">
           <button class="btn pri" onclick="saveFirebase()">✓ Salva configurazione</button>
           <button class="btn" onclick="testFirebase()">▶ Testa connessione</button>
@@ -417,15 +425,17 @@ let _autoSaveFbTimer = null;
 function autoSaveFirebase(){
   clearTimeout(_autoSaveFbTimer);
   _autoSaveFbTimer = setTimeout(()=>{
-    const key  = (document.getElementById('cfg-firebase-key')?.value||'').trim();
-    const db   = (document.getElementById('cfg-firebase-db')?.value||'').trim();
-    const pid  = (document.getElementById('cfg-firebase-pid')?.value||'').trim();
-    const auth = (document.getElementById('cfg-firebase-auth')?.value||'').trim();
+    const key    = (document.getElementById('cfg-firebase-key')?.value||'').trim();
+    const db     = (document.getElementById('cfg-firebase-db')?.value||'').trim();
+    const pid    = (document.getElementById('cfg-firebase-pid')?.value||'').trim();
+    const auth   = (document.getElementById('cfg-firebase-auth')?.value||'').trim();
+    const bucket = (document.getElementById('cfg-firebase-bucket')?.value||'').trim();
     const cfg = cfgGet();
-    cfg.firebase_apiKey      = key;
-    cfg.firebase_databaseURL = db;
-    cfg.firebase_projectId   = pid;
-    cfg.firebase_authDomain  = auth || (pid ? pid+'.firebaseapp.com' : '');
+    cfg.firebase_apiKey       = key;
+    cfg.firebase_databaseURL  = db;
+    cfg.firebase_projectId    = pid;
+    cfg.firebase_authDomain   = auth || (pid ? pid+'.firebaseapp.com' : '');
+    cfg.firebase_storageBucket = bucket || (pid ? pid+'.firebasestorage.app' : '');
     cfgSet(cfg);
     _unsaved = false;
     updateStatus(cfg, kpiGet()||{...DCFG_KPI});
@@ -506,10 +516,11 @@ function loadAll(){
 function loadFirebase(){
   const cfg = cfgGet();
   const fields = {
-    'cfg-firebase-key':  cfg.firebase_apiKey,
-    'cfg-firebase-db':   cfg.firebase_databaseURL,
-    'cfg-firebase-pid':  cfg.firebase_projectId,
-    'cfg-firebase-auth': cfg.firebase_authDomain,
+    'cfg-firebase-key':    cfg.firebase_apiKey,
+    'cfg-firebase-db':     cfg.firebase_databaseURL,
+    'cfg-firebase-pid':    cfg.firebase_projectId,
+    'cfg-firebase-auth':   cfg.firebase_authDomain,
+    'cfg-firebase-bucket': cfg.firebase_storageBucket,
   };
   Object.entries(fields).forEach(([id, val])=>{
     const el = document.getElementById(id);
