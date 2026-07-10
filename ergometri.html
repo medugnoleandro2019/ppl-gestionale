@@ -819,6 +819,21 @@ nav.ppl-topnav.nav-open a.tn-link{
       Stima basata su ~11–14 cal/min a ritmo sostenuto (dati Assault Fitness).
       La stima varia significativamente con l'intensità reale.
     </div>
+    <div class="erg-save-panel">
+      <div class="calc-lbl-s" style="margin-bottom:6px;">Salva risultato nello storico cliente</div>
+      <div class="erg-save-row">
+        <div class="combo-wrap" style="flex:1;min-width:180px;">
+          <input class="combo-inp" id="erg-cliente-input-air" placeholder="Cerca cliente..." autocomplete="off"
+            oninput="comboFilter('erg-combo-air',this.value,_comboClienti,'erg-cliente-val-air')"
+            onfocus="comboOpen('erg-combo-air',this.value,_comboClienti,'erg-cliente-val-air')"
+            onblur="setTimeout(()=>comboClose('erg-combo-air'),200)">
+          <input type="hidden" id="erg-cliente-val-air">
+          <div class="combo-drop" id="erg-combo-air"></div>
+        </div>
+        <button class="btn pri" onclick="salvaRisultatoAirBike()">💾 Salva</button>
+      </div>
+      <div id="erg-save-msg-air" style="margin-top:6px;font-size:11px;min-height:14px;"></div>
+    </div>
   </div>
   <div class="slbl">Riferimenti Air Bike</div>
   <div class="calc-block" style="padding:0;overflow:hidden;">
@@ -1454,6 +1469,44 @@ function calcHyroxReverse(){
   ['hyrox-rev-run','hyrox-rev-erg','hyrox-rev-watt'].forEach(id=>{
     document.getElementById(id).classList.remove('nd');
   });
+}
+
+
+/* ══ SALVA RISULTATO AIR BIKE ═══════════════════════════════════════════
+   L'Air Bike non usa la formula Concept2 (watt non standard) — salviamo
+   calorie e tempo stimato invece di watt/pace.
+   ═══════════════════════════════════════════════════════════════════════ */
+async function salvaRisultatoAirBike(){
+  const cid = document.getElementById('erg-cliente-val-air')?.value;
+  const msg = document.getElementById('erg-save-msg-air');
+  if(!cid){ if(msg){msg.textContent='⚠ Seleziona un cliente.';msg.style.color='var(--org)';} return; }
+  if(!_db){ if(msg){msg.textContent='⚠ Firebase non configurato (vedi Risorse).';msg.style.color='var(--org)';} return; }
+
+  const cal = parseFloat(document.getElementById('air-cal')?.value)||0;
+  const rpm = parseFloat(document.getElementById('air-rpm')?.value)||0;
+  const timeText = document.getElementById('air-time')?.textContent;
+
+  if(cal<=0 || !timeText || timeText==='—'){
+    if(msg){msg.textContent='⚠ Inserisci prima un risultato valido.';msg.style.color='var(--org)';}
+    return;
+  }
+
+  const oggi = new Date().toLocaleDateString('it-IT');
+  try{
+    await _db.ref('ppl/erg_risultati').push({
+      clienteId: cid,
+      macchina: 'air',
+      calorie: cal,
+      rpm: rpm,
+      tempoStimato: timeText,
+      data: oggi,
+      dataTS: Date.now(),
+    });
+    if(msg){msg.textContent='✓ Risultato salvato nello storico cliente';msg.style.color='var(--grn)';}
+    setTimeout(()=>{ if(msg) msg.textContent=''; }, 3000);
+  }catch(e){
+    if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}
+  }
 }
 
 </script>
