@@ -415,6 +415,18 @@ nav.ppl-topnav.nav-open a.tn-link{
   .wkg-table{font-size:10px;}
 }
 
+
+.combo-wrap{position:relative;}
+.combo-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+  font-family:'DM Sans',sans-serif;font-size:12px;padding:8px 10px;outline:none;width:100%;transition:.15s;box-sizing:border-box;}
+.combo-inp:focus{border-color:var(--gold);}
+.combo-drop{position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--g1);border:1px solid var(--g4);
+  border-radius:3px;max-height:180px;overflow-y:auto;z-index:500;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4);}
+.combo-drop.open{display:block;}
+.combo-opt{padding:8px 12px;cursor:pointer;font-size:12px;color:var(--mu2);}
+.combo-opt:hover{background:var(--g3);color:var(--wh);}
+.combo-none{padding:8px 12px;font-size:11px;color:var(--g6);font-style:italic;}
+
 </style>
 </head>
 <body>
@@ -547,6 +559,22 @@ nav.ppl-topnav.nav-open a.tn-link{
     <span class="ss-range" id="ss-range">—</span>
     <span class="ss-note">88–94% FTP · massimo stimolo allenante con recupero sostenibile (Allen &amp; Coggan)</span>
   </div>
+  <div class="calc-block" style="margin-top:10px;">
+  <div class="calc-lbl-s" style="margin-bottom:6px;">Salva test FTP nello storico cliente</div>
+  <div class="calc-row" style="align-items:flex-end;">
+    <div class="combo-wrap" style="flex:1;min-width:180px;">
+      <input class="combo-inp" id="ftp-cliente-input" placeholder="Cerca cliente..." autocomplete="off"
+        oninput="comboFilter('ftp-combo',this.value,_comboClienti,'ftp-cliente-val')"
+        onfocus="comboOpen('ftp-combo',this.value,_comboClienti,'ftp-cliente-val')"
+        onblur="setTimeout(()=>comboClose('ftp-combo'),200)">
+      <input type="hidden" id="ftp-cliente-val">
+      <div class="combo-drop" id="ftp-combo"></div>
+    </div>
+    <button class="btn pri" onclick="salvaTestFTP()">💾 Salva</button>
+  </div>
+  <div id="ftp-save-msg" style="margin-top:6px;font-size:11px;min-height:14px;"></div>
+</div>
+
 </div>
 
 <div class="slbl" style="margin-top:20px;">Zone di potenza — 7 zone Coggan</div>
@@ -602,6 +630,8 @@ nav.ppl-topnav.nav-open a.tn-link{
 
 </div>
 </body>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 
 const ZONES=[
@@ -697,6 +727,99 @@ function renderZones(){
 function toggleNav(){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.toggle('nav-open');}
 document.addEventListener('click',function(e){if(e.target.classList.contains('tn-link')){const nav=document.getElementById('ppl-topnav');if(nav)nav.classList.remove('nav-open');}});
 document.addEventListener('DOMContentLoaded',()=>renderZones());
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   COLLEGAMENTO FIREBASE — salva test FTP per cliente
+   ══════════════════════════════════════════════════════════════════════════ */
+const PPL_CFG_KEY = 'ppl_config';
+function getPPLConfig(){ try{const v=localStorage.getItem(PPL_CFG_KEY);return v?JSON.parse(v):{};}catch(e){return{};} }
+
+let _db = null;
+let _comboClienti = [];
+
+function initZoneFirebase(){
+  const cfg = getPPLConfig();
+  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL) return;
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey: cfg.firebase_apiKey,
+        authDomain: cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
+        databaseURL: cfg.firebase_databaseURL,
+        projectId: cfg.firebase_projectId,
+      });
+    }
+    _db = firebase.database();
+    _db.ref('ppl/clienti').on('value', snap=>{
+      const clienti = snap.val()||{};
+      _comboClienti = Object.entries(clienti)
+        .map(([id,c])=>({value:id, label:(c.nome||'')+' '+(c.cognome||'')}))
+        .sort((a,b)=>a.label.localeCompare(b.label));
+    });
+  }catch(e){ console.error('Errore Firebase zone bici:', e); }
+}
+
+function comboFilter(dropId,query,opts,hiddenId){
+  const drop=document.getElementById(dropId); if(!drop)return;
+  const q=(query||'').toLowerCase().trim();
+  const filtered=q?opts.filter(o=>o.label.toLowerCase().includes(q)):opts;
+  renderComboOpts(drop,filtered,q,hiddenId);
+  drop.classList.toggle('open',filtered.length>0);
+}
+function comboOpen(dropId,query,opts,hiddenId){
+  const drop=document.getElementById(dropId); if(!drop)return;
+  const q=(query||'').toLowerCase();
+  const filtered=q?opts.filter(o=>o.label.toLowerCase().includes(q)):opts.slice(0,30);
+  renderComboOpts(drop,filtered,q,hiddenId);
+  drop.classList.toggle('open',filtered.length>0);
+}
+function renderComboOpts(drop,filtered,q,hiddenId){
+  if(!filtered.length){drop.innerHTML='<div class="combo-none">Nessun cliente</div>';drop.classList.add('open');return;}
+  drop.innerHTML=filtered.slice(0,40).map(o=>{
+    const hl=q?o.label.replace(new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','gi'),'<mark>$1</mark>'):o.label;
+    return `<div class="combo-opt" data-value="${o.value}" onmousedown="selectCombo('${drop.id}','${hiddenId}','${o.value}','${o.label.replace(/'/g,"\\'")}')">${hl}</div>`;
+  }).join('');
+}
+function selectCombo(dropId,hiddenId,value,label){
+  const drop=document.getElementById(dropId);
+  const hidden=document.getElementById(hiddenId);
+  if(hidden) hidden.value=value;
+  const inputId=hiddenId.replace('-val','-input');
+  const input=document.getElementById(inputId);
+  if(input) input.value=label;
+  if(drop) drop.classList.remove('open');
+}
+function comboClose(dropId){ const d=document.getElementById(dropId);if(d)d.classList.remove('open'); }
+
+/* ── Salva test FTP ── */
+async function salvaTestFTP(){
+  const cid = document.getElementById('ftp-cliente-val')?.value;
+  const msg = document.getElementById('ftp-save-msg');
+  if(!cid){ if(msg){msg.textContent='⚠ Seleziona un cliente.';msg.style.color='var(--org)';} return; }
+  if(!_db){ if(msg){msg.textContent='⚠ Firebase non configurato (vedi Risorse).';msg.style.color='var(--org)';} return; }
+  if(_ftp<=0){ if(msg){msg.textContent='⚠ Calcola prima un FTP valido.';msg.style.color='var(--org)';} return; }
+
+  const oggi = new Date().toLocaleDateString('it-IT');
+  try{
+    await _db.ref('ppl/test_zone').push({
+      clienteId: cid,
+      tipo: 'bici',
+      ftp: _ftp,
+      peso: _peso || null,
+      wkg: _peso>0 ? +(_ftp/_peso).toFixed(2) : null,
+      metodo: _currentTest,
+      data: oggi,
+      dataTS: Date.now(),
+    });
+    if(msg){msg.textContent='✓ Test salvato nello storico cliente';msg.style.color='var(--grn)';}
+    setTimeout(()=>{ if(msg) msg.textContent=''; }, 3000);
+  }catch(e){
+    if(msg){msg.textContent='✕ '+e.message;msg.style.color='var(--red)';}
+  }
+}
+
+document.addEventListener('DOMContentLoaded', initZoneFirebase);
 
 </script>
 </html>
