@@ -1383,6 +1383,8 @@ select.pkg-edit-inp{cursor:pointer;}
       <div id="detail-erg-history"></div>
       <div class="slbl-mini" style="margin-top:14px;">📊 Frequenza ultimi 6 mesi</div>
       <div id="detail-freq-chart"></div>
+      <div class="slbl-mini" style="margin-top:14px;">❤️ Storico Test Zone (Corsa/Bici)</div>
+      <div id="detail-zone-history"></div>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('modal-client-detail')">Chiudi</button>
@@ -1516,6 +1518,7 @@ function startListening(){
       palinsesto:   raw.palinsesto||{},
       erg_risultati:raw.erg_risultati||{},
       assenze:      raw.assenze||{},
+      test_zone:    raw.test_zone||{},
     };
     cfgSet(BK_CACHE_KEY,_data);
     _connected=true;
@@ -2561,6 +2564,7 @@ function openClient(cid){
   const abbsA=abbs.filter(a=>a.stato==='Attivo');
   renderErgHistory(cid);
   renderFreqChart(cid);
+  renderZoneHistory(cid);
   const stats=document.getElementById('detail-stats');
   if(stats)stats.innerHTML=[
     {v:abbsA.length,l:'Abb. attivi'},
@@ -3312,9 +3316,9 @@ function renderErgHistory(cid){
           if(isAirBike){
             return `<div style="text-align:center;position:relative;">
               <button class="icon-btn del" style="position:absolute;top:-4px;right:-4px;font-size:8px;padding:1px 4px;"
-                onclick="event.stopPropagation();deleteErgRisultato('${r.id}',${cid ? "'"+cid+"'" : "null"})" title="Elimina">✕</button>
-              <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${r.calorie||'—'} cal</div>
-              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${r.tempoStimato||''} · ${r.rpm||''} rpm</div>
+                onclick="event.stopPropagation();deleteErgRisultato('${r.id}','${cid}')" title="Elimina">✕</button>
+              <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${r.watt||'—'}W</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${r.rpm||''} rpm · ${r.calMin||''} cal/min</div>
               <div style="font-size:8px;color:var(--g6);">${r.data}</div>
             </div>`;
           }
@@ -3547,6 +3551,84 @@ function calcolaAssenzeEffettive(cid){
     }
   }
   return { count, metodo, dettagli };
+}
+
+
+/* ══ STORICO TEST ZONE CORSA/BICI ═════════════════════════════════════════
+   Legge ppl/test_zone (scritto da zone_corsa.html e zone_bici.html),
+   mostra progressione FCmax/FTP nel tempo con trend.
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderZoneHistory(cid){
+  const container = document.getElementById('detail-zone-history');
+  if(!container) return;
+  const tests = Object.entries(_data.test_zone||{})
+    .filter(([,t])=>t.clienteId===cid)
+    .map(([id,t])=>({id,...t}))
+    .sort((a,b)=>(b.dataTS||0)-(a.dataTS||0));
+
+  if(!tests.length){
+    container.innerHTML = '<div style="font-size:11px;color:var(--mu);padding:8px 0;">Nessun test zona registrato</div>';
+    return;
+  }
+
+  const byTipo = { corsa: tests.filter(t=>t.tipo==='corsa'), bici: tests.filter(t=>t.tipo==='bici') };
+  let html = '';
+
+  if(byTipo.corsa.length){
+    const latest = byTipo.corsa[0], oldest = byTipo.corsa[byTipo.corsa.length-1];
+    const delta = byTipo.corsa.length>1 ? latest.fcmax - oldest.fcmax : 0;
+    const trend = delta>0 ? `<span style="color:var(--org);">↑ +${delta} bpm</span>`
+                : delta<0 ? `<span style="color:var(--grn);">↓ ${delta} bpm</span>` : '';
+    html += `<div style="background:var(--g2);border-radius:4px;padding:10px 12px;margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--wh);">🏃 Zone Corsa — FCmax</span>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${byTipo.corsa.length} test ${trend}</span>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        ${byTipo.corsa.slice(0,6).map(t=>`
+          <div style="text-align:center;position:relative;">
+            <button class="icon-btn del" style="position:absolute;top:-4px;right:-4px;font-size:8px;padding:1px 4px;"
+              onclick="event.stopPropagation();deleteTestZone('${t.id}','${cid}')" title="Elimina">✕</button>
+            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${t.fcmax} bpm</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${t.vmax?t.vmax+' km/h':''}</div>
+            <div style="font-size:8px;color:var(--g6);">${t.data}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  if(byTipo.bici.length){
+    const latest = byTipo.bici[0], oldest = byTipo.bici[byTipo.bici.length-1];
+    const delta = byTipo.bici.length>1 ? latest.ftp - oldest.ftp : 0;
+    const trend = delta>0 ? `<span style="color:var(--grn);">↑ +${delta}W</span>`
+                : delta<0 ? `<span style="color:var(--red);">↓ ${delta}W</span>` : '';
+    html += `<div style="background:var(--g2);border-radius:4px;padding:10px 12px;margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--wh);">🚴 Zone Bici — FTP</span>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${byTipo.bici.length} test ${trend}</span>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        ${byTipo.bici.slice(0,6).map(t=>`
+          <div style="text-align:center;position:relative;">
+            <button class="icon-btn del" style="position:absolute;top:-4px;right:-4px;font-size:8px;padding:1px 4px;"
+              onclick="event.stopPropagation();deleteTestZone('${t.id}','${cid}')" title="Elimina">✕</button>
+            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${t.ftp}W</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${t.wkg?t.wkg+' W/kg':''}</div>
+            <div style="font-size:8px;color:var(--g6);">${t.data}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+async function deleteTestZone(testId, cid){
+  if(!confirm('Eliminare questo test dallo storico?')) return;
+  try{
+    await fbRemove('ppl/test_zone/'+testId);
+    if(cid) renderZoneHistory(cid);
+  }catch(e){ alert('Errore: '+e.message); }
 }
 
 </script>
