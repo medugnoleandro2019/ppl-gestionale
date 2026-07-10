@@ -194,6 +194,7 @@ nav.ppl-topnav.nav-open a.tn-link{
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
   <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
   <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="oggi.html">📺 Oggi in Studio</a>
   <a class="tn-link active" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
@@ -304,6 +305,58 @@ nav.ppl-topnav.nav-open a.tn-link{
     </div>
   </div>
 
+  <div class="slbl">Personalizzazione portale clienti</div>
+  <div class="res-grid">
+    <div class="res-card" style="min-width:100%;">
+      <div class="res-card-head">
+        <span class="res-card-icon">🎨</span>
+        <span class="res-card-title">Brand & colori</span>
+        <span class="res-card-badge badge-nd" id="badge-theme">Default</span>
+      </div>
+      <div class="res-card-body">
+        <div class="res-hint" style="margin-bottom:12px;">
+          Si applica automaticamente al portale clienti — nessuna modifica al codice necessaria.
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+          <div class="res-field" style="flex:1;min-width:160px;">
+            <span class="res-lbl">Nome breve (es. PPL)</span>
+            <input class="res-inp" id="theme-brand-name" type="text" placeholder="PPL" oninput="autoSaveTheme()">
+          </div>
+          <div class="res-field" style="flex:2;min-width:200px;">
+            <span class="res-lbl">Nome completo studio</span>
+            <input class="res-inp" id="theme-full-name" type="text" placeholder="Phoenix Performance Lab" oninput="autoSaveTheme()">
+          </div>
+          <div class="res-field" style="flex:0.5;min-width:100px;">
+            <span class="res-lbl">Colore primario</span>
+            <input type="color" id="theme-color" value="#B8972A"
+              style="width:100%;height:40px;padding:0;border:1px solid var(--g4);border-radius:4px;cursor:pointer;background:none;"
+              oninput="autoSaveTheme()">
+          </div>
+        </div>
+        <div id="theme-save-msg" class="res-save-msg" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slbl">Backup dati</div>
+  <div class="res-grid">
+    <div class="res-card" style="min-width:100%;">
+      <div class="res-card-head">
+        <span class="res-card-icon">📥</span>
+        <span class="res-card-title">Esporta backup completo</span>
+      </div>
+      <div class="res-card-body">
+        <div class="res-hint" style="margin-bottom:12px;">
+          Scarica una copia completa di tutti i dati (clienti, abbonamenti, sessioni, valutazioni,
+          batterie, annunci, ecc.) in un file JSON — una rete di sicurezza indipendente da Firebase,
+          utile da conservare periodicamente.
+        </div>
+        <button class="btn pri" onclick="esportaBackupJSON()">📥 Scarica backup ora</button>
+        <div id="backup-msg" class="res-save-msg" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="slbl">Target KPI dashboard</div>
   <div class="res-grid">
     <div class="res-card" style="min-width:100%;">
@@ -353,6 +406,8 @@ nav.ppl-topnav.nav-open a.tn-link{
   </div>
 </div>
 </body>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
 <script>
 /* ══ AUTO-SAVE — evita perdita dati su refresh/F5 ═══════════════════════
    Ogni digitazione salva automaticamente su localStorage con un breve
@@ -441,6 +496,7 @@ function loadAll(){
   if(brand && cfg.studio_name) brand.textContent = cfg.studio_name;
 
   loadFirebase();
+  loadTheme();
   updateStatus(cfg, kpi);
 }
 
@@ -602,6 +658,102 @@ document.addEventListener('click', e=>{
 
 // Init
 document.addEventListener('DOMContentLoaded', loadAll);
+
+
+/* ══ PERSONALIZZAZIONE TEMA — salva su Firebase Database ══════════════════
+   Il portale clienti legge questi valori da ppl/config/branding e li
+   applica automaticamente ad ogni accesso, su qualsiasi dispositivo.
+   ═══════════════════════════════════════════════════════════════════════ */
+let _themeDb = null;
+
+function getThemeDb(){
+  if(_themeDb) return _themeDb;
+  const cfg = cfgGet();
+  if(!cfg.firebase_apiKey || !cfg.firebase_databaseURL) return null;
+  try{
+    if(!firebase.apps.length){
+      firebase.initializeApp({
+        apiKey: cfg.firebase_apiKey,
+        authDomain: cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
+        databaseURL: cfg.firebase_databaseURL,
+        projectId: cfg.firebase_projectId,
+      });
+    }
+    _themeDb = firebase.database();
+    return _themeDb;
+  }catch(e){ console.error('Theme DB init error:', e); return null; }
+}
+
+function loadTheme(){
+  const db = getThemeDb();
+  if(!db) return;
+  db.ref('ppl/config/branding').once('value').then(snap=>{
+    const branding = snap.val();
+    if(branding){
+      document.getElementById('theme-brand-name').value = branding.brandName||'';
+      document.getElementById('theme-full-name').value  = branding.fullName||'';
+      document.getElementById('theme-color').value      = branding.primaryColor||'#B8972A';
+      const badge = document.getElementById('badge-theme');
+      if(badge){ badge.className='res-card-badge badge-ok'; badge.textContent='Personalizzato ✓'; }
+    }
+  }).catch(e=>console.warn('Impossibile caricare tema:', e));
+}
+
+let _autoSaveThemeTimer = null;
+function autoSaveTheme(){
+  clearTimeout(_autoSaveThemeTimer);
+  _autoSaveThemeTimer = setTimeout(()=>{
+    const db = getThemeDb();
+    const msg = document.getElementById('theme-save-msg');
+    if(!db){
+      if(msg){ msg.textContent='⚠ Configura prima Firebase (sopra).'; msg.style.color='var(--org)'; }
+      return;
+    }
+    const brandName = document.getElementById('theme-brand-name')?.value.trim() || 'PPL';
+    const fullName  = document.getElementById('theme-full-name')?.value.trim() || '';
+    const color     = document.getElementById('theme-color')?.value || '#B8972A';
+
+    db.ref('ppl/config/branding').set({ brandName, fullName, primaryColor: color })
+      .then(()=>{
+        if(msg){ msg.textContent='✓ Salvato — applicato al portale clienti'; msg.style.color='var(--grn)'; }
+        const badge = document.getElementById('badge-theme');
+        if(badge){ badge.className='res-card-badge badge-ok'; badge.textContent='Personalizzato ✓'; }
+      })
+      .catch(e=>{ if(msg){ msg.textContent='✕ '+e.message; msg.style.color='var(--red)'; } });
+  }, 400);
+}
+
+
+/* ══ BACKUP EXPORT JSON ══════════════════════════════════════════════════
+   Scarica uno snapshot completo del database in un file .json — rete di
+   sicurezza indipendente da Firebase, utile per archiviazione periodica.
+   ═══════════════════════════════════════════════════════════════════════ */
+async function esportaBackupJSON(){
+  const msg = document.getElementById('backup-msg');
+  const db = getThemeDb(); // riusa la stessa connessione già inizializzata per il tema
+  if(!db){
+    if(msg){ msg.textContent='⚠ Configura prima Firebase (sopra).'; msg.style.color='var(--org)'; }
+    return;
+  }
+  if(msg){ msg.textContent='⏳ Preparazione backup...'; msg.style.color='var(--mu)'; }
+  try{
+    const snap = await db.ref('ppl').once('value');
+    const data = snap.val() || {};
+    const oggi = new Date().toLocaleDateString('it-IT').replace(/\\//g,'-');
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'ppl_backup_'+oggi+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    if(msg){ msg.textContent='✓ Backup scaricato'; msg.style.color='var(--grn)'; }
+  }catch(e){
+    if(msg){ msg.textContent='✕ '+e.message; msg.style.color='var(--red)'; }
+  }
+}
 
 </script>
 </html>
