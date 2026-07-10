@@ -610,6 +610,7 @@ select.pkg-edit-inp{cursor:pointer;}
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
   <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
   <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="oggi.html">📺 Oggi in Studio</a>
   <a class="tn-link" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
@@ -719,6 +720,9 @@ select.pkg-edit-inp{cursor:pointer;}
           <div class="combo-drop" id="sto-combo"></div>
         </div>
       </div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+      <button class="btn" id="btn-export-pdf" style="display:none;" onclick="exportStoricoPDF()">🖨 Esporta PDF</button>
     </div>
     <div id="storico-container">
       <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
@@ -1085,6 +1089,7 @@ function renderBatterie(){
         </div>
         <div style="display:flex;gap:4px;">
           <button class="icon-btn" onclick="editBatteria('${id}')">✏</button>
+          <button class="icon-btn" onclick="duplicaBatteria('${id}')" title="Duplica batteria">⧉</button>
           <button class="icon-btn del" onclick="deleteBatteria('${id}')">✕</button>
         </div>
       </div>
@@ -1130,6 +1135,15 @@ function openPanelNuovaBatteria(){
 function editBatteria(id){
   _editingBatteriaId = id;
   renderBatteriaForm(_data.batterie?.[id]);
+  openPanel('panel-batteria');
+}
+
+function duplicaBatteria(id){
+  const original = _data.batterie?.[id];
+  if(!original) return;
+  _editingBatteriaId = null; // nessun ID: verrà creata come NUOVA batteria
+  const copy = { ...original, nome: (original.nome||'Batteria') + ' (copia)' };
+  renderBatteriaForm(copy);
   openPanel('panel-batteria');
 }
 
@@ -1357,12 +1371,15 @@ function renderStoricoCliente(cid){
     .map(([id,v])=>({id,...v}))
     .sort((a,b)=>(a.dataTS||0)-(b.dataTS||0));
 
+  const exportBtn = document.getElementById('btn-export-pdf');
   if(!vals.length){
     container.innerHTML=`<div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;
       color:var(--g6);text-transform:uppercase;padding:30px;text-align:center;">
       Nessuna valutazione per ${clientName}</div>`;
+    if(exportBtn) exportBtn.style.display='none';
     return;
   }
+  if(exportBtn) exportBtn.style.display='inline-block';
 
   // Group by battery
   const byBat = {};
@@ -1495,6 +1512,79 @@ document.addEventListener('keydown',e=>{
 });
 
 document.addEventListener('DOMContentLoaded', initFirebase);
+
+
+/* ══ EXPORT PDF STORICO VALUTAZIONI ══════════════════════════════════════
+   Apre una finestra di stampa pulita (leggibile su carta bianca) con il
+   contenuto dello storico corrente. Il browser gestisce "Salva come PDF"
+   dalla finestra di stampa nativa — nessuna libreria esterna necessaria.
+   ═══════════════════════════════════════════════════════════════════════ */
+function exportStoricoPDF(){
+  if(!_storicoClienteId){ alert('Seleziona prima un cliente.'); return; }
+  const c = _data.clienti?.[_storicoClienteId];
+  const clientName = c ? (c.nome+' '+c.cognome) : '—';
+  const oggi = new Date().toLocaleDateString('it-IT');
+
+  const vals = Object.entries(_data.valutazioni||{})
+    .filter(([,v])=>v.clienteId===_storicoClienteId)
+    .map(([id,v])=>({id,...v}))
+    .sort((a,b)=>(a.dataTS||0)-(b.dataTS||0));
+
+  const byBat = {};
+  vals.forEach(v=>{
+    const key = v.batteriaId||'unknown';
+    if(!byBat[key]) byBat[key]=[];
+    byBat[key].push(v);
+  });
+
+  let bodyHtml = '';
+  Object.entries(byBat).forEach(([batId, batVals])=>{
+    const b = _data.batterie?.[batId];
+    const batNome = b?.nome || batVals[0]?.batteriaNome || batId;
+    bodyHtml += `<h3 style="margin:24px 0 10px;color:#B8972A;font-family:Georgia,serif;">${batNome}</h3>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">
+        <thead><tr style="background:#f2f2f2;">
+          <th style="text-align:left;padding:8px;border:1px solid #ddd;">Esercizio</th>
+          ${batVals.map(v=>`<th style="text-align:center;padding:8px;border:1px solid #ddd;">${v.data||''}</th>`).join('')}
+        </tr></thead>
+        <tbody>`;
+    const refVal = batVals.find(v=>v.risultati);
+    const esercizi = refVal ? Object.entries(refVal.risultati).map(([,r])=>r) : [];
+    esercizi.forEach((esRef,esIdx)=>{
+      bodyHtml += `<tr><td style="padding:8px;border:1px solid #ddd;font-weight:600;">${esRef.nome||('Es. '+(esIdx+1))}</td>`;
+      batVals.forEach(v=>{
+        const res = v.risultati?.[esIdx];
+        bodyHtml += `<td style="text-align:center;padding:8px;border:1px solid #ddd;">
+          ${res ? (res.valore||'—')+' <span style="color:#888;font-size:10px;">('+  (res.livello||'')+')</span>' : '—'}</td>`;
+      });
+      bodyHtml += '</tr>';
+    });
+    bodyHtml += '</tbody></table>';
+  });
+
+  const printWin = window.open('', '_blank');
+  printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+    <title>Valutazione — ${clientName}</title>
+    <style>
+      body{font-family:Georgia,'Times New Roman',serif;color:#222;padding:40px;max-width:800px;margin:0 auto;}
+      .header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #B8972A;padding-bottom:16px;margin-bottom:24px;}
+      .brand{font-size:24px;letter-spacing:6px;color:#B8972A;text-transform:uppercase;}
+      .meta{text-align:right;font-size:12px;color:#666;}
+      .client-name{font-size:20px;font-weight:600;margin-bottom:4px;}
+      @media print{ body{padding:20px;} }
+    </style>
+    </head><body>
+    <div class="header">
+      <span class="brand">PPL</span>
+      <div class="meta">Report valutazioni<br>Generato il ${oggi}</div>
+    </div>
+    <div class="client-name">${clientName}</div>
+    <div style="color:#666;font-size:12px;margin-bottom:20px;">${vals.length} sessioni di valutazione registrate</div>
+    ${bodyHtml}
+    </body></html>`);
+  printWin.document.close();
+  setTimeout(()=>{ printWin.print(); }, 400);
+}
 
 </script>
 </html>
