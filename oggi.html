@@ -416,7 +416,7 @@ nav.ppl-topnav.nav-open a.tn-link{
 }
 
 
-body{margin-top:0 !important;}
+
 .oggi-shell{min-height:100vh;padding:24px;max-width:900px;margin:0 auto;}
 .oggi-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;
   padding-bottom:16px;border-bottom:2px solid var(--g3);}
@@ -450,6 +450,26 @@ body{margin-top:0 !important;}
 </style>
 </head>
 <body>
+<nav class="ppl-topnav" id="ppl-topnav">
+  <span class="tn-brand">PPL</span>
+  <div class="tn-links" id="tn-links">
+  <a class="tn-link" href="index.html">📊 Dashboard</a>
+  <a class="tn-link" href="valutazione.html">🧪 Valutazione</a>
+  <a class="tn-link" href="progressioni.html">📈 Progressioni</a>
+  <a class="tn-link" href="intensita.html">⚡ Intensità</a>
+  <a class="tn-link" href="sop.html">📁 SOP</a>
+  <a class="tn-link" href="prenotazioni.html">📅 Prenotazioni</a>
+  <a class="tn-link" href="comunicazioni.html">📢 Comunicazioni</a>
+  <a class="tn-link" href="simulatore.html">🎯 Simulatore BE</a>
+  <a class="tn-link" href="listino.html">💰 Listino</a>
+  <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
+  <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
+  <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link active" href="oggi.html">📺 Oggi in Studio</a>
+  <a class="tn-link" href="risorse.html">⚙ Risorse</a>
+  </div>
+  <button class="tn-toggle" onclick="toggleNav()">☰</button>
+</nav>
 <div class="oggi-shell">
   <div class="oggi-header">
     <span class="oggi-brand">PPL</span>
