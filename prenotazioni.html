@@ -1007,6 +1007,13 @@ select.pkg-edit-inp{cursor:pointer;}
 .scad-days-inp{background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);font-family:'DM Mono',monospace;font-size:14px;padding:4px 8px;width:60px;outline:none;text-align:center;}
 .scad-days-inp:focus{border-color:var(--gold);}
 
+
+.freq-chart{display:flex;align-items:flex-end;gap:6px;height:90px;padding:10px 4px 0;}
+.freq-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;}
+.freq-bar{width:100%;max-width:32px;background:var(--gold);border-radius:3px 3px 0 0;transition:height .3s;min-height:2px;}
+.freq-bar-val{font-family:'DM Mono',monospace;font-size:9px;color:var(--mu2);margin-bottom:3px;}
+.freq-bar-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--mu);text-transform:uppercase;margin-top:4px;}
+
 </style>
 </head>
 <body>
@@ -1025,6 +1032,7 @@ select.pkg-edit-inp{cursor:pointer;}
   <a class="tn-link" href="zone_corsa.html">🏃 Zone Corsa</a>
   <a class="tn-link" href="zone_bici.html">🚴 Zone Bici</a>
   <a class="tn-link" href="ergometri.html">🚣 Ergometri</a>
+  <a class="tn-link" href="oggi.html">📺 Oggi in Studio</a>
   <a class="tn-link" href="risorse.html">⚙ Risorse</a>
   </div>
   <button class="tn-toggle" onclick="toggleNav()">☰</button>
@@ -1047,6 +1055,7 @@ select.pkg-edit-inp{cursor:pointer;}
         <div class="bk-tab" onclick="switchBkTab('calendario',this)">📅 Calendario</div>
         <div class="bk-tab" onclick="switchBkTab('sessioni',this)">✏ Registra</div>
         <div class="bk-tab" onclick="switchBkTab('storico',this)">📋 Storico</div>
+        <div class="bk-tab" onclick="switchBkTab('assenze',this)">👻 Presenze Mancate</div>
         <div class="bk-tab" onclick="switchBkTab('setup',this)">⚙ Setup</div>
       </div>
 
@@ -1076,7 +1085,10 @@ select.pkg-edit-inp{cursor:pointer;}
           <span class="scad-filter-lbl">Preavviso</span>
           <input class="scad-days-inp" id="scad-days" type="number" min="7" max="180" value="30" oninput="renderScadenze()">
           <span class="scad-filter-lbl">giorni</span>
-          <span style="flex:1;"></span>
+          <input type="text" id="scad-search" placeholder="Cerca cliente..."
+            style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+            font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 12px;outline:none;flex:1;min-width:160px;"
+            oninput="filterScadenze(this.value)">
           <span id="scad-count" style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);"></span>
         </div>
         <div id="scad-list"></div>
@@ -1155,6 +1167,17 @@ select.pkg-edit-inp{cursor:pointer;}
           </div>
           <div id="storico-list"></div>
         </div>
+      </div>
+
+      <!-- PRESENZE MANCATE -->
+      <div class="bk-section" id="bksec-assenze">
+        <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="assenze-search" placeholder="Cerca cliente..."
+            style="background:var(--g2);border:1px solid var(--g4);border-radius:3px;color:var(--wh);
+            font-family:'DM Sans',sans-serif;font-size:12px;padding:7px 12px;outline:none;flex:1;min-width:180px;"
+            oninput="renderAssenze(this.value)">
+        </div>
+        <div id="assenze-list"></div>
       </div>
 
       <!-- SETUP -->
@@ -1356,6 +1379,10 @@ select.pkg-edit-inp{cursor:pointer;}
       <div id="detail-abbs" style="margin-bottom:14px;"></div>
       <div class="slbl-mini">Ultime sessioni</div>
       <div id="detail-sess"></div>
+      <div class="slbl-mini" style="margin-top:14px;">🏃 Storico Ergometri</div>
+      <div id="detail-erg-history"></div>
+      <div class="slbl-mini" style="margin-top:14px;">📊 Frequenza ultimi 6 mesi</div>
+      <div id="detail-freq-chart"></div>
     </div>
     <div class="modal-foot">
       <button class="btn" onclick="closeModal('modal-client-detail')">Chiudi</button>
@@ -1478,13 +1505,15 @@ function startListening(){
   _dbRef.on('value',snap=>{
     const raw=snap.val()||{};
     _data={
-      clienti:    raw.clienti||{},
-      abbonamenti:raw.abbonamenti||{},
-      sessioni:   raw.sessioni||{},
-      pacchetti:  raw.pacchetti||{},
-      tipiLezione:raw.tipiLezione||{},
-      lezioni:    raw.lezioni||{},
-      palinsesto: raw.palinsesto||{},
+      clienti:      raw.clienti||{},
+      abbonamenti:  raw.abbonamenti||{},
+      sessioni:     raw.sessioni||{},
+      pacchetti:    raw.pacchetti||{},
+      tipiLezione:  raw.tipiLezione||{},
+      lezioni:      raw.lezioni||{},
+      palinsesto:   raw.palinsesto||{},
+      erg_risultati:raw.erg_risultati||{},
+      assenze:      raw.assenze||{},
     };
     cfgSet(BK_CACHE_KEY,_data);
     _connected=true;
@@ -2112,6 +2141,7 @@ function switchBkTab(id,el){
   document.getElementById('bksec-'+id)?.classList.add('active');
   if(id==='calendario') renderCalendar();
   if(id==='scadenze')   renderScadenze();
+  if(id==='assenze')    renderAssenze();
 }
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
@@ -2340,6 +2370,8 @@ function renderAttPresent(){
     return `<div class="att-present-row">
       <div class="att-present-name">${c.nome||''} ${c.cognome||cid}</div>
       <span class="att-present-pkg">${pkg?.nome||abb?.pacchetto||'manuale'}</span>
+      <button class="att-remove-btn" style="color:var(--org);" title="Segna come non presentato (mantiene il credito scalato)"
+        onclick="markNoShow('${cid}')">👻</button>
       <button class="att-remove-btn" onclick="removeAttendance('${cid}')">✕</button>
     </div>`;
   }).join('');
@@ -2410,6 +2442,17 @@ function openEditClient(){
     </div>
     <div style="margin-bottom:10px;"><div class="pkg-edit-lbl">Note</div>
       <input class="pkg-edit-inp" id="ec-note" value="${c.note||''}"></div>
+    <div style="margin-bottom:10px;">
+      <div class="pkg-edit-lbl">Metodo conteggio assenze (no-show)</div>
+      <select class="pkg-edit-inp" id="ec-noshow-metodo">
+        <option value="consecutive" ${(!c.noShowMetodo||c.noShowMetodo==='consecutive')?'selected':''}>Assenze consecutive</option>
+        <option value="periodo" ${c.noShowMetodo==='periodo'?'selected':''}>Nel periodo dell'abbonamento attivo</option>
+      </select>
+      <div style="font-size:9px;color:var(--g6);margin-top:4px;font-style:italic;">
+        "Consecutive": conta solo se le ultime assenze non sono interrotte da una presenza reale.<br>
+        "Nel periodo": conta tutte le assenze avvenute durante la validità dell'abbonamento attuale.
+      </div>
+    </div>
     <div style="display:flex;gap:8px;">
       <button class="btn pri" style="flex:1;" onclick="saveEditClient()">✓ Salva</button>
       <button class="btn" onclick="document.getElementById('edit-client-form').style.display='none'">Annulla</button>
@@ -2423,10 +2466,11 @@ async function saveEditClient(){
   const tel    =document.getElementById('ec-tel')?.value.trim();
   const email  =document.getElementById('ec-email')?.value.trim();
   const note   =document.getElementById('ec-note')?.value.trim();
+  const noShowMetodo = document.getElementById('ec-noshow-metodo')?.value || 'consecutive';
   const msg    =document.getElementById('ec-msg');
   if(!nome||!cognome){if(msg){msg.textContent='⚠ Nome e cognome obbligatori.';msg.style.color='var(--org)';}return;}
   try{
-    await fbUpdate('ppl/clienti/'+_currentClientId,{nome,cognome,telefono:tel||'',email:email||'',note:note||''});
+    await fbUpdate('ppl/clienti/'+_currentClientId,{nome,cognome,telefono:tel||'',email:email||'',note:note||'',noShowMetodo});
     if(msg){msg.textContent='✓ Salvato';msg.style.color='var(--grn)';}
     setTimeout(()=>{
       document.getElementById('edit-client-form').style.display='none';
@@ -2511,6 +2555,8 @@ function openClient(cid){
   const abbs=Object.entries(_data.abbonamenti||{}).filter(([,a])=>a.clienteId===cid).map(([aid,a])=>({id:aid,...a}));
   const sess=Object.entries(_data.sessioni||{}).filter(([,s])=>s.clienteId===cid).map(([sid,s])=>({id:sid,...s}));
   const abbsA=abbs.filter(a=>a.stato==='Attivo');
+  renderErgHistory(cid);
+  renderFreqChart(cid);
   const stats=document.getElementById('detail-stats');
   if(stats)stats.innerHTML=[
     {v:abbsA.length,l:'Abb. attivi'},
@@ -2675,6 +2721,24 @@ function loadAbbonamenti(cid){
    4. Crediti in esaurimento (<=2 rimasti)
    Gli abbonamenti esauriti NON vengono mai cancellati — restano come storico.
    ═══════════════════════════════════════════════════════════════════════ */
+function filterScadenze(q){
+  const query = (q||'').toLowerCase().trim();
+  document.querySelectorAll('#scad-list .scad-row').forEach(row=>{
+    const name = row.dataset.name||'';
+    row.style.display = !query || name.includes(query) ? '' : 'none';
+  });
+  // Nascondi le etichette di sezione se tutte le righe sottostanti sono filtrate
+  document.querySelectorAll('#scad-list .scad-section-lbl').forEach(lbl=>{
+    let next = lbl.nextElementSibling;
+    let anyVisible = false;
+    while(next && !next.classList.contains('scad-section-lbl')){
+      if(next.classList.contains('scad-row') && next.style.display !== 'none') anyVisible = true;
+      next = next.nextElementSibling;
+    }
+    lbl.style.display = anyVisible ? '' : 'none';
+  });
+}
+
 function renderScadenze(){
   const list    = document.getElementById('scad-list');
   const countEl = document.getElementById('scad-count');
@@ -2697,7 +2761,17 @@ function renderScadenze(){
   }
 
   const clienti = _data.clienti||{};
-  const esauriti=[],scaduti=[],inScadenza=[],lowCred=[];
+  const esauriti=[],scaduti=[],inScadenza=[],lowCred=[],certScaduti=[],certInScadenza=[];
+
+  // Certificati medici in scadenza o scaduti
+  Object.entries(clienti).forEach(([cid,c])=>{
+    const cert = c.certificatoMedico;
+    if(!cert || !cert.scadenza) return;
+    const sd = parseScadDate(cert.scadenza);
+    if(!sd) return;
+    if(sd < today)        certScaduti.push({cid,c,cert,sd});
+    else if(sd <= cutoff) certInScadenza.push({cid,c,cert,sd});
+  });
 
   Object.entries(_data.abbonamenti||{}).forEach(([id,a])=>{
     const c = clienti[a.clienteId];
@@ -2718,7 +2792,7 @@ function renderScadenze(){
 
   const sortDate = arr=>arr.sort((x,y)=>(x.sd&&y.sd)?x.sd-y.sd:x.cr-y.cr);
   [esauriti,scaduti,inScadenza,lowCred].forEach(sortDate);
-  const total = esauriti.length+scaduti.length+inScadenza.length+lowCred.length;
+  const total = esauriti.length+scaduti.length+inScadenza.length+lowCred.length+certScaduti.length+certInScadenza.length; // assenze critiche mostrate separatamente sotto
 
   if(countEl) countEl.textContent = total ? total+' alert' : 'Tutto ok \u2713';
   if(tab) tab.textContent = total ? '\u26A0 Scadenze ('+total+')' : '\u26A0 Scadenze';
@@ -2740,7 +2814,7 @@ function renderScadenze(){
     }
     const cid = a.clienteId;
     const pname = pkg ? pkg.nome : (a.pacchetto||'\u2014');
-    return `<div class="scad-row ${alertCls}" onclick="openClient('${cid}')">
+    return `<div class="scad-row ${alertCls}" data-name="${((c.nome||'')+' '+(c.cognome||'')).toLowerCase()}" onclick="openClient('${cid}')">
       <div class="scad-avatar">${init}</div>
       <div class="scad-info">
         <div class="scad-name">${c.nome||''} ${c.cognome||''}</div>
@@ -2769,6 +2843,55 @@ function renderScadenze(){
     html+=`<div class="scad-section-lbl org">Crediti in esaurimento &mdash; &le;2 rimasti (${lowCred.length})</div>`;
     html+=lowCred.map(e=>scadRow(e,'alert-org','org','Low credit','var(--org)')).join('');
   }
+
+  function certRow(e, alertCls, badgeCls, badgeTxt){
+    const {cid,c,cert,sd} = e;
+    const init = ((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
+    const sdStr = sd.toLocaleDateString('it-IT');
+    const dl = Math.round((sd-today)/86400000);
+    const daysStr = dl<0 ? '(scaduto '+Math.abs(dl)+'gg fa)' : dl===0 ? '(scade oggi)' : '('+dl+'gg)';
+    return `<div class="scad-row ${alertCls}" data-name="${((c.nome||'')+' '+(c.cognome||'')).toLowerCase()}" onclick="openClient('${cid}')">
+      <div class="scad-avatar">${init}</div>
+      <div class="scad-info">
+        <div class="scad-name">${c.nome||''} ${c.cognome||''}</div>
+        <div class="scad-pkg">&#127973; Certificato medico &middot; scad. ${sdStr} ${daysStr}</div>
+      </div>
+      <span class="scad-badge ${badgeCls}">${badgeTxt}</span>
+      <a href="${cert.url}" target="_blank" class="scad-action" onclick="event.stopPropagation();">&#128065; Visualizza</a>
+    </div>`;
+  }
+
+  if(certScaduti.length){
+    html+=`<div class="scad-section-lbl red">Certificati medici scaduti (${certScaduti.length})</div>`;
+    html+=certScaduti.map(e=>certRow(e,'alert-red','red','Cert. scaduto')).join('');
+  }
+  if(certInScadenza.length){
+    html+=`<div class="scad-section-lbl org">Certificati medici in scadenza entro ${days} giorni (${certInScadenza.length})</div>`;
+    html+=certInScadenza.map(e=>certRow(e,'alert-org','org','Cert. in scadenza')).join('');
+  }
+
+  // Assenze critiche — clienti che hanno raggiunto la soglia secondo il loro metodo
+  const clientiConAssenze = [...new Set(Object.values(_data.assenze||{}).map(a=>a.clienteId))];
+  const assenzeCritiche = clientiConAssenze
+    .map(cid=>({cid, c:clienti[cid], ...calcolaAssenzeEffettive(cid)}))
+    .filter(e=>e.c && e.count >= NOSHOW_THRESHOLD);
+
+  if(assenzeCritiche.length){
+    html += `<div class="scad-section-lbl red">Assenze critiche (${assenzeCritiche.length})</div>`;
+    html += assenzeCritiche.map(e=>{
+      const init = ((e.c.nome||'')[0]||(e.c.cognome||'')[0]||'?').toUpperCase();
+      const metodoLbl = e.metodo==='periodo' ? 'nel periodo abbonamento' : 'consecutive';
+      return `<div class="scad-row alert-red" data-name="${((e.c.nome||'')+' '+(e.c.cognome||'')).toLowerCase()}" onclick="openClient('${e.cid}')">
+        <div class="scad-avatar">${init}</div>
+        <div class="scad-info">
+          <div class="scad-name">${e.c.nome||''} ${e.c.cognome||''}</div>
+          <div class="scad-pkg">👻 ${e.count} assenze ${metodoLbl}</div>
+        </div>
+        <span class="scad-badge red">Critico</span>
+      </div>`;
+    }).join('');
+  }
+
   list.innerHTML=html;
 }
 
@@ -3128,6 +3251,275 @@ async function removeCertMedico(){
 
 
 
+
+
+/* ══ STORICO ERGOMETRI PER CLIENTE ═══════════════════════════════════════
+   Legge i risultati salvati da ergometri.html (nodo ppl/erg_risultati),
+   li mostra raggruppati per macchina con la variazione nel tempo.
+   ═══════════════════════════════════════════════════════════════════════ */
+const ERG_LABELS = { row:'🚣 RowErg', ski:'⛷ SkiErg', bike:'🚵 BikeErg' };
+
+function renderErgHistory(cid){
+  const container = document.getElementById('detail-erg-history');
+  if(!container) return;
+  const risultati = Object.entries(_data.erg_risultati||{})
+    .filter(([,r])=>r.clienteId===cid)
+    .map(([id,r])=>({id,...r}))
+    .sort((a,b)=>(b.dataTS||0)-(a.dataTS||0));
+
+  if(!risultati.length){
+    container.innerHTML = '<div style="font-size:11px;color:var(--mu);padding:8px 0;">Nessun test ergometro registrato</div>';
+    return;
+  }
+
+  // Group by machine type
+  const byMachine = {};
+  risultati.forEach(r=>{
+    const key = r.macchina||'row';
+    if(!byMachine[key]) byMachine[key]=[];
+    byMachine[key].push(r);
+  });
+
+  function fmtSplit(secs){
+    const m=Math.floor(secs/60), s=Math.round(secs%60);
+    return m+':'+String(s).padStart(2,'0');
+  }
+
+  let html = '';
+  Object.entries(byMachine).forEach(([machine, results])=>{
+    const label = ERG_LABELS[machine]||machine;
+    const std = machine==='bike' ? 1000 : 500;
+    const latest = results[0];
+    const oldest = results[results.length-1];
+    const deltaWatt = results.length>1 ? latest.watt - oldest.watt : 0;
+    const trend = deltaWatt>0 ? `<span style="color:var(--grn);">↑ +${deltaWatt}W</span>`
+                : deltaWatt<0 ? `<span style="color:var(--red);">↓ ${deltaWatt}W</span>`
+                : '';
+    html += `<div style="background:var(--g2);border-radius:4px;padding:10px 12px;margin-bottom:6px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:12px;color:var(--wh);">${label}</span>
+        <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${results.length} test ${trend}</span>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;">
+        ${results.slice(0,5).map(r=>{
+          const equivSplitSec = (r.tempoSec/r.distanza)*std;
+          return `<div style="text-align:center;">
+            <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${r.watt}W</div>
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${fmtSplit(equivSplitSec)}/${std}m</div>
+            <div style="font-size:8px;color:var(--g6);">${r.data}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+
+/* ══ PRESENZE MANCATE — no-show tracking ═════════════════════════════════
+   Quando un cliente prenotato non si presenta, il coach lo segna con 👻
+   invece di rimuoverlo: il credito resta scalato (policy standard no-show)
+   ma la lezione si libera visivamente, e l'assenza viene registrata in
+   /ppl/assenze/ per individuare pattern (assenze ricorrenti per cliente).
+   ═══════════════════════════════════════════════════════════════════════ */
+async function markNoShow(cid){
+  if(!confirm('Segnare questo cliente come non presentato?\\n\\nIl credito rimane scalato (policy standard), ma la prenotazione viene rimossa dal conteggio posti.')) return;
+  const l = _data.lezioni?.[_currentLessonId];
+  const abbId = _attendance[cid];
+  const c = _data.clienti?.[cid];
+
+  try{
+    // Registra l'assenza per tracciamento pattern
+    await fbPush('ppl/assenze', {
+      clienteId: cid,
+      lezioneId: _currentLessonId,
+      data: l?.data || '',
+      ora: l?.ora || '',
+      tipo: _data.tipiLezione?.[l?.tipoId]?.nome || 'Lezione',
+    });
+    // Rimuovi dalla lista presenti locale (il credito NON viene restituito)
+    delete _attendance[cid];
+    renderAttendance();
+  }catch(e){
+    alert('Errore: '+e.message);
+  }
+}
+
+/* ── Vista Presenze Mancate — raggruppata per cliente ── */
+function renderAssenze(query){
+  const container = document.getElementById('assenze-list');
+  if(!container) return;
+  const q = (query||'').toLowerCase().trim();
+
+  const clienti = _data.clienti||{};
+  const clientiConAssenze = [...new Set(Object.values(_data.assenze||{}).map(a=>a.clienteId))];
+
+  if(!clientiConAssenze.length){
+    container.innerHTML = `<div class="empty-state" style="padding:30px;text-align:center;color:var(--mu);">
+      <div style="font-size:24px;margin-bottom:8px;">✓</div>
+      <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;">
+        Nessuna assenza registrata</div>
+    </div>`;
+    return;
+  }
+
+  let entries = clientiConAssenze.map(cid=>{
+    const calc = calcolaAssenzeEffettive(cid);
+    const rawCount = Object.values(_data.assenze||{}).filter(a=>a.clienteId===cid).length;
+    return { cid, ...calc, rawCount };
+  });
+  entries.sort((a,b)=>b.count-a.count);
+
+  if(q){
+    entries = entries.filter(e=>{
+      const c = clienti[e.cid]||{};
+      return ((c.nome||'')+' '+(c.cognome||'')).toLowerCase().includes(q);
+    });
+  }
+
+  if(!entries.length){
+    container.innerHTML = '<div class="empty-state" style="padding:20px;text-align:center;color:var(--mu);">Nessun risultato</div>';
+    return;
+  }
+
+  container.innerHTML = entries.map(({cid, count, metodo, dettagli, rawCount})=>{
+    const c = clienti[cid] || {};
+    const init = ((c.nome||'')[0]||(c.cognome||'')[0]||'?').toUpperCase();
+    const alertLevel = count>=NOSHOW_THRESHOLD ? 'red' : count===NOSHOW_THRESHOLD-1 ? 'org' : 'nd';
+    const metodoLbl = metodo==='periodo' ? 'nel periodo abb.' : 'consecutive';
+    const listPreview = dettagli.slice(0,3).map(a=>a.data+' · '+(a.tipo||'')).join(' — ');
+    return `<div class="scad-row ${alertLevel==='red'?'alert-red':alertLevel==='org'?'alert-org':''}" onclick="openClient('${cid}')">
+      <div class="scad-avatar">${init}</div>
+      <div class="scad-info">
+        <div class="scad-name">${c.nome||''} ${c.cognome||''}</div>
+        <div class="scad-pkg">${listPreview||'—'}${dettagli.length>3?' e altre '+(dettagli.length-3):''}
+          <span style="color:var(--g6);"> · totale assenze: ${rawCount}</span></div>
+      </div>
+      <span class="scad-badge ${alertLevel==='red'?'red':alertLevel==='org'?'org':''}"
+        style="${alertLevel==='nd'?'background:var(--g3);border:1px solid var(--g4);color:var(--mu);':''}">
+        ${count} ${metodoLbl}</span>
+    </div>`;
+  }).join('');
+}
+
+
+/* ══ GRAFICO FREQUENZA — sessioni per mese, ultimi 6 mesi ══════════════════
+   Barre semplici in CSS puro, nessuna libreria esterna. Aiuta a individuare
+   cali di frequentazione prima che diventino abbandoni.
+   ═══════════════════════════════════════════════════════════════════════ */
+function renderFreqChart(cid){
+  const container = document.getElementById('detail-freq-chart');
+  if(!container) return;
+
+  const sessioni = Object.values(_data.sessioni||{}).filter(s=>s.clienteId===cid);
+
+  const months = [];
+  const today = new Date();
+  for(let i=5;i>=0;i--){
+    const d = new Date(today.getFullYear(), today.getMonth()-i, 1);
+    months.push({ key: d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'), label: d.toLocaleDateString('it-IT',{month:'short'}), count: 0 });
+  }
+
+  function parseDataFlex(str){
+    if(!str) return null;
+    if(str.includes('/')){ const p=str.split('/'); return new Date(+p[2],+p[1]-1,+p[0]); }
+    if(str.includes('-')) return new Date(str+'T00:00:00');
+    return null;
+  }
+
+  sessioni.forEach(s=>{
+    const d = parseDataFlex(s.data);
+    if(!d) return;
+    const key = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+    const m = months.find(m=>m.key===key);
+    if(m) m.count++;
+  });
+
+  const maxCount = Math.max(1, ...months.map(m=>m.count));
+
+  if(sessioni.length===0){
+    container.innerHTML = '<div style="font-size:11px;color:var(--mu);padding:8px 0;">Nessuna sessione registrata</div>';
+    return;
+  }
+
+  container.innerHTML = `<div class="freq-chart">
+    ${months.map(m=>{
+      const heightPct = (m.count/maxCount)*100;
+      return `<div class="freq-bar-col">
+        <div class="freq-bar-val">${m.count||''}</div>
+        <div class="freq-bar" style="height:${Math.max(heightPct,m.count>0?8:2)}%;
+          ${m.count===0?'background:var(--g4);':''}"></div>
+        <div class="freq-bar-lbl">${m.label}</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+
+/* ══ CALCOLO ASSENZE EFFETTIVE — per metodo scelto dal cliente ══════════════
+   "consecutive": conta le assenze più recenti finché non si incontra una
+   sessione realmente frequentata (interrompe il conteggio).
+   "periodo": conta tutte le assenze avvenute durante la validità
+   dell'abbonamento attivo corrente del cliente.
+   ═══════════════════════════════════════════════════════════════════════ */
+const NOSHOW_THRESHOLD = 3; // soglia per considerare l'assenza "critica"
+
+function parseDataGenerica(str){
+  if(!str||!str.trim()) return null;
+  if(str.includes('/')){ const p=str.split('/'); if(p.length!==3) return null; return new Date(+p[2],+p[1]-1,+p[0]); }
+  if(str.includes('-')) return new Date(str+'T00:00:00');
+  return null;
+}
+
+function calcolaAssenzeEffettive(cid){
+  const c = _data.clienti?.[cid];
+  if(!c) return { count:0, metodo:'consecutive', dettagli:[] };
+  const metodo = c.noShowMetodo || 'consecutive';
+
+  const assenzeCliente = Object.values(_data.assenze||{})
+    .filter(a=>a.clienteId===cid)
+    .map(a=>({...a, _tipo:'assenza', _d: parseDataGenerica(a.data)}))
+    .filter(a=>a._d);
+
+  if(metodo === 'periodo'){
+    // Trova l'abbonamento attivo corrente
+    const abbAttivo = Object.values(_data.abbonamenti||{})
+      .find(a=>a.clienteId===cid && a.stato==='Attivo');
+    if(!abbAttivo){
+      return { count:0, metodo, dettagli:[] };
+    }
+    const inizio = parseDataGenerica(abbAttivo.dataInizio);
+    const fine   = abbAttivo.dataScadenza ? parseDataGenerica(abbAttivo.dataScadenza) : new Date(2099,0,1);
+    const dettagli = assenzeCliente.filter(a=>{
+      if(!inizio) return true;
+      return a._d >= inizio && (!fine || a._d <= fine);
+    });
+    return { count: dettagli.length, metodo, dettagli };
+  }
+
+  // metodo 'consecutive': unisci assenze + sessioni reali, ordina per data/ora,
+  // conta le assenze più recenti finché non si incontra una sessione reale
+  const sessioniCliente = Object.values(_data.sessioni||{})
+    .filter(s=>s.clienteId===cid)
+    .map(s=>({...s, _tipo:'presenza', _d: parseDataGenerica(s.data)}))
+    .filter(s=>s._d);
+
+  const eventi = [...assenzeCliente, ...sessioniCliente]
+    .sort((a,b)=> (b._d - a._d) || (b.ora||'').localeCompare(a.ora||''));
+
+  let count = 0;
+  const dettagli = [];
+  for(const ev of eventi){
+    if(ev._tipo === 'assenza'){
+      count++;
+      dettagli.push(ev);
+    } else {
+      break; // una sessione reale interrompe la sequenza consecutiva
+    }
+  }
+  return { count, metodo, dettagli };
+}
 
 </script>
 </html>
