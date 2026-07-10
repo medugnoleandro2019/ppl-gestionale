@@ -570,6 +570,7 @@ function initFirebase(){
         authDomain: cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
         databaseURL: cfg.firebase_databaseURL,
         projectId: cfg.firebase_projectId,
+        storageBucket: cfg.firebase_storageBucket||(cfg.firebase_projectId+'.firebasestorage.app'),
       });
     }
     _db = firebase.database();
