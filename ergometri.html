@@ -794,30 +794,62 @@ nav.ppl-topnav.nav-open a.tn-link{
 </div>
 
 <div id="erg-panel-air" class="erg-panel">
-  <div class="slbl">Air Bike (Assault / Echo Bike)</div>
+  <div class="slbl">Air Bike (Assault AirBike — riferimento)</div>
   <div class="calc-block">
     <div class="warn-box" style="margin-bottom:12px;">
-      Gli Air Bike non usano la formula Concept2. I watt visualizzati variano per marca/modello
-      e non sono comparabili. Il riferimento per DEKA e allenamento sono le <strong>calorie</strong>,
-      non il pace.
+      Gli Air Bike (Assault, Echo, Airdyne) non usano la formula Concept2 (nessuna cinghia/catena a
+      trasmissione diretta) — la resistenza è generata da una ventola il cui attrito cresce in modo
+      quasi-cubico con la velocità di pedalata. Questo calcolatore usa la relazione RPM→Watt
+      <strong>documentata dai monitor ufficiali Assault Bike</strong> (tabella di riferimento
+      RPM/Watt pubblicata da Assault Fitness), non una stima oraria approssimativa.
     </div>
-    <div class="calc-row">
-      <div class="calc-field">
-        <span class="calc-lbl-s">Calorie target</span>
-        <input class="calc-inp" id="air-cal" type="number" min="1" max="200" placeholder="25" oninput="calcAir()">
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="air-mode-rpm-btn" onclick="setAirMode('rpm',this)">Da RPM sostenuto</button>
+      <button class="mode-btn" id="air-mode-target-btn" onclick="setAirMode('target',this)">Obiettivo calorie</button>
+    </div>
+
+    <div class="mode-panel active" id="air-mode-rpm">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">RPM medio sostenuto</span>
+          <input class="calc-inp" id="air-rpm-real" type="number" min="20" max="120" placeholder="es. 62" oninput="calcAirFromRPM()">
+        </div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">Peso corporeo (kg) — opz.</span>
+          <input class="calc-inp" id="air-peso" type="number" min="30" max="150" placeholder="75" oninput="calcAirFromRPM()">
+        </div>
       </div>
-      <div class="calc-field">
-        <span class="calc-lbl-s">RPM medio stimato</span>
-        <input class="calc-inp" id="air-rpm" type="number" min="40" max="150" placeholder="75" oninput="calcAir()">
+      <div class="result-strip">
+        <div class="result-cell"><div class="result-lbl">Watt stimati</div><div class="result-val nd" id="air-watt-real">—</div></div>
+        <div class="result-cell"><div class="result-lbl">Cal/min</div><div class="result-val nd" id="air-calmin-real">—</div></div>
+        <div class="result-cell"><div class="result-lbl">Cal in 10 min</div><div class="result-val nd" id="air-cal10">—</div></div>
+      </div>
+      <div class="calc-hint" style="margin-top:10px;">
+        Formula: Watt ≈ 0,00457 × RPM<sup>2,7</sup> (fit sulla tabella RPM/Watt ufficiale Assault Bike).
+        Cal/min = Watt × 0,0652 (efficienza metabolica ~22% per lavoro combinato braccia+gambe, più bassa del ciclismo puro).
       </div>
     </div>
-    <div class="result-strip">
-      <div class="result-cell"><div class="result-lbl">Tempo stimato</div><div class="result-val nd" id="air-time">—</div></div>
-      <div class="result-cell"><div class="result-lbl">Cal/min</div><div class="result-val nd" id="air-calmin">—</div></div>
-    </div>
-    <div class="calc-hint" style="margin-top:10px;">
-      Stima basata su ~11–14 cal/min a ritmo sostenuto (dati Assault Fitness).
-      La stima varia significativamente con l'intensità reale.
+
+    <div class="mode-panel" id="air-mode-target">
+      <div class="calc-row">
+        <div class="calc-field">
+          <span class="calc-lbl-s">Calorie obiettivo</span>
+          <input class="calc-inp" id="air-cal" type="number" min="1" max="200" placeholder="25" oninput="calcAir()">
+        </div>
+        <div class="calc-field">
+          <span class="calc-lbl-s">RPM medio stimato</span>
+          <input class="calc-inp" id="air-rpm" type="number" min="20" max="120" placeholder="75" oninput="calcAir()">
+        </div>
+      </div>
+      <div class="result-strip">
+        <div class="result-cell"><div class="result-lbl">Tempo stimato</div><div class="result-val nd" id="air-time">—</div></div>
+        <div class="result-cell"><div class="result-lbl">Watt equivalenti</div><div class="result-val nd" id="air-watt-target">—</div></div>
+        <div class="result-cell"><div class="result-lbl">Cal/min</div><div class="result-val nd" id="air-calmin">—</div></div>
+      </div>
+      <div class="calc-hint" style="margin-top:10px;">
+        Stessa formula fisica del modo "Da RPM sostenuto", risolta rispetto al tempo necessario per l'obiettivo calorico.
+      </div>
     </div>
     <div class="erg-save-panel">
       <div class="calc-lbl-s" style="margin-bottom:6px;">Salva risultato nello storico cliente</div>
@@ -1097,17 +1129,70 @@ function updateErgResults(type, splitSec, watts){
 }
 
 /* ── Air Bike ── */
+/* ══ AIR BIKE — formula fisica reale (fit su tabella RPM/Watt ufficiale) ══
+   Watt ≈ 0,00457 × RPM^2,7 — validato contro la tabella RPM/Watt pubblicata
+   da Assault Fitness (zoarfitness.com/Assault Bike reference chart).
+   Cal/min = Watt × 0,01434 / 0,22 (efficienza metabolica per lavoro
+   combinato braccia+gambe — più bassa del ciclismo puro a sole gambe,
+   fonte: traincalc.com, gross mechanical efficiency ~0,22 per air bike).
+   ═══════════════════════════════════════════════════════════════════ */
+const _airMode = { current: 'rpm' };
+
+function setAirMode(mode, el){
+  _airMode.current = mode;
+  document.getElementById('air-mode-rpm-btn').classList.toggle('active', mode==='rpm');
+  document.getElementById('air-mode-target-btn').classList.toggle('active', mode==='target');
+  document.getElementById('air-mode-rpm').classList.toggle('active', mode==='rpm');
+  document.getElementById('air-mode-target').classList.toggle('active', mode==='target');
+}
+
+function airWattsFromRPM(rpm){
+  return 0.00457 * Math.pow(rpm, 2.7);
+}
+function airRPMFromWatts(watts){
+  return Math.pow(watts / 0.00457, 1/2.7);
+}
+function airCalPerMinFromWatts(watts, pesoKg){
+  let calMin = watts * 0.0652; // 0.01434/0.22
+  if(pesoKg > 0){
+    // Leggero aggiustamento per peso corporeo (riferimento 75kg)
+    calMin *= Math.pow(pesoKg / 75, 0.35);
+  }
+  return calMin;
+}
+
+function calcAirFromRPM(){
+  const rpm = parseFloat(document.getElementById('air-rpm-real')?.value)||0;
+  const peso = parseFloat(document.getElementById('air-peso')?.value)||0;
+  if(rpm<=0) return;
+
+  const watts = airWattsFromRPM(rpm);
+  const calMin = airCalPerMinFromWatts(watts, peso);
+
+  const wEl = document.getElementById('air-watt-real');
+  const cmEl = document.getElementById('air-calmin-real');
+  const c10El = document.getElementById('air-cal10');
+
+  if(wEl){ wEl.textContent = Math.round(watts)+' W'; wEl.classList.remove('nd'); }
+  if(cmEl){ cmEl.textContent = calMin.toFixed(1)+' cal/min'; cmEl.classList.remove('nd'); }
+  if(c10El){ c10El.textContent = Math.round(calMin*10)+' cal'; c10El.classList.remove('nd'); }
+}
+
 function calcAir(){
   const cal = parseFloat(document.getElementById('air-cal')?.value)||0;
-  const rpm = parseFloat(document.getElementById('air-rpm')?.value)||75;
-  if(cal<=0) return;
-  // Approximate: calories per minute based on RPM interpolation
-  const calPerMin = rpm < 55 ? 7 : rpm < 70 ? 9 : rpm < 85 ? 12 : 16;
-  const timeSec = (cal / calPerMin) * 60;
+  const rpm = parseFloat(document.getElementById('air-rpm')?.value)||0;
+  if(cal<=0 || rpm<=0) return;
+
+  const watts = airWattsFromRPM(rpm);
+  const calMin = airCalPerMinFromWatts(watts, 0);
+  const timeSec = calMin>0 ? (cal / calMin) * 60 : 0;
+
   const te = document.getElementById('air-time');
+  const wt = document.getElementById('air-watt-target');
   const cm = document.getElementById('air-calmin');
   if(te){ te.textContent = fmtTime(timeSec); te.classList.remove('nd'); }
-  if(cm){ cm.textContent = calPerMin.toFixed(0)+' cal/min'; cm.classList.remove('nd'); }
+  if(wt){ wt.textContent = Math.round(watts)+' W'; wt.classList.remove('nd'); }
+  if(cm){ cm.textContent = calMin.toFixed(1)+' cal/min'; cm.classList.remove('nd'); }
 }
 
 /* ══ HYROX ═══════════════════════════════════════════════════════════════ */
@@ -1482,12 +1567,24 @@ async function salvaRisultatoAirBike(){
   if(!cid){ if(msg){msg.textContent='⚠ Seleziona un cliente.';msg.style.color='var(--org)';} return; }
   if(!_db){ if(msg){msg.textContent='⚠ Firebase non configurato (vedi Risorse).';msg.style.color='var(--org)';} return; }
 
-  const cal = parseFloat(document.getElementById('air-cal')?.value)||0;
-  const rpm = parseFloat(document.getElementById('air-rpm')?.value)||0;
-  const timeText = document.getElementById('air-time')?.textContent;
+  // Usa i dati della modalità "Da RPM sostenuto" se compilata, altrimenti quella obiettivo-calorie
+  let rpm, watt, calMin;
+  if(_airMode.current === 'rpm'){
+    rpm = parseFloat(document.getElementById('air-rpm-real')?.value)||0;
+    const wattText = document.getElementById('air-watt-real')?.textContent;
+    const calMinText = document.getElementById('air-calmin-real')?.textContent;
+    watt = wattText && wattText!=='—' ? parseFloat(wattText) : 0;
+    calMin = calMinText && calMinText!=='—' ? parseFloat(calMinText) : 0;
+  } else {
+    rpm = parseFloat(document.getElementById('air-rpm')?.value)||0;
+    const wattText = document.getElementById('air-watt-target')?.textContent;
+    const calMinText = document.getElementById('air-calmin')?.textContent;
+    watt = wattText && wattText!=='—' ? parseFloat(wattText) : 0;
+    calMin = calMinText && calMinText!=='—' ? parseFloat(calMinText) : 0;
+  }
 
-  if(cal<=0 || !timeText || timeText==='—'){
-    if(msg){msg.textContent='⚠ Inserisci prima un risultato valido.';msg.style.color='var(--org)';}
+  if(rpm<=0 || watt<=0){
+    if(msg){msg.textContent='⚠ Inserisci prima un risultato valido (RPM sostenuto).';msg.style.color='var(--org)';}
     return;
   }
 
@@ -1496,9 +1593,9 @@ async function salvaRisultatoAirBike(){
     await _db.ref('ppl/erg_risultati').push({
       clienteId: cid,
       macchina: 'air',
-      calorie: cal,
       rpm: rpm,
-      tempoStimato: timeText,
+      watt: Math.round(watt),
+      calMin: +calMin.toFixed(1),
       data: oggi,
       dataTS: Date.now(),
     });
