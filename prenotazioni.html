@@ -1458,6 +1458,7 @@ let _data = cfgGet(BK_CACHE_KEY) || {
 let _calWeekStart = getMonday(new Date());
 let _currentLessonId = null;
 let _attendance = {};  // clienteId → abbonamentoId (present at current lesson)
+let _noShowSet = new Set(); // clienteId marcati come no-show in QUESTA sessione del modal
 
 /* ══ FIREBASE ══════════════════════════════════════════════════════════════ */
 function initFirebase(){
@@ -1478,6 +1479,7 @@ function initFirebase(){
         authDomain:cfg.firebase_authDomain||(cfg.firebase_projectId+'.firebaseapp.com'),
         databaseURL:cfg.firebase_databaseURL,
         projectId:cfg.firebase_projectId,
+        storageBucket:cfg.firebase_storageBucket||(cfg.firebase_projectId+'.firebasestorage.app'),
       });
     }
     _db=firebase.database();
@@ -1856,9 +1858,10 @@ async function saveAttendance(){
         }
       }
     }
-    // Restore credits for removed clients
+    // Restore credits for removed clients — MA NON per chi è stato segnato no-show
+    // (per loro il credito resta scalato: policy standard, tracciato in ppl/assenze)
     for(const [cid,abbId] of Object.entries(oldPresenti)){
-      if(!newPresenti[cid]&&abbId&&abbId!=='manual'){
+      if(!newPresenti[cid] && abbId && abbId!=='manual' && !_noShowSet.has(cid)){
         const abb=_data.abbonamenti?.[abbId];
         if(abb){
           await fbUpdate('ppl/abbonamenti/'+abbId,{
@@ -2333,6 +2336,7 @@ function loadSessOrari(){
 
 function openAttendance(lessonId){
   _currentLessonId = lessonId;
+  _noShowSet = new Set();
   const l = _data.lezioni?.[lessonId]; if(!l)return;
   const tipo = _data.tipiLezione?.[l.tipoId];
   const dt = new Date(l.data);
@@ -3287,23 +3291,37 @@ function renderErgHistory(cid){
 
   let html = '';
   Object.entries(byMachine).forEach(([machine, results])=>{
-    const label = ERG_LABELS[machine]||machine;
+    const label = ERG_LABELS[machine] || (machine==='air' ? '💨 Air Bike' : machine);
+    const isAirBike = machine === 'air';
     const std = machine==='bike' ? 1000 : 500;
-    const latest = results[0];
-    const oldest = results[results.length-1];
-    const deltaWatt = results.length>1 ? latest.watt - oldest.watt : 0;
-    const trend = deltaWatt>0 ? `<span style="color:var(--grn);">↑ +${deltaWatt}W</span>`
-                : deltaWatt<0 ? `<span style="color:var(--red);">↓ ${deltaWatt}W</span>`
-                : '';
+
+    let trend = '';
+    if(!isAirBike && results.length>1){
+      const deltaWatt = results[0].watt - results[results.length-1].watt;
+      trend = deltaWatt>0 ? `<span style="color:var(--grn);">↑ +${deltaWatt}W</span>`
+            : deltaWatt<0 ? `<span style="color:var(--red);">↓ ${deltaWatt}W</span>` : '';
+    }
+
     html += `<div style="background:var(--g2);border-radius:4px;padding:10px 12px;margin-bottom:6px;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
         <span style="font-size:12px;color:var(--wh);">${label}</span>
         <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${results.length} test ${trend}</span>
       </div>
       <div style="display:flex;gap:14px;flex-wrap:wrap;">
-        ${results.slice(0,5).map(r=>{
+        ${results.slice(0,8).map(r=>{
+          if(isAirBike){
+            return `<div style="text-align:center;position:relative;">
+              <button class="icon-btn del" style="position:absolute;top:-4px;right:-4px;font-size:8px;padding:1px 4px;"
+                onclick="event.stopPropagation();deleteErgRisultato('${r.id}',${cid ? "'"+cid+"'" : "null"})" title="Elimina">✕</button>
+              <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${r.calorie||'—'} cal</div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${r.tempoStimato||''} · ${r.rpm||''} rpm</div>
+              <div style="font-size:8px;color:var(--g6);">${r.data}</div>
+            </div>`;
+          }
           const equivSplitSec = (r.tempoSec/r.distanza)*std;
-          return `<div style="text-align:center;">
+          return `<div style="text-align:center;position:relative;">
+            <button class="icon-btn del" style="position:absolute;top:-4px;right:-4px;font-size:8px;padding:1px 4px;"
+              onclick="event.stopPropagation();deleteErgRisultato('${r.id}','${cid}')" title="Elimina">✕</button>
             <div style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold);">${r.watt}W</div>
             <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--mu);">${fmtSplit(equivSplitSec)}/${std}m</div>
             <div style="font-size:8px;color:var(--g6);">${r.data}</div>
@@ -3314,6 +3332,14 @@ function renderErgHistory(cid){
   });
 
   container.innerHTML = html;
+}
+
+async function deleteErgRisultato(resultId, cid){
+  if(!confirm('Eliminare questo test dallo storico? Libera spazio rimuovendo la sessione obsoleta.')) return;
+  try{
+    await fbRemove('ppl/erg_risultati/'+resultId);
+    if(cid) renderErgHistory(cid);
+  }catch(e){ alert('Errore: '+e.message); }
 }
 
 
@@ -3338,7 +3364,9 @@ async function markNoShow(cid){
       ora: l?.ora || '',
       tipo: _data.tipiLezione?.[l?.tipoId]?.nome || 'Lezione',
     });
-    // Rimuovi dalla lista presenti locale (il credito NON viene restituito)
+    // Rimuovi dalla lista presenti locale E segna come no-show
+    // (così saveAttendance sa di NON restituire il credito per questo cliente)
+    _noShowSet.add(cid);
     delete _attendance[cid];
     renderAttendance();
   }catch(e){
